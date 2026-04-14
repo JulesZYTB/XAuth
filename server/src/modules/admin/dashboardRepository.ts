@@ -76,6 +76,33 @@ class DashboardRepository {
     );
     return rows;
   }
+
+  async getSuspiciousIPs() {
+    const [rows] = await databaseClient.query<Rows>(
+      `SELECT ip_address as ip, COUNT(*) as failedAttempts, MAX(created_at) as lastAttempt
+       FROM validation_log
+       WHERE status = 'failed' AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+       GROUP BY ip_address
+       HAVING failedAttempts > 5
+       ORDER BY failedAttempts DESC
+       LIMIT 10`
+    );
+    return rows;
+  }
+
+  async getSharedKeys() {
+    const [rows] = await databaseClient.query<Rows>(
+      `SELECT l.id, l.license_key as licenseKey, COUNT(DISTINCT v.country_code) as countriesCount, COUNT(DISTINCT v.ip_address) as ipsCount, GROUP_CONCAT(DISTINCT v.country_code) as countries
+       FROM validation_log v
+       JOIN license l ON v.license_id = l.id
+       WHERE v.status = 'success' AND v.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+       GROUP BY v.license_id, l.id, l.license_key
+       HAVING countriesCount > 1 OR ipsCount > 2
+       ORDER BY ipsCount DESC
+       LIMIT 10`
+    );
+    return rows;
+  }
 }
 
 export default new DashboardRepository();

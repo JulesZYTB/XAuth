@@ -59,4 +59,16 @@ const getAnomalies: RequestHandler = async (req, res, next) => {
   }
 };
 
-export default { getStats, getMap, getDau, getAnomalies };
+const getAuditorScan: RequestHandler = async (req, res, next) => {
+  try {
+    const suspiciousIPs = await dashboardRepository.getSuspiciousIPs();
+    const sharedKeys = await dashboardRepository.getSharedKeys();
+
+    res.json({ suspiciousIPs, sharedKeys });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+export default { getStats, getMap, getDau, getAnomalies, getAuditorScan };

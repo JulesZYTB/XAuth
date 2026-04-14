@@ -81,5 +81,6 @@ router.get("/api/dashboard/stats", dashboardActions.getStats);
 router.get("/api/dashboard/map", dashboardActions.getMap);
 router.get("/api/dashboard/dau", dashboardActions.getDau);
 router.get("/api/dashboard/anomalies", dashboardActions.getAnomalies);
+router.get("/api/dashboard/auditor-scan", dashboardActions.getAuditorScan);
 
 export default router;

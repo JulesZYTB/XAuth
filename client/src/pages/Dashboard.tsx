@@ -29,6 +29,7 @@ import {
 } from "recharts";
 
 import WorldMap from "../components/WorldMap";
+import SecurityAuditorModal from "../components/SecurityAuditorModal";
 
 type Stats = {
   totalUsers: number;
@@ -46,6 +47,7 @@ export default function Dashboard() {
   const { t } = useTranslation();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAuditorOpen, setIsAuditorOpen] = useState(false);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -267,12 +269,18 @@ export default function Dashboard() {
           </div>
           <button 
             type="button"
+            onClick={() => setIsAuditorOpen(true)}
             className="w-full mt-8 bg-dark p-4 rounded-2xl border border-gray-800 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors flex items-center justify-center gap-2 cursor-pointer"
           >
             {t("dashboard.security_auditor", "Security Auditor")} <ShieldAlert className="w-4 h-4" />
           </button>
         </div>
       </div>
+
+      <SecurityAuditorModal 
+        isOpen={isAuditorOpen}
+        onClose={() => setIsAuditorOpen(false)}
+      />
     </div>
   );
 }

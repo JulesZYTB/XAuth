@@ -44,7 +44,18 @@
     "failures": "Failures",
     "live_feed": "Live Feed",
     "security_auditor": "Security Auditor",
-    "export": "Export Report"
+    "export": "Export Report",
+    "auditor_title": "Security Auditor",
+    "auditor_subtitle": "Automated threat detection and anomalies scan",
+    "auditor_scanning": "Scanning Database",
+    "auditor_ips": "Suspicious IP Addresses",
+    "auditor_found": "Found",
+    "auditor_no_ips": "No brute-force or massive failed attempts detected recently.",
+    "auditor_last_attempt": "Last Attempt",
+    "auditor_keys": "Potentially Shared Keys",
+    "auditor_no_keys": "No suspicious license sharing detected (Based on unique countries/IPs per key).",
+    "auditor_completed": "Scan completed. {{count}} potential issues found.",
+    "auditor_rescan": "Run New Scan"
   },
   "auth": {
     "hub_subtitle": "Enterprise Security Hub",

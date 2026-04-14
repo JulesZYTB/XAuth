@@ -44,7 +44,18 @@
     "failures": "Échecs",
     "live_feed": "Flux en Direct",
     "security_auditor": "Auditeur de Sécurité",
-    "export": "Exporter le Rapport"
+    "export": "Exporter le Rapport",
+    "auditor_title": "Auditeur de Sécurité",
+    "auditor_subtitle": "Détection automatisée des menaces et anomalies",
+    "auditor_scanning": "Analyse de la Base de Données",
+    "auditor_ips": "Adresses IP Suspectes",
+    "auditor_found": "Détecté(s)",
+    "auditor_no_ips": "Aucune attaque par force brute ou tentatives massives récentes.",
+    "auditor_last_attempt": "Dernière Tentative",
+    "auditor_keys": "Clefs Potentiellement Partagées",
+    "auditor_no_keys": "Aucun partage suspect détecté (basé sur les IPs et Pays uniques).",
+    "auditor_completed": "Analyse terminée. {{count}} problèmes potentiels détectés.",
+    "auditor_rescan": "Lancer une Nouvelle Analyse"
   },
   "auth": {
     "hub_subtitle": "Plateforme de Sécurité d'Entreprise",
