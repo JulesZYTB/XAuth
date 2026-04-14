@@ -11,7 +11,9 @@ import {
   ShieldCheck,
   Settings2,
   Webhook,
-  Package
+  Package,
+  CheckCircle2,
+  ShieldAlert
 } from "lucide-react";
 
 
@@ -44,6 +46,21 @@ export default function Apps() {
   const [appForWebhook, setAppForWebhook] = useState<App | null>(null);
   const [isReleaseModalOpen, setIsReleaseModalOpen] = useState(false);
   const [appForRelease, setAppForRelease] = useState<App | null>(null);
+  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+
+  const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 4000);
+  };
+
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopy = (text: string, id: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    showNotification(`${label} ${t("common.copied", "Copied!")}`, "success");
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
 
 
@@ -133,7 +150,18 @@ export default function Apps() {
   };
 
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000 relative">
+      {notification && (
+        <div className={`fixed top-8 right-8 z-[100] flex items-center gap-3 px-6 py-4 rounded-2xl border shadow-2xl animate-in slide-in-from-top-12 duration-500 ${
+          notification.type === 'success' 
+            ? "bg-green-500/10 border-green-500/20 text-green-500" 
+            : "bg-red-500/10 border-red-500/20 text-red-500"
+        }`}>
+          {notification.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <ShieldAlert className="w-5 h-5" />}
+          <span className="text-sm font-bold">{notification.message}</span>
+        </div>
+      )}
+
       <header className="bg-secondary/40 p-8 rounded-4xl border border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 shadow-2xl backdrop-blur-xl">
         <div className="flex items-center gap-6">
           <div className="p-5 bg-accent/20 rounded-4xl shadow-xl shadow-accent/10">
@@ -235,10 +263,10 @@ export default function Apps() {
                     <code className="text-sm font-mono text-gray-300 truncate max-w-[200px]">{app.id}</code>
                     <button 
                       type="button"
-                      onClick={() => navigator.clipboard.writeText(app.id.toString())}
+                      onClick={() => handleCopy(app.id.toString(), `app-${app.id}-id`, t("apps.app_id", "App ID"))}
                       className="text-[10px] text-accent font-black uppercase opacity-0 group-hover/key:opacity-100 transition-all cursor-pointer"
                     >
-                      {t("copy")}
+                      {copiedId === `app-${app.id}-id` ? t("common.copied", "Copied!") : t("copy", "Copy")}
                     </button>
                   </div>
                 </div>
@@ -251,10 +279,10 @@ export default function Apps() {
                     <code className="text-sm font-mono text-gray-300 truncate max-w-[200px]">{app.secret_key}</code>
                     <button 
                       type="button"
-                      onClick={() => navigator.clipboard.writeText(app.secret_key)}
+                      onClick={() => handleCopy(app.secret_key, `app-${app.id}-secret`, t("apps.app_secret", "App Secret Key"))}
                       className="text-[10px] text-accent font-black uppercase opacity-0 group-hover/key:opacity-100 transition-all cursor-pointer"
                     >
-                      {t("copy")}
+                      {copiedId === `app-${app.id}-secret` ? t("common.copied", "Copied!") : t("copy", "Copy")}
                     </button>
                   </div>
                 </div>

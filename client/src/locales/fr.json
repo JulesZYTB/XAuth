@@ -12,7 +12,8 @@
     "cancel": "Annuler",
     "confirm_action": "Confirmer l'Action",
     "saving": "Sauvegarde en cours...",
-    "finished": "Terminé"
+    "finished": "Terminé",
+    "copied": "Copié !"
   },
   "time": {
     "1_hour": "1 Heure",

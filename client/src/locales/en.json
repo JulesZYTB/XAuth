@@ -12,7 +12,8 @@
     "cancel": "Cancel",
     "confirm_action": "Confirm Action",
     "saving": "Saving...",
-    "finished": "Finished"
+    "finished": "Finished",
+    "copied": "Copied!"
   },
   "time": {
     "1_hour": "1 Hour",
