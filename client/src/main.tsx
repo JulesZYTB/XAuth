@@ -13,8 +13,25 @@ import Register from "./pages/Register";
 import UserHub from "./pages/UserHub";
 import Users from "./pages/Users";
 import Logs from "./pages/Logs";
+import Home from "./pages/Home";
+import Profile from "./pages/Profile";
+
+const IndexRoute = () => {
+  const token = localStorage.getItem("token");
+  if (!token) return <Login />;
+  try {
+    const user = JSON.parse(atob(token.split(".")[1]));
+    return user?.role === "admin" ? <Dashboard /> : <UserHub />;
+  } catch (e) {
+    return <Login />;
+  }
+};
 
 const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Home />,
+  },
   {
     path: "/login",
     element: <Login />,
@@ -27,17 +44,12 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       {
-        path: "/",
-        element: (() => {
-          const token = localStorage.getItem("token");
-          if (!token) return <Login />;
-          try {
-            const user = JSON.parse(atob(token.split(".")[1]));
-            return user?.role === "admin" ? <Dashboard /> : <UserHub />;
-          } catch (e) {
-            return <Login />;
-          }
-        })(),
+        path: "/dashboard",
+        element: <IndexRoute />,
+      },
+      {
+        path: "/profile",
+        element: <Profile />,
       },
       {
         path: "/apps",

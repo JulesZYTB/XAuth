@@ -47,5 +47,43 @@
     "sign_up": "S'inscrire",
     "already_have_account": "Vous avez déjà un compte ?",
     "log_in": "Se connecter"
+  },
+  "home": {
+    "login": "Connexion",
+    "get_started": "Commencer",
+    "hero_title": "Protection Infaillible",
+    "hero_highlight": "pour vos Logiciels.",
+    "hero_desc": "XAuth Omega est l'infrastructure de licence d'entreprise multiplateforme ultime. Sécurisez vos applications, gérez les utilisateurs à l'échelle mondiale et empêchez les accès non autorisés sans effort.",
+    "start_now": "Essai Gratuit",
+    "view_docs": "Voir la Documentation",
+    "features_title": "Télémétrie de Qualité Entreprise",
+    "features_subtitle": "Tout ce dont vous avez besoin pour distribuer et protéger votre code avec succès.",
+    "feature1_title": "AES GCM Clou Militaire",
+    "feature1_desc": "Sessions entièrement chiffrées garantissant la protection de la logique de vos logiciels grâce à des nonces dynamiques.",
+    "feature2_title": "HWID Multiplateforme",
+    "feature2_desc": "Récupération fiable de l'appareil sur Windows, Linux et macOS, empêchant le partage de vos licences.",
+    "feature3_title": "Télémétrie en Temps Réel",
+    "feature3_desc": "Suivez les Utilisateurs Actifs Quotidiens, les anomalies (tentatives de crack) et les localisations en direct."
+  },
+  "profile": {
+    "title": "Mon Profil",
+    "subtitle": "Gérez vos paramètres et identifiants personnels",
+    "update_success": "Profil mis à jour avec succès",
+    "new_password": "Nouveau Mot de Passe (laissez vide pour conserver)",
+    "save_changes": "Enregistrer les modifications"
+  },
+  "user_hub": {
+    "title": "Portail des Licences",
+    "subtitle": "Gérez vos abonnements logiciels et produits actifs",
+    "redeem": "Activer",
+    "loading": "Récupération de votre portefeuille logiciel...",
+    "enterprise_license": "Licence Entreprise",
+    "license_identity": "Identité de la Licence",
+    "digital_hwid": "HWID Numérique",
+    "not_pooled": "Non Assigné",
+    "end_date": "Date de Fin",
+    "access_docs": "Accéder à la Documentation",
+    "no_licenses": "Aucune licence active trouvée.",
+    "redeem_hint": "Activez une clé produit ci-dessus pour accéder à votre logiciel."
   }
 }

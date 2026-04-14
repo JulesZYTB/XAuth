@@ -41,7 +41,7 @@ export default function Layout() {
     { 
       label: user?.role === "admin" ? t("menu.global_dashboard", "Global Dashboard") : t("menu.my_licenses", "My Licenses"), 
       icon: LayoutDashboard, 
-      path: "/", 
+      path: "/dashboard", 
       roles: ["admin", "user"] 
     },
     { 
@@ -103,15 +103,17 @@ export default function Layout() {
         </div>
 
         <div className="mt-auto pt-6 border-t border-gray-800">
-          <div className="bg-dark/50 p-4 rounded-2xl mb-4 border border-gray-800/50 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center">
-              <User className="w-5 h-5 text-accent" aria-hidden="true" />
+          <Link to="/profile" className="bg-dark/50 p-4 rounded-2xl mb-4 border border-gray-800/50 flex items-center gap-3 hover:border-accent/40 transition-colors group cursor-pointer block">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <User className="w-5 h-5 text-accent" aria-hidden="true" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-black truncate text-white">{user?.username}</p>
+                <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{user?.role}</p>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-black truncate">{user?.username}</p>
-              <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{user?.role}</p>
-            </div>
-          </div>
+          </Link>
           <button
             type="button"
             onClick={handleLogout}

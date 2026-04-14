@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { ShieldCheck, Cpu, Calendar, Activity, Key, CreditCard, CheckCircle2, XCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type License = {
   id: number;
@@ -11,6 +12,7 @@ type License = {
 };
 
 export default function UserHub() {
+  const { t } = useTranslation();
   const [licenses, setLicenses] = useState<License[]>([]);
   const [loading, setLoading] = useState(true);
   const [redeemKey, setRedeemKey] = useState("");
@@ -66,8 +68,8 @@ export default function UserHub() {
     <div className="space-y-12 animate-in fade-in duration-700 h-full">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
-          <h2 className="text-3xl font-black text-white tracking-tight">License Hub</h2>
-          <p className="text-gray-400 mt-1">Manage your active software subscriptions and products</p>
+          <h2 className="text-3xl font-black text-white tracking-tight">{t("user_hub.title", "License Hub")}</h2>
+          <p className="text-gray-400 mt-1">{t("user_hub.subtitle", "Manage your active software subscriptions and products")}</p>
         </div>
         
         <form onSubmit={handleRedeem} className="w-full md:w-auto flex flex-col gap-3">
@@ -86,9 +88,9 @@ export default function UserHub() {
             </div>
             <button 
               type="submit"
-              className="bg-white hover:bg-white/90 text-dark px-8 py-4 rounded-2xl font-black transition-all shadow-xl active:scale-95 flex items-center gap-2"
+              className="bg-white hover:bg-white/90 text-dark px-8 py-4 rounded-2xl font-black transition-all shadow-xl active:scale-95 flex items-center gap-2 cursor-pointer"
             >
-              <CreditCard className="w-5 h-5" /> Redeem
+              <CreditCard className="w-5 h-5" /> {t("user_hub.redeem", "Redeem")}
             </button>
           </div>
           {redeemStatus && (
@@ -102,7 +104,7 @@ export default function UserHub() {
 
       {loading ? (
         <div className="flex items-center justify-center h-64 text-gray-500" aria-live="polite">
-          <Activity className="w-8 h-8 animate-spin mr-3" /> Fetching your software portfolio...
+          <Activity className="w-8 h-8 animate-spin mr-3" /> {t("user_hub.loading", "Fetching your software portfolio...")}
         </div>
       ) : (
         <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20">
@@ -125,13 +127,13 @@ export default function UserHub() {
                 </div>
                 <div>
                   <h3 className="text-xl font-black text-white">{license.app_name}</h3>
-                  <p className="text-[10px] text-gray-600 font-bold uppercase tracking-tighter">Enterprise License</p>
+                  <p className="text-[10px] text-gray-600 font-bold uppercase tracking-tighter">{t("user_hub.enterprise_license", "Enterprise License")}</p>
                 </div>
               </div>
 
               <div className="space-y-4">
                 <div className="bg-dark/50 p-5 rounded-4xl border border-gray-800/50">
-                  <p className="text-[10px] text-gray-500 uppercase font-black mb-2 opacity-50">License Identity</p>
+                  <p className="text-[10px] text-gray-500 uppercase font-black mb-2 opacity-50">{t("user_hub.license_identity", "License Identity")}</p>
                   <code className="text-sm font-mono text-gray-200 block truncate">
                     {license.license_key}
                   </code>
@@ -141,16 +143,16 @@ export default function UserHub() {
                   <div className="bg-dark/30 p-4 rounded-2xl flex items-center gap-3 border border-transparent hover:border-gray-800 transition-all">
                     <Cpu className="w-4 h-4 text-gray-600" aria-hidden="true" />
                     <div>
-                      <p className="text-[9px] text-gray-500 uppercase font-black">Digital HWID</p>
+                      <p className="text-[9px] text-gray-500 uppercase font-black">{t("user_hub.digital_hwid", "Digital HWID")}</p>
                       <p className="text-xs text-gray-300 font-mono truncate w-24">
-                        {license.hwid || "Not Pooled"}
+                        {license.hwid || t("user_hub.not_pooled", "Not Pooled")}
                       </p>
                     </div>
                   </div>
                   <div className="bg-dark/30 p-4 rounded-2xl flex items-center gap-3 border border-transparent hover:border-gray-800 transition-all">
                     <Calendar className="w-4 h-4 text-gray-600" aria-hidden="true" />
                     <div>
-                      <p className="text-[9px] text-gray-500 uppercase font-black">End Date</p>
+                      <p className="text-[9px] text-gray-500 uppercase font-black">{t("user_hub.end_date", "End Date")}</p>
                       <p className="text-xs text-gray-300 font-bold uppercase tracking-tighter">
                         {new Date(license.expiry_date).toLocaleDateString()}
                       </p>
@@ -161,10 +163,10 @@ export default function UserHub() {
 
               <button 
                 type="button"
-                className="w-full mt-8 py-4 bg-white/5 hover:bg-white/10 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border border-white/5 active:scale-[0.98] text-gray-400 group-hover:text-white"
+                className="w-full mt-8 py-4 bg-white/5 hover:bg-white/10 rounded-2xl text-xs font-black uppercase tracking-widest transition-all border border-white/5 active:scale-[0.98] text-gray-400 group-hover:text-white cursor-pointer"
                 aria-label={`View documentation for ${license.app_name}`}
               >
-                Access Product Docs
+                {t("user_hub.access_docs", "Access Product Docs")}
               </button>
             </li>
           ))}
@@ -172,8 +174,8 @@ export default function UserHub() {
           {licenses.length === 0 && (
             <div className="col-span-full border-2 border-dashed border-gray-800 rounded-[3rem] py-32 flex flex-col items-center text-gray-600">
               <Key className="w-16 h-16 mb-4 opacity-10" />
-              <p className="text-lg font-bold">No active licenses found.</p>
-              <p className="text-sm opacity-50 mt-1">Redeem a product key above to activate your software.</p>
+              <p className="text-lg font-bold">{t("user_hub.no_licenses", "No active licenses found.")}</p>
+              <p className="text-sm opacity-50 mt-1">{t("user_hub.redeem_hint", "Redeem a product key above to activate your software.")}</p>
             </div>
           )}
         </ul>

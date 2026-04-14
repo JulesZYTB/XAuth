@@ -47,5 +47,43 @@
     "sign_up": "Sign Up",
     "already_have_account": "Already have an account?",
     "log_in": "Log In"
+  },
+  "home": {
+    "login": "Login",
+    "get_started": "Get Started",
+    "hero_title": "Unbreakable Protection",
+    "hero_highlight": "for Your Software.",
+    "hero_desc": "XAuth Omega is the ultimate cross-platform enterprise licensing infrastructure. Secure your applications, manage users globally, and prevent unauthorized access effortlessly.",
+    "start_now": "Start Free Trial",
+    "view_docs": "View Documentation",
+    "features_title": "Enterprise-Grade Telemetry",
+    "features_subtitle": "Everything you need to successfully distribute and protect your code.",
+    "feature1_title": "Military-Grade AES GCM",
+    "feature1_desc": "Fully encrypted handshake sessions ensuring your software logic is protected with dynamic nonces.",
+    "feature2_title": "Cross-Platform HWID",
+    "feature2_desc": "Reliable device tracking across Windows, Linux, and macOS prevents unauthorized sharing of licenses.",
+    "feature3_title": "Real-Time Telemetry",
+    "feature3_desc": "Monitor Daily Active Users, Anomaly tracking (cracking attempts), and global map distributions live."
+  },
+  "profile": {
+    "title": "My Profile",
+    "subtitle": "Manage your personal settings and identity",
+    "update_success": "Profile updated successfully",
+    "new_password": "New Password (Leave blank to keep)",
+    "save_changes": "Save Changes"
+  },
+  "user_hub": {
+    "title": "License Hub",
+    "subtitle": "Manage your active software subscriptions and products",
+    "redeem": "Redeem",
+    "loading": "Fetching your software portfolio...",
+    "enterprise_license": "Enterprise License",
+    "license_identity": "License Identity",
+    "digital_hwid": "Digital HWID",
+    "not_pooled": "Not Pooled",
+    "end_date": "End Date",
+    "access_docs": "Access Product Docs",
+    "no_licenses": "No active licenses found.",
+    "redeem_hint": "Redeem a product key above to activate your software."
   }
 }

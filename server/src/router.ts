@@ -33,6 +33,9 @@ router.post("/api/auth/register", userActions.register);
 // Protected routes
 router.use(verifyToken);
 
+// PROFILE (Self)
+router.put("/api/auth/profile", userActions.updateProfile);
+
 // USERS CRUD
 router.get("/api/users", userActions.browse);
 router.patch("/api/users/:id", userActions.editRole);

@@ -109,5 +109,35 @@ const destroy: RequestHandler = async (req, res, next) => {
   }
 };
 
-export default { login, register, browse, editRole, destroy };
+const updateProfile: RequestHandler = async (req, res, next) => {
+  try {
+    const authUser = (req as any).auth as AuthUser;
+    const { username, email, password } = req.body;
+    
+    if (!username || !email) {
+      res.status(400).json({ message: "Username and email are required" });
+      return;
+    }
+    
+    let hashedPassword = undefined;
+    if (password && password.trim() !== "") {
+      hashedPassword = await bcrypt.hash(password, 10);
+    }
+    
+    await userRepository.updateProfile(authUser.id, username, email, hashedPassword);
+    
+    // sign new token
+    const token = jwt.sign(
+      { id: authUser.id, email, role: authUser.role, username },
+      process.env.APP_SECRET || "default_secret",
+      { expiresIn: "1h" }
+    );
+    
+    res.json({ message: "Profile updated successfully", token });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { login, register, browse, editRole, destroy, updateProfile };
 

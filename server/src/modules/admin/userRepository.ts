@@ -41,6 +41,22 @@ class UserRepository {
     return result.affectedRows;
   }
 
+  async updateProfile(id: number, username: string, email: string, hashedPassword?: string) {
+    if (hashedPassword) {
+      const [result] = await databaseClient.query<Result>(
+        "update user set username = ?, email = ?, password = ? where id = ?",
+        [username, email, hashedPassword, id]
+      );
+      return result.affectedRows;
+    } else {
+      const [result] = await databaseClient.query<Result>(
+        "update user set username = ?, email = ? where id = ?",
+        [username, email, id]
+      );
+      return result.affectedRows;
+    }
+  }
+
   async delete(id: number) {
     const [result] = await databaseClient.query<Result>(
       "delete from user where id = ? and id != 1", // Protection for system_admin

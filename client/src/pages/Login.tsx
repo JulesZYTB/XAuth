@@ -28,7 +28,7 @@ export default function Login() {
 
       const data = await response.json();
       localStorage.setItem("token", data.token);
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unexpected error occurred");
     }
