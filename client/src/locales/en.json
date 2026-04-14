@@ -8,6 +8,19 @@
     "audit_logs": "Audit Logs",
     "sign_out": "Sign Out"
   },
+  "common": {
+    "cancel": "Cancel",
+    "confirm_action": "Confirm Action",
+    "saving": "Saving...",
+    "finished": "Finished"
+  },
+  "time": {
+    "1_hour": "1 Hour",
+    "1_day": "1 Day",
+    "7_days": "7 Days",
+    "30_days": "30 Days",
+    "lifetime": "Lifetime"
+  },
   "dashboard": {
     "syncing": "Synchronizing Core Metrics...",
     "active_licenses": "Active Licenses",
@@ -107,7 +120,32 @@
     "no_apps_title": "No protected applications yet.",
     "no_apps_desc": "Deploy your first app to start issuing licenses.",
     "delete_confirm_msg": "This action is irreversible. Deleting this application will instantly invalidate all associated license keys and terminate active user sessions.",
-    "delete_confirm": "Destroy Permanently"
+    "delete_confirm": "Destroy Permanently",
+    "webhook_title": "Event Webhooks",
+    "webhook_notif": "Notifications for",
+    "webhook_dest": "Destination URL",
+    "webhook_secret": "Secret (Optional)",
+    "webhook_add": "Add Webhook",
+    "webhook_active": "Active Endpoints",
+    "webhook_loading": "Loading endpoints...",
+    "webhook_empty": "No webhooks configured for this app yet.",
+    "webhook_events": "Events:",
+    "webhook_test": "Test URL",
+    "webhook_delete": "Delete Hook",
+    "release_title": "Release Management",
+    "release_deploying": "Deploying versions for",
+    "release_version": "Version String",
+    "release_channel": "Target Channel",
+    "release_stable": "Stable / Main",
+    "release_beta": "Beta / Testing",
+    "release_url": "Download URL (Direct Link)",
+    "release_hash": "SHA-256 Checksum",
+    "release_publish": "Publish Release",
+    "release_history": "Deployment History",
+    "release_fetching": "Fetching releases...",
+    "release_empty": "No releases published yet. Use the gateway to deploy your first version.",
+    "release_download": "Download Binary",
+    "release_delete": "Delete Release"
   },
   "licenses": {
     "title": "License Forge",
@@ -144,7 +182,23 @@
     "success_delete": "License permanently removed.",
     "success_generic": "Action completed.",
     "error_network": "Network error occurred.",
-    "back_to_apps": "Back to Apps"
+    "back_to_apps": "Back to Apps",
+    "forge_title": "Advanced License Forge",
+    "key_format": "Key Format Architecture",
+    "temporal_validity": "Temporal Validity",
+    "manual_override": "Manual Override",
+    "leave_blank_auto": "LEAVE BLANK FOR AUTO-GEN",
+    "init_prod": "Initialize Production",
+    "pattern_standard": "Standard (XXXX-XXXX-XXXX)",
+    "pattern_extended": "Extended (XXXXX-XXXXX-XXXXX)",
+    "pattern_legacy": "Legacy (XXXX-XXXX)",
+    "metadata_title": "License Metadata",
+    "metadata_settings": "Settings for",
+    "metadata_desc": "These variables are returned to the client software during validation. Use JSON format to store feature flags, user roles, or custom configurations.",
+    "metadata_json": "JSON Configuration",
+    "metadata_invalid_json": "Invalid JSON format. Please check your syntax.",
+    "metadata_save_fail": "Failed to save configuration.",
+    "metadata_save": "Save Metadata"
   },
   "users": {
     "title": "Identity Center",

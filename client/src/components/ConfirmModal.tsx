@@ -1,5 +1,6 @@
 import { AlertTriangle } from "lucide-react";
 import Modal from "./Modal";
+import { useTranslation } from "react-i18next";
 
 type ConfirmModalProps = {
   isOpen: boolean;
@@ -17,10 +18,11 @@ export default function ConfirmModal({
   onConfirm, 
   title, 
   message, 
-  confirmText = "Confirm Action",
+  confirmText,
   type = "danger"
 }: ConfirmModalProps) {
-  
+  const { t } = useTranslation();
+  const resolvedConfirmText = confirmText || t("common.confirm_action", "Confirm Action");
   const colors = {
     danger: "text-red-500 bg-red-500/10 border-red-500/20",
     warning: "text-orange-500 bg-orange-500/10 border-orange-500/20",
@@ -45,16 +47,16 @@ export default function ConfirmModal({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 px-6 py-4 rounded-2xl bg-dark border border-gray-800 text-gray-400 font-bold hover:text-white hover:bg-white/5 transition-all outline-none focus:ring-2 focus:ring-gray-700"
+            className="flex-1 px-6 py-4 rounded-2xl bg-dark border border-gray-800 text-gray-400 font-bold hover:text-white hover:bg-white/5 transition-all outline-none focus:ring-2 focus:ring-gray-700 cursor-pointer"
           >
-            Cancel
+            {t("common.cancel", "Cancel")}
           </button>
           <button
             type="button"
             onClick={() => { onConfirm(); onClose(); }}
-            className={`flex-1 px-6 py-4 rounded-2xl text-white font-black shadow-xl transition-all active:scale-95 outline-none focus:ring-4 focus:ring-white/10 ${btnColors[type]}`}
+            className={`flex-1 px-6 py-4 rounded-2xl text-white font-black shadow-xl transition-all active:scale-95 outline-none focus:ring-4 focus:ring-white/10 cursor-pointer ${btnColors[type]}`}
           >
-            {confirmText}
+            {resolvedConfirmText}
           </button>
         </div>
       </div>

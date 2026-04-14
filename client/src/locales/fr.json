@@ -8,6 +8,19 @@
     "audit_logs": "Journaux d'Audit",
     "sign_out": "Déconnexion"
   },
+  "common": {
+    "cancel": "Annuler",
+    "confirm_action": "Confirmer l'Action",
+    "saving": "Sauvegarde en cours...",
+    "finished": "Terminé"
+  },
+  "time": {
+    "1_hour": "1 Heure",
+    "1_day": "1 Jour",
+    "7_days": "7 Jours",
+    "30_days": "30 Jours",
+    "lifetime": "À Vie"
+  },
   "dashboard": {
     "syncing": "Synchronisation des Métriques...",
     "active_licenses": "Licences Actives",
@@ -107,7 +120,32 @@
     "no_apps_title": "Aucune application protégée pour le moment.",
     "no_apps_desc": "Déployez votre première app pour commencer à émettre des licences.",
     "delete_confirm_msg": "Cette action est irréversible. La suppression de cette application invalidera instantanément toutes les clés de licence associées et mettra fin aux sessions utilisateur actives.",
-    "delete_confirm": "Détruire Définitivement"
+    "delete_confirm": "Détruire Définitivement",
+    "webhook_title": "Webhooks d'Événements",
+    "webhook_notif": "Notifications pour",
+    "webhook_dest": "URL de Destination",
+    "webhook_secret": "Secret (Optionnel)",
+    "webhook_add": "Ajouter Webhook",
+    "webhook_active": "Points d'Accès Actifs",
+    "webhook_loading": "Chargement des points d'accès...",
+    "webhook_empty": "Aucun webhook configuré pour cette app pour le moment.",
+    "webhook_events": "Événements :",
+    "webhook_test": "Tester l'URL",
+    "webhook_delete": "Supprimer le Webhook",
+    "release_title": "Gestion des Déploiements",
+    "release_deploying": "Déploiement des versions pour",
+    "release_version": "Chaîne de Version",
+    "release_channel": "Canal Cible",
+    "release_stable": "Stable / Principal",
+    "release_beta": "Bêta / Test",
+    "release_url": "URL de Téléchargement (Lien Direct)",
+    "release_hash": "Empreinte SHA-256",
+    "release_publish": "Publier la Version",
+    "release_history": "Historique de Déploiement",
+    "release_fetching": "Récupération des versions...",
+    "release_empty": "Aucune version publiée pour l'instant. Utilisez le portail pour déployer votre première version.",
+    "release_download": "Télécharger le Binaire",
+    "release_delete": "Supprimer la Version"
   },
   "licenses": {
     "title": "Forge de Licences",
@@ -144,7 +182,23 @@
     "success_delete": "Licence supprimée définitivement.",
     "success_generic": "Action terminée.",
     "error_network": "Une erreur réseau est survenue.",
-    "back_to_apps": "Retour aux Apps"
+    "back_to_apps": "Retour aux Apps",
+    "forge_title": "Forge de Licences Avancée",
+    "key_format": "Architecture du Format de Clé",
+    "temporal_validity": "Validité Temporelle",
+    "manual_override": "Saisie Manuelle",
+    "leave_blank_auto": "LAISSER VIDE POUR AUTO-GEN",
+    "init_prod": "Initialiser la Production",
+    "pattern_standard": "Standard (XXXX-XXXX-XXXX)",
+    "pattern_extended": "Étendu (XXXXX-XXXXX-XXXXX)",
+    "pattern_legacy": "Héritage (XXXX-XXXX)",
+    "metadata_title": "Métadonnées de la Licence",
+    "metadata_settings": "Paramètres pour",
+    "metadata_desc": "Ces variables sont retournées au logiciel client lors de la validation. Utilisez le format JSON pour stocker des fonctionnalités, des rôles d'utilisateur ou des configurations personnalisées.",
+    "metadata_json": "Configuration JSON",
+    "metadata_invalid_json": "Format JSON invalide. Veuillez vérifier votre syntaxe.",
+    "metadata_save_fail": "Échec de la sauvegarde de la configuration.",
+    "metadata_save": "Sauvegarder les Métadonnées"
   },
   "users": {
     "title": "Centre d'Identité",

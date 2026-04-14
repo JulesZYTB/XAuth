@@ -77,6 +77,9 @@ router.delete("/api/licenses/:id", licenseActions.destroy);
 router.get("/api/logs", auditLogActions.browse);
 
 // ADMIN DASHBOARD
-router.get("/api/admin/stats", dashboardActions.getStats);
+router.get("/api/dashboard/stats", dashboardActions.getStats);
+router.get("/api/dashboard/map", dashboardActions.getMap);
+router.get("/api/dashboard/dau", dashboardActions.getDau);
+router.get("/api/dashboard/anomalies", dashboardActions.getAnomalies);
 
 export default router;
