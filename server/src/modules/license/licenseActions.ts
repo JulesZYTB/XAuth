@@ -1,4 +1,5 @@
-import type { RequestHandler } from "express";
+import type { Request, RequestHandler } from "express";
+
 import crypto from "node:crypto";
 import licenseRepository from "./licenseRepository";
 import appRepository from "../app/appRepository";
@@ -7,6 +8,10 @@ import securityService from "../../services/security";
 import auditLogRepository from "../audit/auditLogRepository";
 import type { AuthUser } from "../../types";
 import webhookService from "../../services/webhookService";
+
+interface AuthenticatedRequest extends Request {
+  auth: AuthUser;
+}
 
 // Dashboard action: Create a new license
 const add: RequestHandler = async (req, res, next) => {
@@ -142,7 +147,9 @@ const unban: RequestHandler = async (req, res, next) => {
 const resetHwid: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
-    const actor = (req as any).auth as AuthUser;
+    const actor = (req as unknown as AuthenticatedRequest).auth;
+
+
     const license = await licenseRepository.read(id);
     
     await licenseRepository.resetHwid(id);
@@ -176,7 +183,9 @@ function generateRandomKey(pattern = "XXXX-XXXX-XXXX") {
 const regenerateKey: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
-    const actor = (req as any).auth as AuthUser;
+    const actor = (req as unknown as AuthenticatedRequest).auth;
+
+
     const license = await licenseRepository.read(id);
     const newKey = generateRandomKey();
     
@@ -213,7 +222,9 @@ const browse: RequestHandler = async (req, res, next) => {
 
 const myLicenses: RequestHandler = async (req, res, next) => {
   try {
-    const userId = ((req as any).auth as AuthUser).id;
+    const userId = (req as unknown as AuthenticatedRequest).auth.id;
+
+
     const licenses = await licenseRepository.readByUserId(userId);
     res.json(licenses);
   } catch (err) {
@@ -224,7 +235,9 @@ const myLicenses: RequestHandler = async (req, res, next) => {
 const redeem: RequestHandler = async (req, res, next) => {
   try {
     const { license_key } = req.body;
-    const userId = ((req as any).auth as AuthUser).id;
+    const userId = (req as unknown as AuthenticatedRequest).auth.id;
+
+
     
     // Get license info before redemption for webhook
     const license = await licenseRepository.readByKey(license_key);

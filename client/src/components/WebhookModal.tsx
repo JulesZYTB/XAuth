@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+
 import { X, Webhook, Trash2, Plus, ShieldCheck, ExternalLink, Activity } from "lucide-react";
 
 interface WebhookData {
@@ -22,7 +23,7 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
   const [newUrl, setNewUrl] = useState("");
   const [newSecret, setNewSecret] = useState("");
 
-  const fetchWebhooks = async () => {
+  const fetchWebhooks = useCallback(async () => {
     try {
       const res = await fetch(`/api/apps/${appId}/webhooks`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -34,11 +35,12 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
     } finally {
       setLoading(false);
     }
-  };
+  }, [appId]);
 
   useEffect(() => {
     if (isOpen) fetchWebhooks();
-  }, [isOpen, appId]);
+  }, [isOpen, fetchWebhooks]);
+
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,17 +93,19 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
               <p className="text-xs text-gray-400">Notifications for <span className="text-accent font-bold">{appName}</span></p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-800 rounded-xl transition-all text-gray-500 hover:text-white">
+          <button type="button" onClick={onClose} className="p-2 hover:bg-gray-800 rounded-xl transition-all text-gray-500 hover:text-white">
             <X className="w-6 h-6" />
           </button>
         </header>
+
 
         <div className="p-8 space-y-8 max-h-[60vh] overflow-y-auto">
           {/* Create Webhook Form */}
           <form onSubmit={handleCreate} className="space-y-4 bg-dark/30 p-6 rounded-3xl border border-gray-800/50">
             <div className="space-y-2">
-              <label className="text-[10px] text-gray-500 uppercase font-black px-1">Destination URL</label>
+              <label htmlFor="webhook-url" className="text-[10px] text-gray-500 uppercase font-black px-1">Destination URL</label>
               <input
+                id="webhook-url"
                 type="url"
                 required
                 placeholder="https://your-server.com/webhook"
@@ -112,8 +116,9 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-[10px] text-gray-500 uppercase font-black px-1">Secret (Optional)</label>
+                <label htmlFor="webhook-secret" className="text-[10px] text-gray-500 uppercase font-black px-1">Secret (Optional)</label>
                 <input
+                  id="webhook-secret"
                   type="text"
                   placeholder="For HMAC signature"
                   className="w-full bg-dark/50 border border-gray-800 rounded-2xl px-5 py-3 text-sm text-white outline-none focus:border-accent transition-all"
@@ -121,6 +126,7 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
                   onChange={(e) => setNewSecret(e.target.value)}
                 />
               </div>
+
               <div className="flex items-end">
                 <button 
                   type="submit"
@@ -161,6 +167,7 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
                   </div>
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
                     <button 
+                      type="button"
                       onClick={() => window.open(hook.url, "_blank")}
                       className="p-2 text-gray-500 hover:text-accent transition-all"
                       title="Test URL"
@@ -168,6 +175,7 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
                       <ExternalLink className="w-4 h-4" />
                     </button>
                     <button 
+                      type="button"
                       onClick={() => handleDelete(hook.id)}
                       className="p-2 text-gray-500 hover:text-red-500 transition-all"
                       title="Delete Hook"
@@ -175,6 +183,7 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
+
                 </div>
               ))
             )}
@@ -183,12 +192,14 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
 
         <footer className="p-8 bg-dark/20 flex justify-end">
           <button 
+            type="button"
             onClick={onClose}
             className="px-8 py-3 bg-gray-800 hover:bg-gray-700 rounded-2xl text-white text-xs font-black transition-all"
           >
             Finished
           </button>
         </footer>
+
       </div>
     </div>
   );

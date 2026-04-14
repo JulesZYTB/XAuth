@@ -23,7 +23,7 @@ export default function EditVariablesModal({ isOpen, onClose, onSave, initialVar
       setIsSaving(true);
       await onSave(variables);
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err instanceof SyntaxError ? "Invalid JSON format. Please check your syntax." : "Failed to save configuration.");
       console.error(err);
     } finally {
@@ -46,7 +46,7 @@ export default function EditVariablesModal({ isOpen, onClose, onSave, initialVar
               <p className="text-xs text-gray-400">Settings for <span className="text-accent font-bold truncate max-w-[150px] inline-block align-bottom">{licenseKey}</span></p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-800 rounded-xl transition-all text-gray-500 hover:text-white">
+          <button type="button" onClick={onClose} className="p-2 hover:bg-gray-800 rounded-xl transition-all text-gray-500 hover:text-white">
             <X className="w-6 h-6" />
           </button>
         </header>
@@ -60,8 +60,9 @@ export default function EditVariablesModal({ isOpen, onClose, onSave, initialVar
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] text-gray-500 uppercase font-black px-1">JSON Configuration</label>
+            <label htmlFor="license-config" className="text-[10px] text-gray-500 uppercase font-black px-1">JSON Configuration</label>
             <textarea
+              id="license-config"
               className="w-full h-48 bg-dark/50 border border-gray-800 rounded-3xl p-6 font-mono text-sm text-gray-300 outline-none focus:border-accent transition-all resize-none box-shadow-inner"
               value={variables}
               onChange={(e) => setVariables(e.target.value)}
@@ -79,12 +80,14 @@ export default function EditVariablesModal({ isOpen, onClose, onSave, initialVar
 
         <footer className="p-8 bg-dark/20 flex gap-3 justify-end">
           <button 
+            type="button"
             onClick={onClose}
             className="px-6 py-3 border border-gray-800 hover:bg-gray-800 rounded-2xl text-gray-400 text-xs font-black transition-all"
           >
             Cancel
           </button>
           <button 
+            type="button"
             onClick={handleSave}
             disabled={isSaving}
             className="px-8 py-3 bg-accent hover:brightness-110 rounded-2xl text-white text-xs font-black flex items-center gap-2 transition-all shadow-xl shadow-accent/20 active:scale-95 disabled:opacity-50"

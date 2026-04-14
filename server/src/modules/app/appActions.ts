@@ -1,12 +1,18 @@
-import type { RequestHandler } from "express";
+import type { Request, RequestHandler } from "express";
 import crypto from "node:crypto";
 import appRepository from "./appRepository";
 import type { AuthUser } from "../../types";
 
+interface AuthenticatedRequest extends Request {
+  auth: AuthUser;
+}
 
 const browse: RequestHandler = async (req, res, next) => {
   try {
-    const ownerId = ((req as any).auth as AuthUser).id;
+    const ownerId = (req as AuthenticatedRequest).auth.id;
+
+
+
     const apps = await appRepository.readByOwnerId(ownerId);
     res.json(apps);
   } catch (err) {
@@ -17,7 +23,10 @@ const browse: RequestHandler = async (req, res, next) => {
 const add: RequestHandler = async (req, res, next) => {
   try {
     const { name } = req.body;
-    const ownerId = ((req as any).auth as AuthUser).id;
+    const ownerId = (req as unknown as AuthenticatedRequest).auth.id;
+
+
+
 
     const secret_key = crypto.randomBytes(16).toString("hex");
 
@@ -37,7 +46,10 @@ const add: RequestHandler = async (req, res, next) => {
 const edit: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
-    const ownerId = ((req as any).auth as AuthUser).id;
+    const ownerId = (req as unknown as AuthenticatedRequest).auth.id;
+
+
+
     await appRepository.update(id, ownerId, req.body);
     res.sendStatus(204);
   } catch (err) {
@@ -48,7 +60,10 @@ const edit: RequestHandler = async (req, res, next) => {
 const togglePause: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
-    const ownerId = ((req as any).auth as AuthUser).id;
+    const ownerId = (req as unknown as AuthenticatedRequest).auth.id;
+
+
+
     
     const app = await appRepository.read(id);
     if (!app || app.owner_id !== ownerId) {
@@ -67,7 +82,9 @@ const destroy: RequestHandler = async (req, res, next) => {
 
   try {
     const id = Number(req.params.id);
-    const ownerId = ((req as any).auth as AuthUser).id;
+    const ownerId = (req as unknown as Request & { auth: AuthUser }).auth.id;
+
+
 
     await appRepository.delete(id, ownerId);
     res.sendStatus(204);

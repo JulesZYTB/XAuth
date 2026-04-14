@@ -166,7 +166,8 @@ export default function Licenses() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
       {notification && (
-        <div className={`fixed top-8 right-8 z-[100] flex items-center gap-3 px-6 py-4 rounded-2xl border shadow-2xl animate-in slide-in-from-top-12 duration-500 ${
+        <div className={`fixed top-8 right-8 z-100 flex items-center gap-3 px-6 py-4 rounded-2xl border shadow-2xl animate-in slide-in-from-top-12 duration-500 ${
+
           notification.type === 'success' 
             ? "bg-green-500/10 border-green-500/20 text-green-500" 
             : "bg-red-500/10 border-red-500/20 text-red-500"

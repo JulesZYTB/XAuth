@@ -6,7 +6,8 @@ class WebhookService {
   /**
    * Dispatches an event to all enabled webhooks for a specific application.
    */
-  async dispatch(appId: number, event: WebhookEvent, payload: any) {
+  async dispatch(appId: number, event: WebhookEvent, payload: Record<string, unknown>) {
+
     try {
       const hooks = await webhookRepository.readByAppId(appId);
       const enabledHooks = hooks.filter(h => h.is_enabled);

@@ -9,8 +9,10 @@ import {
   Play, 
   ChevronRight,
   ShieldCheck,
-  Settings2
+  Settings2,
+  Webhook
 } from "lucide-react";
+
 import { Link } from "react-router";
 import ConfirmModal from "../components/ConfirmModal";
 import WebhookModal from "../components/WebhookModal";
@@ -125,7 +127,8 @@ export default function Apps() {
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
       <header className="bg-secondary/40 p-8 rounded-4xl border border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 shadow-2xl backdrop-blur-xl">
         <div className="flex items-center gap-6">
-          <div className="p-5 bg-accent/20 rounded-[2rem] shadow-xl shadow-accent/10">
+          <div className="p-5 bg-accent/20 rounded-4xl shadow-xl shadow-accent/10">
+
             <Rocket className="w-10 h-10 text-accent" aria-hidden="true" />
           </div>
           <div>
