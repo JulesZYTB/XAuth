@@ -3,7 +3,27 @@ import json
 import uuid
 import base64
 import hashlib
+import subprocess
+import platform
 from Crypto.Cipher import AES
+
+def get_hwid():
+    """Generates a reliable hardware ID (cross-platform)"""
+    try:
+        if platform.system() == "Windows":
+            output = subprocess.check_output('wmic csproduct get uuid', shell=True).decode()
+            return output.split('\n')[1].strip()
+        elif platform.system() == "Linux":
+            with open("/etc/machine-id", "r") as f:
+                return f.read().strip()
+        elif platform.system() == "Darwin":
+            output = subprocess.check_output("ioreg -rd1 -c IOPlatformExpertDevice | awk '/IOPlatformUUID/ { print $3; }'", shell=True).decode()
+            return output.strip().strip('"')
+    except Exception:
+        pass
+    # Fallback to mac address if all else fails
+    return str(uuid.getnode())
+
 
 class XAuthUltra:
     def __init__(self, app_id, app_secret, base_url="http://localhost:3310"):
@@ -57,7 +77,7 @@ class XAuthUltra:
             if not self.initialize():
                 return False
 
-        hwid = str(uuid.getnode())
+        hwid = get_hwid()
 
         payload = {
             "license_key": license_key,
@@ -100,8 +120,8 @@ class XAuthUltra:
 if __name__ == "__main__":
     print("--- XAuth Ultra Secure Client ---")
     APP_ID = 1  # Replace with actual App ID
-    SECRET = "2681a8a09f95130269a51f4e699271fc"
-    LICENSE_KEY = "40TQT-MLJVS-EOV89" # No more input(), hardcoded or arguments
+    SECRET = "REPLACE_WITH_YOUR_SECRET"
+    LICENSE_KEY = "REPLACE_WITH_LICENSE_KEY" # No more input(), hardcoded or arguments
 
     auth = XAuthUltra(app_id=APP_ID, app_secret=SECRET)
     
