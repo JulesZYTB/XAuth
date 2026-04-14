@@ -40,6 +40,42 @@ class DashboardRepository {
     );
     return rows;
   }
+
+  async getMapData() {
+    const [rows] = await databaseClient.query<Rows>(
+      `SELECT country_code as country, COUNT(*) as value 
+       FROM validation_log 
+       WHERE country_code IS NOT NULL AND country_code != '??'
+       GROUP BY country_code 
+       ORDER BY value DESC`
+    );
+    return rows;
+  }
+
+  async getDauData() {
+    const [rows] = await databaseClient.query<Rows>(
+      `SELECT DATE_FORMAT(created_at, '%Y-%m-%d') as date, COUNT(DISTINCT ip_address) as count 
+       FROM validation_log 
+       WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+       GROUP BY DATE(created_at) 
+       ORDER BY date ASC`
+    );
+    return rows;
+  }
+
+  async getAnomalyData() {
+    const [rows] = await databaseClient.query<Rows>(
+      `SELECT 
+         DATE_FORMAT(created_at, '%Y-%m-%dT%H:00:00.000Z') as timestamp,
+         SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END) as successes,
+         SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failures
+       FROM validation_log 
+       WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+       GROUP BY DATE_FORMAT(created_at, '%Y-%m-%dT%H:00:00.000Z')
+       ORDER BY timestamp ASC`
+    );
+    return rows;
+  }
 }
 
 export default new DashboardRepository();
