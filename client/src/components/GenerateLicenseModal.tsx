@@ -118,7 +118,7 @@ export default function GenerateLicenseModal({ isOpen, onClose, onGenerate }: Ge
         <button
           type="button"
           onClick={handleGenerate}
-          className="w-full bg-accent hover:bg-accent/80 text-white font-black py-5 rounded-[2rem] shadow-2xl shadow-accent/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
+          className="w-full bg-accent hover:bg-accent/80 text-white font-black py-5 rounded-4xl shadow-2xl shadow-accent/30 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
         >
           <Sparkles className="w-5 h-5" /> Initialize Production
         </button>

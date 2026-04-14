@@ -22,7 +22,12 @@ export default function UserHub() {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
-      setLicenses(data);
+      if (Array.isArray(data)) {
+        setLicenses(data);
+      } else {
+        setLicenses([]);
+      }
+
     } catch (err) {
       console.error(err);
     } finally {

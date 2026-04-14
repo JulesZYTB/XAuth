@@ -39,7 +39,14 @@ export default function Dashboard() {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
-      setStats(data);
+      
+      if (data && typeof data === "object" && data.trafficData && data.recentActivity) {
+        setStats(data);
+      } else {
+        console.error("Invalid stats data received:", data);
+        setStats(null);
+      }
+
     } catch (err) {
       console.error(err);
     } finally {

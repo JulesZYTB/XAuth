@@ -37,7 +37,13 @@ export default function Apps() {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
-      setApps(data);
+      if (Array.isArray(data)) {
+        setApps(data);
+      } else {
+        console.error("Invalid apps data:", data);
+        setApps([]);
+      }
+
     } catch (err) {
       console.error(err);
     } finally {
@@ -135,7 +141,7 @@ export default function Apps() {
           />
           <button 
             type="submit"
-            className="bg-accent px-8 py-4 rounded-2xl text-white font-black hover:bg-accent/80 transition-all flex items-center gap-3 shadow-xl shadow-accent/20 active:scale-95"
+            className="bg-accent px-8 py-5 rounded-4xl text-white text-sm font-black flex items-center gap-3 shadow-2xl shadow-accent/30 active:scale-95 transition-all"
           >
             <Plus className="w-5 h-5" /> Deploy
           </button>

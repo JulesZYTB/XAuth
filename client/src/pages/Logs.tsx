@@ -22,7 +22,12 @@ export default function Logs() {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
-      setLogs(data);
+      if (Array.isArray(data)) {
+        setLogs(data);
+      } else {
+        setLogs([]);
+      }
+
     } catch (err) {
       console.error(err);
     } finally {

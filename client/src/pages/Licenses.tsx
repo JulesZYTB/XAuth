@@ -9,7 +9,9 @@ import {
   Lock,
   Unlock,
   ChevronLeft,
-  Plus
+  Plus,
+  Wand2,
+  CheckCircle2
 } from "lucide-react";
 
 import ConfirmModal from "../components/ConfirmModal";
@@ -29,11 +31,17 @@ export default function Licenses() {
   const navigate = useNavigate();
   const [licenses, setLicenses] = useState<License[]>([]);
   const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
   
   // Modal states
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
-  const [activeAction, setActiveAction] = useState<{ id: number, action: "ban" | "unban" | "reset-hwid" | "delete" } | null>(null);
+  const [activeAction, setActiveAction] = useState<{ id: number, action: "ban" | "unban" | "reset-hwid" | "delete" | "regenerate" } | null>(null);
+
+  const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 4000);
+  };
 
   const fetchLicenses = useCallback(async () => {
     try {
@@ -41,7 +49,11 @@ export default function Licenses() {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
-      setLicenses(data);
+      if (Array.isArray(data)) {
+        setLicenses(data);
+      } else {
+        setLicenses([]);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -53,7 +65,7 @@ export default function Licenses() {
 
   const handleCreateKey = async (data: { license_key?: string, expiry_date: string }) => {
     try {
-      await fetch("/api/licenses", {
+      const res = await fetch("/api/licenses", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -64,7 +76,13 @@ export default function Licenses() {
           app_id: Number(appId)
         }),
       });
-      fetchLicenses();
+      
+      if (res.ok) {
+        showNotification("New license provisioned successfully.");
+        fetchLicenses();
+      } else {
+        showNotification("Provisioning failed.", "error");
+      }
     } catch (err) {
       console.error(err);
     }
@@ -89,24 +107,42 @@ export default function Licenses() {
       
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        alert(`Action failed: ${errData.message || res.statusText}`);
+        showNotification(errData.message || "Operation failed", "error");
       } else {
+        const successMessages = {
+          'ban': "License banned successfully.",
+          'unban': "License restored.",
+          'reset-hwid': "Hardware ID has been cleared.",
+          'regenerate': "New license key generated successfully.",
+          'delete': "License permanentely removed."
+        };
+        showNotification(successMessages[action] || "Action completed.");
         fetchLicenses();
       }
     } catch (err) {
       console.error(err);
-      alert("Network error occurred.");
+      showNotification("Network error occurred.", "error");
     }
   };
 
-
-  const openConfirm = (id: number, action: "ban" | "unban" | "reset-hwid" | "delete") => {
+  const openConfirm = (id: number, action: "ban" | "unban" | "reset-hwid" | "delete" | "regenerate") => {
     setActiveAction({ id, action });
     setIsConfirmModalOpen(true);
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 relative">
+      {notification && (
+        <div className={`fixed top-8 right-8 z-[100] flex items-center gap-3 px-6 py-4 rounded-2xl border shadow-2xl animate-in slide-in-from-top-12 duration-500 ${
+          notification.type === 'success' 
+            ? "bg-green-500/10 border-green-500/20 text-green-500" 
+            : "bg-red-500/10 border-red-500/20 text-red-500"
+        }`}>
+          {notification.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <ShieldAlert className="w-5 h-5" />}
+          <span className="text-sm font-bold">{notification.message}</span>
+        </div>
+      )}
+
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
           <button 
@@ -123,7 +159,7 @@ export default function Licenses() {
         <button 
           type="button"
           onClick={() => setIsGenerateModalOpen(true)}
-          className="bg-accent px-8 py-5 rounded-[2rem] text-white text-sm font-black flex items-center gap-3 shadow-2xl shadow-accent/30 active:scale-95 transition-all"
+          className="bg-accent px-8 py-5 rounded-4xl text-white text-sm font-black flex items-center gap-3 shadow-2xl shadow-accent/30 active:scale-95 transition-all"
         >
           <Plus className="w-5 h-5" /> Provision New Key
         </button>
@@ -148,7 +184,11 @@ export default function Licenses() {
             <tbody className="divide-y divide-gray-800/50">
               {licenses.map((license) => (
                 <tr key={license.id} className="hover:bg-white/2 transition-colors group">
-                  <td className="px-6 py-5 font-mono text-sm text-gray-300">{license.license_key}</td>
+                  <td className="px-6 py-5 font-mono text-sm text-gray-300">
+                    <div className="flex items-center gap-3">
+                      <span className="select-all">{license.license_key}</span>
+                    </div>
+                  </td>
                   <td className="px-6 py-5">
                     <span className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${
                       license.status === "active" ? "bg-green-500/10 text-green-500 border-green-500/20" : "bg-red-500/10 text-red-500 border-red-500/20"
@@ -162,8 +202,16 @@ export default function Licenses() {
                     <div className="flex justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
                       <button 
                         type="button"
+                        onClick={() => openConfirm(license.id, "regenerate")}
+                        className="p-2 text-gray-500 hover:text-blue-500 hover:bg-blue-500/10 rounded-xl transition-all"
+                        title="Regenerate Key Value"
+                      >
+                        <Wand2 className="w-4 h-4" />
+                      </button>
+                      <button 
+                        type="button"
                         onClick={() => openConfirm(license.id, "reset-hwid")}
-                        className="p-2 text-gray-500 hover:text-accent rounded-xl transition-all"
+                        className="p-2 text-gray-500 hover:text-accent hover:bg-accent/10 rounded-xl transition-all"
                         title="Reset HWID"
                       >
                         <RefreshCcw className="w-4 h-4" />
@@ -211,14 +259,20 @@ export default function Licenses() {
         isOpen={isConfirmModalOpen}
         onClose={() => setIsConfirmModalOpen(false)}
         onConfirm={confirmAction}
-        title={activeAction?.action === 'delete' ? "Destroy License" : "Alter Security Status"}
+        title={
+          activeAction?.action === 'delete' ? "Destroy License" : 
+          activeAction?.action === 'regenerate' ? "Regenerate Key Secret" :
+          "Alter Security Status"
+        }
         message={
           activeAction?.action === 'delete' 
           ? "This will permanently remove the license key from the system. Users will not be able to redeem or use it anymore."
+          : activeAction?.action === 'regenerate'
+          ? "This will void the current license string and generate a completely new one. Any client currently using the old string will be disconnected."
           : `Are you sure you want to ${activeAction?.action} this license record? This will take immediate effect on all active sessions.`
         }
-        confirmText="Confirm Change"
-        type={activeAction?.action === 'delete' ? 'danger' : 'warning'}
+        confirmText={activeAction?.action === 'regenerate' ? "Regenerate Now" : "Confirm Change"}
+        type={activeAction?.action === 'delete' ? 'danger' : activeAction?.action === 'regenerate' ? 'info' : 'warning'}
       />
 
       <GenerateLicenseModal 

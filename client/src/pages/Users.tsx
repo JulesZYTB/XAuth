@@ -23,7 +23,12 @@ export default function Users() {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
-      setUsers(data);
+      if (Array.isArray(data)) {
+        setUsers(data);
+      } else {
+        setUsers([]);
+      }
+
     } catch (err) {
       console.error(err);
     } finally {
