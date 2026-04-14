@@ -7,7 +7,10 @@ import {
   TrendingUp, 
   ChevronRight,
   Terminal,
-  Activity
+  Activity,
+  Globe,
+  ShieldAlert,
+  BarChart3
 } from "lucide-react";
 
 import { 
@@ -17,8 +20,13 @@ import {
   AreaChart,
   Area,
   XAxis,
-  YAxis
+  YAxis,
+  BarChart,
+  Bar,
+  Legend
 } from "recharts";
+
+import WorldMap from "../components/WorldMap";
 
 type Stats = {
   totalUsers: number;
@@ -27,6 +35,9 @@ type Stats = {
   activeLicenses: number;
   trafficData: { date: string, count: number }[];
   recentActivity: { id: number, action: string, details: string, created_at: string, username?: string, app_name?: string }[];
+  mapData: { country: string, value: number }[];
+  dauData: { date: string, count: number }[];
+  anomalyData: { timestamp: string, successes: number, failures: number }[];
 };
 
 export default function Dashboard() {
@@ -35,17 +46,28 @@ export default function Dashboard() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const res = await fetch("/api/admin/stats", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      const data = await res.json();
+      const headers = { Authorization: `Bearer ${localStorage.getItem("token")}` };
       
-      if (data && typeof data === "object" && data.trafficData && data.recentActivity) {
-        setStats(data);
-      } else {
-        console.error("Invalid stats data received:", data);
-        setStats(null);
-      }
+      const [coreRes, mapRes, dauRes, anomalyRes] = await Promise.all([
+        fetch("/api/dashboard/stats", { headers }),
+        fetch("/api/dashboard/map", { headers }),
+        fetch("/api/dashboard/dau", { headers }),
+        fetch("/api/dashboard/anomalies", { headers })
+      ]);
+
+      const [core, map, dau, anomaly] = await Promise.all([
+        coreRes.json(),
+        mapRes.json(),
+        dauRes.json(),
+        anomalyRes.json()
+      ]);
+      
+      setStats({
+        ...core,
+        mapData: Array.isArray(map) ? map : [],
+        dauData: Array.isArray(dau) ? dau : [],
+        anomalyData: Array.isArray(anomaly) ? anomaly : []
+      });
 
     } catch (err) {
       console.error(err);
@@ -69,7 +91,7 @@ export default function Dashboard() {
     { label: "Active Licenses", value: stats.activeLicenses, growth: "Live", icon: ShieldCheck, color: "text-accent" },
     { label: "Total Users", value: stats.totalUsers, growth: "+All", icon: Users, color: "text-blue-500" },
     { label: "Total Apps", value: stats.totalApps, growth: "Stable", icon: Zap, color: "text-orange-500" },
-    { label: "Requests (Logs)", value: stats.trafficData.reduce((acc, curr) => acc + curr.count, 0), growth: "Total", icon: ActivityIcon, color: "text-green-500" },
+    { label: "Global Reach", value: stats.mapData.length, growth: "Countries", icon: Globe, color: "text-green-500" },
   ];
 
   return (
@@ -80,8 +102,10 @@ export default function Dashboard() {
           <p className="text-gray-400 mt-1 font-medium">Real-time telemetrics for XAuth Omega infrastructure</p>
         </div>
         <div className="bg-secondary px-6 py-3 rounded-2xl border border-gray-800 flex items-center gap-3">
-          <span className="text-[10px] text-gray-500 uppercase font-black">Period:</span>
-          <span className="text-sm font-bold text-white">Last 7 Days</span>
+          <span className="text-[10px] text-gray-500 uppercase font-black">Node Status:</span>
+          <span className="text-sm font-bold text-green-500 flex items-center gap-1.5">
+             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /> Operational
+          </span>
           <ChevronRight className="w-4 h-4 text-gray-600" />
         </div>
       </header>
@@ -103,47 +127,99 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-secondary p-10 rounded-[3rem] border border-gray-800 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-8">
-            <TrendingUp className="w-8 h-8 text-accent/20" />
+      {/* Analytics Layer */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <WorldMap data={stats.mapData} />
+        
+        <div className="bg-secondary p-10 rounded-[3rem] border border-gray-800 shadow-2xl relative overflow-hidden">
+          <div className="flex justify-between items-start mb-10">
+            <div>
+              <h3 className="text-xl font-black text-white mb-1">Retention & DAU</h3>
+              <p className="text-sm text-gray-500 font-medium">Daily Active Users over 30 days</p>
+            </div>
+            <BarChart3 className="w-6 h-6 text-blue-500 opacity-50" />
           </div>
-          <div className="mb-10">
-            <h3 className="text-xl font-black text-white mb-1">Traffic Analysis</h3>
-            <p className="text-sm text-gray-500 font-medium">Daily license validation requests</p>
-          </div>
-          <div className="h-[300px] w-full">
+          <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={stats.trafficData}>
-                <defs>
-                  <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
+              <BarChart data={stats.dauData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
                 <XAxis 
                   dataKey="date" 
                   stroke="#64748b" 
                   fontSize={10} 
-                  fontWeight="bold" 
                   axisLine={false} 
                   tickLine={false}
-                  tickFormatter={(val) => new Date(val).toLocaleDateString(undefined, { weekday: 'short' })}
+                  tickFormatter={(val) => new Date(val).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                 />
-                <YAxis stroke="#64748b" fontSize={10} fontWeight="bold" axisLine={false} tickLine={false} />
+                <YAxis stroke="#64748b" fontSize={10} axisLine={false} tickLine={false} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: "#0f172a", borderRadius: "16px", border: "1px solid #1e293b", fontSize: "12px", fontWeight: "bold" }}
-                  itemStyle={{ color: "#fff" }}
+                  contentStyle={{ backgroundColor: "#0f172a", borderRadius: "16px", border: "1px solid #1e293b", fontSize: "12px" }}
+                  itemStyle={{ color: "#3b82f6" }}
+                  cursor={{ fill: 'rgba(59, 130, 246, 0.05)' }}
                 />
-                <Area type="monotone" dataKey="count" stroke="#3b82f6" fillOpacity={1} fill="url(#colorVal)" strokeWidth={3} />
+                <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 bg-secondary p-10 rounded-[3rem] border border-gray-800 shadow-2xl relative overflow-hidden">
+          <div className="flex justify-between items-start mb-10">
+            <div>
+              <h3 className="text-xl font-black text-white mb-1">Anomaly Detection</h3>
+              <p className="text-sm text-gray-500 font-medium">Tracking failed vs successful validations (Crack Attempts)</p>
+            </div>
+            <div className="flex items-center gap-4">
+               <div className="flex items-center gap-2">
+                 <div className="w-2 h-2 bg-accent rounded-full" />
+                 <span className="text-[10px] font-black text-gray-500 uppercase">Successes</span>
+               </div>
+               <div className="flex items-center gap-2">
+                 <div className="w-2 h-2 bg-red-500 rounded-full" />
+                 <span className="text-[10px] font-black text-gray-500 uppercase">Failures</span>
+               </div>
+            </div>
+          </div>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={stats.anomalyData}>
+                <defs>
+                  <linearGradient id="colorSuc" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorFail" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                <XAxis 
+                  dataKey="timestamp" 
+                  stroke="#64748b" 
+                  fontSize={10} 
+                  axisLine={false} 
+                  tickLine={false}
+                  tickFormatter={(val) => new Date(val).getHours() + ":00"}
+                />
+                <YAxis stroke="#64748b" fontSize={10} axisLine={false} tickLine={false} />
+                <Tooltip 
+                   contentStyle={{ backgroundColor: "#0f172a", borderRadius: "16px", border: "1px solid #1e293b", fontSize: "12px" }}
+                />
+                <Area type="monotone" dataKey="successes" stroke="#3b82f6" fillOpacity={1} fill="url(#colorSuc)" strokeWidth={2} />
+                <Area type="monotone" dataKey="failures" stroke="#ef4444" fillOpacity={1} fill="url(#colorFail)" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         <div className="bg-secondary p-10 rounded-[3rem] border border-gray-800 shadow-2xl flex flex-col">
-          <h3 className="text-xl font-black text-white mb-8">Live Feed</h3>
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-xl font-black text-white">Live Feed</h3>
+            <ActivityIcon className="w-5 h-5 text-accent animate-pulse" />
+          </div>
           <div className="space-y-4 flex-1">
             {stats.recentActivity.map((log) => (
               <div key={log.id} className="flex flex-col p-4 bg-dark/50 rounded-2xl border border-gray-800/50 group">
@@ -155,11 +231,11 @@ export default function Dashboard() {
                   <span className="text-[9px] text-gray-600 font-bold italic">{new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
                 <p className="text-[11px] text-gray-400 font-medium line-clamp-1">{log.details}</p>
-                <div className="mt-2 flex items-center gap-2">
-                   <div className="w-4 h-4 rounded-full bg-accent/10 flex items-center justify-center">
-                      <Users className="w-2 h-2 text-accent" />
+                <div className="mt-2 flex items-center justify-between">
+                   <div className="flex items-center gap-2">
+                     <span className="text-[9px] text-gray-600 font-bold">@{log.username || "system"}</span>
                    </div>
-                   <span className="text-[9px] text-gray-600 font-bold">@{log.username || "system"}</span>
+                   {log.app_name && <span className="text-[8px] bg-accent/5 text-accent/50 px-2 py-0.5 rounded-full border border-accent/10 font-bold">{log.app_name}</span>}
                 </div>
               </div>
             ))}
@@ -168,10 +244,13 @@ export default function Dashboard() {
             type="button"
             className="w-full mt-8 bg-dark p-4 rounded-2xl border border-gray-800 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors flex items-center justify-center gap-2"
           >
-            Full Audit Logs <ChevronRight className="w-4 h-4" />
+            Security Auditor <ShieldAlert className="w-4 h-4" />
           </button>
         </div>
       </div>
     </div>
+  );
+}
+
   );
 }

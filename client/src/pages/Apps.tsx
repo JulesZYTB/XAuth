@@ -10,12 +10,16 @@ import {
   ChevronRight,
   ShieldCheck,
   Settings2,
-  Webhook
+  Webhook,
+  Package
 } from "lucide-react";
+
 
 import { Link } from "react-router";
 import ConfirmModal from "../components/ConfirmModal";
 import WebhookModal from "../components/WebhookModal";
+import ReleaseModal from "../components/ReleaseModal";
+
 
 
 type App = {
@@ -36,6 +40,9 @@ export default function Apps() {
   const [appToDelete, setAppToDelete] = useState<number | null>(null);
   const [isWebhookModalOpen, setIsWebhookModalOpen] = useState(false);
   const [appForWebhook, setAppForWebhook] = useState<App | null>(null);
+  const [isReleaseModalOpen, setIsReleaseModalOpen] = useState(false);
+  const [appForRelease, setAppForRelease] = useState<App | null>(null);
+
 
 
   const fetchApps = useCallback(async () => {
@@ -178,7 +185,16 @@ export default function Apps() {
                 </button>
                 <button 
                   type="button"
+                  onClick={() => { setAppForRelease(app); setIsReleaseModalOpen(true); }}
+                  className="p-3 bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded-2xl hover:bg-blue-500/20 transition-all"
+                  title="Manage Releases"
+                >
+                  <Package className="w-5 h-5" />
+                </button>
+                <button 
+                  type="button"
                   onClick={() => { setAppForWebhook(app); setIsWebhookModalOpen(true); }}
+
                   className="p-3 bg-accent/10 text-accent border border-accent/20 rounded-2xl hover:bg-accent/20 transition-all"
                   title="Configure Webhooks"
                 >
@@ -280,7 +296,16 @@ export default function Apps() {
           appName={appForWebhook.name}
         />
       )}
+      {appForRelease && (
+        <ReleaseModal 
+          isOpen={isReleaseModalOpen}
+          onClose={() => setIsReleaseModalOpen(false)}
+          appId={appForRelease.id}
+          appName={appForRelease.name}
+        />
+      )}
     </div>
+
 
   );
 }

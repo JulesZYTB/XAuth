@@ -8,10 +8,13 @@ import securityService from "../../services/security";
 import auditLogRepository from "../audit/auditLogRepository";
 import type { AuthUser } from "../../types";
 import webhookService from "../../services/webhookService";
+import geoService from "../../services/geoService";
+import validationLogRepository from "../app/validationLogRepository";
 
 interface AuthenticatedRequest extends Request {
   auth: AuthUser;
 }
+
 
 // Dashboard action: Create a new license
 const add: RequestHandler = async (req, res, next) => {
@@ -35,7 +38,8 @@ const add: RequestHandler = async (req, res, next) => {
 const validate: RequestHandler = async (req, res, next) => {
   try {
     const { license_key, hwid, app_secret, session_id } = req.body;
-    const ip = req.ip || req.socket.remoteAddress;
+    const ip = req.ip || req.socket.remoteAddress || "0.0.0.0";
+
 
     // 1. Session check
     const session = await sessionRepository.read(session_id);
@@ -50,36 +54,103 @@ const validate: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    // Resolve geography once
+    const geo = await geoService.lookup(ip);
+    const country: string = geo.country ?? "Unknown";
+    const country_code: string = geo.countryCode ?? "??";
+
     const app = await appRepository.read(license.app_id);
     if (!app || app.secret_key !== app_secret) {
+      // Log failure (Unauthorized app access)
+      await validationLogRepository.create({
+        app_id: license.app_id,
+        license_id: license.id,
+        ip_address: ip,
+        country: country as string,
+        country_code: country_code as string,
+        status: "failed",
+        error_type: "UNAUTHORIZED_APP"
+      });
+
       res.status(401).json({ message: "Invalid app secret" });
       return;
     }
 
     // KILL-SWITCH CHECK
     if (app.is_paused) {
+      // Log failure (System paused)
+      await validationLogRepository.create({
+        app_id: app.id,
+        license_id: license.id,
+        ip_address: ip,
+        country: country as string,
+        country_code: country_code as string,
+        status: "failed",
+        error_type: "SYSTEM_PAUSED"
+      });
+
       res.status(403).json({ message: "System under maintenance. Access temporarily suspended." });
       return;
     }
 
     if (new Date(license.expiry_date) < new Date()) {
+      await validationLogRepository.create({
+        app_id: app.id,
+        license_id: license.id,
+        ip_address: ip,
+        country: country as string,
+        country_code: country_code as string,
+        status: "failed",
+        error_type: "EXPIRED"
+      });
+
       res.status(403).json({ message: "License expired" });
       return;
     }
 
     if (license.status !== "active") {
+      await validationLogRepository.create({
+        app_id: app.id,
+        license_id: license.id,
+        ip_address: ip,
+        country: country as string,
+        country_code: country_code as string,
+        status: "failed",
+        error_type: "BANNED"
+      });
+
       res.status(403).json({ message: `License is ${license.status}` });
       return;
     }
 
     // HWID Check
     if (license.hwid && license.hwid !== hwid) {
+       await validationLogRepository.create({
+        app_id: app.id,
+        license_id: license.id,
+        ip_address: ip,
+        country: country as string,
+        country_code: country_code as string,
+        status: "failed",
+        error_type: "HWID_MISMATCH"
+      });
+
       res.status(403).json({ message: "HWID mismatch" });
       return;
     }
 
     // IP Lock check
     if (license.ip_lock && license.ip_lock !== ip) {
+       await validationLogRepository.create({
+        app_id: app.id,
+        license_id: license.id,
+        ip_address: ip,
+        country: country as string,
+        country_code: country_code as string,
+        status: "failed",
+        error_type: "IP_MISMATCH"
+      });
+
       res.status(403).json({ message: "IP address blocked for this license" });
       return;
     }
@@ -89,8 +160,21 @@ const validate: RequestHandler = async (req, res, next) => {
       await licenseRepository.updateHwid(license.id, hwid);
     }
 
+    // Log success
+    await validationLogRepository.create({
+      app_id: app.id,
+      license_id: license.id,
+      ip_address: ip || "0.0.0.0",
+      country: country as string,
+      country_code: country_code as string,
+      status: "success"
+    });
+
+
+
     // 4. Finalize session (consume it)
     await sessionRepository.delete(session_id);
+
 
     // Prepare response data with Enterprise metadata
     const responseData = JSON.stringify({ 

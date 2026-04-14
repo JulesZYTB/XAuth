@@ -14,11 +14,17 @@ import sessionActions from "./modules/session/sessionActions";
 import dashboardActions from "./modules/admin/dashboardActions";
 import verifyToken from "./modules/admin/authMiddleware";
 import webhookActions from "./modules/app/webhookActions";
+import analyticsActions from "./modules/app/analyticsActions";
+import releaseActions from "./modules/app/releaseActions";
+import updateActions from "./modules/app/updateActions";
 
 
 // --- CLIENT AUTH API (Public with Secret) ---
 router.post("/api/v1/client/initialize", sessionActions.initialize);
 router.post("/api/v1/client/validate", licenseActions.validate);
+
+// --- PUBLIC UPDATE GATEWAY ---
+router.get("/api/update/:appId/:channel", updateActions.check);
 
 // --- IDENTITY API (Public) ---
 router.post("/api/auth/login", userActions.login);
@@ -44,6 +50,12 @@ router.get("/api/apps/:appId/webhooks", webhookActions.browse);
 router.post("/api/webhooks", webhookActions.add);
 router.patch("/api/webhooks/:id", webhookActions.edit);
 router.delete("/api/webhooks/:id", webhookActions.destroy);
+
+// RELEASE MANAGEMENT
+router.get("/api/apps/:appId/releases", releaseActions.browse);
+router.post("/api/releases", releaseActions.add);
+router.patch("/api/releases/:id", releaseActions.edit);
+router.delete("/api/releases/:id", releaseActions.destroy);
 
 // LICENSES CRUD
 router.get("/api/my-licenses", licenseActions.myLicenses);
