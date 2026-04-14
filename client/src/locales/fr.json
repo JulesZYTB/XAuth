@@ -1,3 +1,11 @@
 {
-  "copy": "Copier"
+  "copy": "Copier",
+  "menu": {
+    "global_dashboard": "Tableau de bord Global",
+    "my_licenses": "Mes Licences",
+    "applications": "Applications",
+    "user_management": "Gestion des Utilisateurs",
+    "audit_logs": "Journaux d'Audit",
+    "sign_out": "Déconnexion"
+  }
 }

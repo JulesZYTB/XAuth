@@ -1,3 +1,11 @@
 {
-  "copy": "Copy"
+  "copy": "Copy",
+  "menu": {
+    "global_dashboard": "Global Dashboard",
+    "my_licenses": "My Licenses",
+    "applications": "Applications",
+    "user_management": "User Management",
+    "audit_logs": "Audit Logs",
+    "sign_out": "Sign Out"
+  }
 }
