@@ -25,11 +25,12 @@ def get_hwid():
     return str(uuid.getnode())
 
 
-class XAuthUltra:
+class XAuth:
+    """XAuth Client SDK for Python"""
     def __init__(self, app_id, app_secret, base_url="http://localhost:3310"):
         self.app_id = app_id
         self.app_secret = app_secret
-        self.base_url = base_url
+        self.base_url = base_url.rstrip("/")
         self.session_id = None
         self.nonce = None
 
@@ -42,15 +43,12 @@ class XAuthUltra:
                 data = response.json()
                 self.session_id = data.get("session_id")
                 self.nonce = data.get("nonce")
-                return True
-            else:
-                print(f"[XAuth] Initialize Failed: {response.text}")
-                return False
+                return True, "Session initialized"
+            return False, response.text
         except Exception as e:
-            print(f"[XAuth] Network Error (Init): {e}")
-            return False
+            return False, str(e)
 
-    def decrypt_response(self, encrypted_data):
+    def _decrypt_response(self, encrypted_data):
         try:
             # Format from server: IV:AuthTag:EncryptedData (all base64)
             iv_b64, tag_b64, data_b64 = encrypted_data.split(":")
@@ -67,15 +65,19 @@ class XAuthUltra:
             decrypted = cipher.decrypt_and_verify(ciphertext, tag)
             
             return json.loads(decrypted.decode('utf-8'))
-        except Exception as e:
-            print(f"[XAuth] Decryption Error: {e}")
+        except Exception:
             return None
 
     def validate_license(self, license_key):
+        """
+        Validates the license key against the XAuth Omega Infrastructure.
+        Returns a dict: {'success': bool, 'message'?: str, 'expiry'?: str, 'broadcast'?: str, 'variables'?: dict}
+        """
         # Ensure session is initialized
         if not self.session_id or not self.nonce:
-            if not self.initialize():
-                return False
+            success, msg = self.initialize()
+            if not success:
+                return {"success": False, "message": f"Initialization failed: {msg}"}
 
         hwid = get_hwid()
 
@@ -97,35 +99,21 @@ class XAuthUltra:
                 # Server returns { data: "encrypted_string" }
                 encrypted_payload = data.get("data")
                 
-                decrypted_data = self.decrypt_response(encrypted_payload)
+                decrypted_data = self._decrypt_response(encrypted_payload)
                 if decrypted_data and decrypted_data.get("status") == "success":
-                    print(f"[XAuth] Secure validation successful!")
-                    print(f"[XAuth] Expiry: {decrypted_data.get('expiry')}")
-                    print(f"[XAuth] Broadcast: {decrypted_data.get('broadcast')}")
-                    return True
+                    return {
+                        "success": True,
+                        "expiry": decrypted_data.get("expiry"),
+                        "broadcast": decrypted_data.get("broadcast"),
+                        "variables": decrypted_data.get("variables", {})
+                    }
                 else:
-                    print("[XAuth] Failed to verify secure response.")
-                    return False
+                    return {"success": False, "message": "Failed to verify secure response."}
             else:
                 try:
                     error_data = response.json()
-                    print(f"[XAuth] Request Failed: {error_data.get('message', 'Unknown error')}")
+                    return {"success": False, "message": error_data.get("message", "Validation rejected")}
                 except Exception:
-                    print(f"[XAuth] Request Failed: {response.text}")
-                return False
+                    return {"success": False, "message": response.text}
         except Exception as e:
-            print(f"[XAuth] Network Error (Validation): {e}")
-            return False
-
-if __name__ == "__main__":
-    print("--- XAuth Ultra Secure Client ---")
-    APP_ID = 1  # Replace with actual App ID
-    SECRET = "REPLACE_WITH_YOUR_SECRET"
-    LICENSE_KEY = "REPLACE_WITH_LICENSE_KEY" # No more input(), hardcoded or arguments
-
-    auth = XAuthUltra(app_id=APP_ID, app_secret=SECRET)
-    
-    if auth.validate_license(LICENSE_KEY):
-        print("Welcome, authenticated user.")
-    else:
-        print("Access denied. Please check your license.")
+            return {"success": False, "message": f"Network Error: {str(e)}"}
