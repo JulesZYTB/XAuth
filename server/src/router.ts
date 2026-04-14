@@ -13,6 +13,7 @@ import auditLogActions from "./modules/audit/auditLogActions";
 import sessionActions from "./modules/session/sessionActions";
 import dashboardActions from "./modules/admin/dashboardActions";
 import verifyToken from "./modules/admin/authMiddleware";
+import webhookActions from "./modules/app/webhookActions";
 
 
 // --- CLIENT AUTH API (Public with Secret) ---
@@ -35,7 +36,14 @@ router.delete("/api/users/:id", userActions.destroy);
 router.get("/api/apps", appActions.browse);
 router.post("/api/apps", appActions.add);
 router.patch("/api/apps/:id", appActions.edit);
+router.patch("/api/apps/:id/toggle-pause", appActions.togglePause);
 router.delete("/api/apps/:id", appActions.destroy);
+
+// WEBHOOKS CRUD
+router.get("/api/apps/:appId/webhooks", webhookActions.browse);
+router.post("/api/webhooks", webhookActions.add);
+router.patch("/api/webhooks/:id", webhookActions.edit);
+router.delete("/api/webhooks/:id", webhookActions.destroy);
 
 // LICENSES CRUD
 router.get("/api/my-licenses", licenseActions.myLicenses);
@@ -57,4 +65,3 @@ router.get("/api/logs", auditLogActions.browse);
 router.get("/api/admin/stats", dashboardActions.getStats);
 
 export default router;
-

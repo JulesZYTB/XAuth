@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { Link } from "react-router";
 import ConfirmModal from "../components/ConfirmModal";
+import WebhookModal from "../components/WebhookModal";
+
 
 type App = {
   id: number;
@@ -30,6 +32,9 @@ export default function Apps() {
   // Modal states
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [appToDelete, setAppToDelete] = useState<number | null>(null);
+  const [isWebhookModalOpen, setIsWebhookModalOpen] = useState(false);
+  const [appForWebhook, setAppForWebhook] = useState<App | null>(null);
+
 
   const fetchApps = useCallback(async () => {
     try {
@@ -170,12 +175,21 @@ export default function Apps() {
                 </button>
                 <button 
                   type="button"
+                  onClick={() => { setAppForWebhook(app); setIsWebhookModalOpen(true); }}
+                  className="p-3 bg-accent/10 text-accent border border-accent/20 rounded-2xl hover:bg-accent/20 transition-all"
+                  title="Configure Webhooks"
+                >
+                  <Webhook className="w-5 h-5" />
+                </button>
+                <button 
+                  type="button"
                   onClick={() => { setAppToDelete(app.id); setIsDeleteModalOpen(true); }}
                   className="p-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-2xl hover:bg-red-500/20 transition-all"
                   aria-label={`Delete ${app.name}`}
                 >
                   <Trash2 className="w-5 h-5" />
                 </button>
+
               </div>
 
               <div className="flex items-center gap-4 mb-8">
@@ -254,6 +268,16 @@ export default function Apps() {
         message="This action is irreversible. Deleting this application will instantly invalidate all associated license keys and terminate active user sessions."
         confirmText="Destroy Permanently"
       />
+
+      {appForWebhook && (
+        <WebhookModal 
+          isOpen={isWebhookModalOpen}
+          onClose={() => setIsWebhookModalOpen(false)}
+          appId={appForWebhook.id}
+          appName={appForWebhook.name}
+        />
+      )}
     </div>
+
   );
 }

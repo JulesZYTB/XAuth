@@ -11,11 +11,14 @@ import {
   ChevronLeft,
   Plus,
   Wand2,
-  CheckCircle2
+  CheckCircle2,
+  Code
 } from "lucide-react";
 
 import ConfirmModal from "../components/ConfirmModal";
 import GenerateLicenseModal from "../components/GenerateLicenseModal";
+import EditVariablesModal from "../components/EditVariablesModal";
+
 
 type License = {
   id: number;
@@ -24,7 +27,9 @@ type License = {
   expiry_date: string;
   status: "active" | "banned";
   app_id: number;
+  variables?: string;
 };
+
 
 export default function Licenses() {
   const { appId } = useParams();
@@ -36,7 +41,10 @@ export default function Licenses() {
   // Modal states
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
+  const [isEditVariablesModalOpen, setIsEditVariablesModalOpen] = useState(false);
+  const [selectedLicense, setSelectedLicense] = useState<License | null>(null);
   const [activeAction, setActiveAction] = useState<{ id: number, action: "ban" | "unban" | "reset-hwid" | "delete" | "regenerate" } | null>(null);
+
 
   const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
     setNotification({ message, type });
@@ -125,6 +133,31 @@ export default function Licenses() {
     }
   };
 
+  const handleUpdateVariables = async (variables: string) => {
+    if (!selectedLicense) return;
+    try {
+      const res = await fetch(`/api/licenses/${selectedLicense.id}`, {
+        method: "PATCH",
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}` 
+        },
+        body: JSON.stringify({ variables }),
+      });
+      
+      if (res.ok) {
+        showNotification("Metadata updated successfully.");
+        fetchLicenses();
+      } else {
+        showNotification("Failed to update metadata.", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      showNotification("Operation failed.", "error");
+    }
+  };
+
+
   const openConfirm = (id: number, action: "ban" | "unban" | "reset-hwid" | "delete" | "regenerate") => {
     setActiveAction({ id, action });
     setIsConfirmModalOpen(true);
@@ -202,12 +235,21 @@ export default function Licenses() {
                     <div className="flex justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
                       <button 
                         type="button"
+                        onClick={() => { setSelectedLicense(license); setIsEditVariablesModalOpen(true); }}
+                        className="p-2 text-gray-500 hover:text-green-500 hover:bg-green-500/10 rounded-xl transition-all"
+                        title="Edit License Metadata"
+                      >
+                        <Code className="w-4 h-4" />
+                      </button>
+                      <button 
+                        type="button"
                         onClick={() => openConfirm(license.id, "regenerate")}
                         className="p-2 text-gray-500 hover:text-blue-500 hover:bg-blue-500/10 rounded-xl transition-all"
                         title="Regenerate Key Value"
                       >
                         <Wand2 className="w-4 h-4" />
                       </button>
+
                       <button 
                         type="button"
                         onClick={() => openConfirm(license.id, "reset-hwid")}
@@ -280,6 +322,17 @@ export default function Licenses() {
         onClose={() => setIsGenerateModalOpen(false)}
         onGenerate={handleCreateKey}
       />
+
+      {selectedLicense && (
+        <EditVariablesModal 
+          isOpen={isEditVariablesModalOpen}
+          onClose={() => setIsEditVariablesModalOpen(false)}
+          onSave={handleUpdateVariables}
+          initialVariables={selectedLicense.variables || "{}"}
+          licenseKey={selectedLicense.license_key}
+        />
+      )}
     </div>
+
   );
 }

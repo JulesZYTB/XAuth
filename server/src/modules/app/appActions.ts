@@ -45,7 +45,26 @@ const edit: RequestHandler = async (req, res, next) => {
   }
 };
 
+const togglePause: RequestHandler = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const ownerId = ((req as any).auth as AuthUser).id;
+    
+    const app = await appRepository.read(id);
+    if (!app || app.owner_id !== ownerId) {
+       res.status(404).json({ message: "App not found or unauthorized" });
+       return;
+    }
+
+    await appRepository.update(id, ownerId, { is_paused: !app.is_paused });
+    res.sendStatus(204);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const destroy: RequestHandler = async (req, res, next) => {
+
   try {
     const id = Number(req.params.id);
     const ownerId = ((req as any).auth as AuthUser).id;
@@ -57,4 +76,4 @@ const destroy: RequestHandler = async (req, res, next) => {
   }
 };
 
-export default { browse, add, destroy, edit };
+export default { browse, add, destroy, edit, togglePause };

@@ -6,7 +6,7 @@ import sessionRepository from "../session/sessionRepository";
 import securityService from "../../services/security";
 import auditLogRepository from "../audit/auditLogRepository";
 import type { AuthUser } from "../../types";
-
+import webhookService from "../../services/webhookService";
 
 // Dashboard action: Create a new license
 const add: RequestHandler = async (req, res, next) => {
@@ -48,6 +48,12 @@ const validate: RequestHandler = async (req, res, next) => {
     const app = await appRepository.read(license.app_id);
     if (!app || app.secret_key !== app_secret) {
       res.status(401).json({ message: "Invalid app secret" });
+      return;
+    }
+
+    // KILL-SWITCH CHECK
+    if (app.is_paused) {
+      res.status(403).json({ message: "System under maintenance. Access temporarily suspended." });
       return;
     }
 
@@ -102,7 +108,14 @@ const validate: RequestHandler = async (req, res, next) => {
 const ban: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
+    const license = await licenseRepository.read(id);
     await licenseRepository.updateStatus(id, "banned");
+    
+    // Webhook dispatch
+    if (license) {
+      await webhookService.dispatch(license.app_id, "BAN", { license_id: id, key: license.license_key });
+    }
+    
     res.sendStatus(204);
   } catch (err) {
     next(err);
@@ -112,7 +125,14 @@ const ban: RequestHandler = async (req, res, next) => {
 const unban: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
+    const license = await licenseRepository.read(id);
     await licenseRepository.updateStatus(id, "active");
+    
+    // Webhook dispatch
+    if (license) {
+      await webhookService.dispatch(license.app_id, "UNBAN", { license_id: id, key: license.license_key });
+    }
+    
     res.sendStatus(204);
   } catch (err) {
     next(err);
@@ -123,6 +143,7 @@ const resetHwid: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
     const actor = (req as any).auth as AuthUser;
+    const license = await licenseRepository.read(id);
     
     await licenseRepository.resetHwid(id);
     
@@ -134,6 +155,11 @@ const resetHwid: RequestHandler = async (req, res, next) => {
       ip_address: req.ip,
       user_agent: req.headers["user-agent"]
     });
+
+    // Webhook dispatch
+    if (license) {
+      await webhookService.dispatch(license.app_id, "RESET_HWID", { license_id: id, key: license.license_key });
+    }
 
     res.sendStatus(204);
   } catch (err) {
@@ -151,6 +177,7 @@ const regenerateKey: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
     const actor = (req as any).auth as AuthUser;
+    const license = await licenseRepository.read(id);
     const newKey = generateRandomKey();
     
     await licenseRepository.updateKey(id, newKey);
@@ -163,6 +190,11 @@ const regenerateKey: RequestHandler = async (req, res, next) => {
       user_agent: req.headers["user-agent"]
     });
 
+    // Webhook dispatch
+    if (license) {
+      await webhookService.dispatch(license.app_id, "KEY_REGENERATE", { license_id: id, old_key: license.license_key, new_key: newKey });
+    }
+
     res.json({ newKey });
   } catch (err) {
     next(err);
@@ -170,7 +202,6 @@ const regenerateKey: RequestHandler = async (req, res, next) => {
 };
 
 const browse: RequestHandler = async (req, res, next) => {
-
   try {
     const appId = Number(req.params.appId);
     const licenses = await licenseRepository.readByAppId(appId);
@@ -194,11 +225,19 @@ const redeem: RequestHandler = async (req, res, next) => {
   try {
     const { license_key } = req.body;
     const userId = ((req as any).auth as AuthUser).id;
+    
+    // Get license info before redemption for webhook
+    const license = await licenseRepository.readByKey(license_key);
+    
     const affected = await licenseRepository.redeem(license_key, userId);
     
     if (affected === 0) {
       res.status(400).json({ message: "Invalid key or license already claimed" });
     } else {
+      // Webhook dispatch
+      if (license) {
+        await webhookService.dispatch(license.app_id, "REDEEM", { license_id: license.id, key: license_key, user_id: userId });
+      }
       res.json({ message: "License successfully linked to your account" });
     }
   } catch (err) {

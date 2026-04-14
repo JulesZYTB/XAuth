@@ -13,7 +13,25 @@ class LicenseRepository {
     return result.insertId;
   }
 
+  async read(id: number) {
+    const [rows] = await databaseClient.query<Rows>(
+      "select * from license where id = ?",
+      [id]
+    );
+    const license = rows[0] as License;
+    if (license) {
+      try {
+        license.license_key = securityService.dbDecrypt(license.license_key);
+        if (license.hwid) license.hwid = securityService.dbDecrypt(license.hwid);
+      } catch (e) {
+        // Handle decryption errors
+      }
+    }
+    return license;
+  }
+
   async readByKey(licenseKey: string) {
+
     const [rows] = await databaseClient.query<Rows>("select * from license");
     
     for (const row of rows as License[]) {
