@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { User, Shield, Trash2, ShieldAlert, Activity } from "lucide-react";
 import ConfirmModal from "../components/ConfirmModal";
+import { useTranslation } from "react-i18next";
 
 type UserData = {
   id: number;
@@ -10,6 +11,7 @@ type UserData = {
 };
 
 export default function Users() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -72,27 +74,27 @@ export default function Users() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <header className="flex justify-between items-end">
         <div>
-          <h2 className="text-3xl font-black text-white tracking-tight">Identity Center</h2>
-          <p className="text-gray-400 mt-1">Manage platform users and access levels</p>
+          <h2 className="text-3xl font-black text-white tracking-tight">{t("users.title", "Identity Center")}</h2>
+          <p className="text-gray-400 mt-1">{t("users.subtitle", "Manage platform users and access levels")}</p>
         </div>
         <div className="bg-accent/10 border border-accent/20 px-4 py-2 rounded-full text-accent text-xs font-bold flex items-center gap-2">
-          <Shield className="w-4 h-4" /> Admin Controls Active
+          <Shield className="w-4 h-4" /> {t("users.admin_controls", "Admin Controls Active")}
         </div>
       </header>
 
       {loading ? (
         <div className="flex items-center justify-center h-64 text-gray-500">
-          <Activity className="w-8 h-8 animate-spin mr-3" /> Fetching identity records...
+          <Activity className="w-8 h-8 animate-spin mr-3" /> {t("users.fetching", "Fetching identity records...")}
         </div>
       ) : (
         <div className="bg-secondary border border-gray-800 rounded-[2.5rem] overflow-hidden shadow-2xl">
           <table className="w-full text-left">
             <thead className="bg-dark/50 border-b border-gray-800">
               <tr>
-                <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black">User</th>
-                <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black">Email</th>
-                <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black text-center">Identity Role</th>
-                <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black text-right">Actions</th>
+                <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black">{t("users.table_user", "User")}</th>
+                <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black">{t("users.table_email", "Email")}</th>
+                <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black text-center">{t("users.table_role", "Identity Role")}</th>
+                <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black text-right">{t("users.table_actions", "Actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800/50">
@@ -129,8 +131,8 @@ export default function Users() {
                       type="button"
                       onClick={() => { setUserToDelete(user.id); setIsDeleteModalOpen(true); }}
                       disabled={user.id === 1}
-                      className="p-3 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all disabled:opacity-30"
-                      aria-label={`Delete ${user.username}`}
+                      className="p-3 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all disabled:opacity-30 cursor-pointer"
+                      aria-label={t("users.delete_user", "Delete User")}
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -145,9 +147,7 @@ export default function Users() {
       <div className="flex items-center gap-4 p-6 bg-red-500/5 border border-red-500/10 rounded-4xl">
         <ShieldAlert className="w-6 h-6 text-red-500 shrink-0" />
         <p className="text-xs text-red-500/70 leading-relaxed font-medium font-sans">
-          <strong>Security Warning:</strong> Modifying user roles can expose sensitive data. 
-          Deleting a user will cascade-delete all associated licenses and application configurations. 
-          The system administrator account (ID 1) is protected from deletion.
+          <strong>{t("users.security_warning_title", "Security Warning:")}</strong> {t("users.security_warning_desc", "Modifying user roles can expose sensitive data. Deleting a user will cascade-delete all associated licenses and application configurations. The system administrator account (ID 1) is protected from deletion.")}
         </p>
       </div>
 
@@ -155,9 +155,9 @@ export default function Users() {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={confirmDelete}
-        title="Sanitize Identity Record"
-        message="This operation is final. Deleting this user will remove all their data, including hosted applications and all associated license keys. This cannot be undone."
-        confirmText="Confirm Deletion"
+        title={t("users.delete_title", "Sanitize Identity Record")}
+        message={t("users.delete_msg", "This operation is final. Deleting this user will remove all their data, including hosted applications and all associated license keys. This cannot be undone.")}
+        confirmText={t("users.delete_confirm", "Confirm Deletion")}
       />
     </div>
   );

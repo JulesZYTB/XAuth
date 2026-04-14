@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Activity, Clock, Globe, Monitor, Box, User, Terminal } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type AuditLog = {
   id: number;
@@ -13,6 +14,7 @@ type AuditLog = {
 };
 
 export default function Logs() {
+  const { t } = useTranslation();
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,13 +44,13 @@ export default function Logs() {
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       <header>
-        <h2 className="text-3xl font-black text-white tracking-tight">Audit Trail</h2>
-        <p className="text-gray-400 mt-1">Real-time system activity and security events</p>
+        <h2 className="text-3xl font-black text-white tracking-tight">{t("logs.title", "Audit Trail")}</h2>
+        <p className="text-gray-400 mt-1">{t("logs.subtitle", "Real-time system activity and security events")}</p>
       </header>
 
       {loading ? (
         <div className="flex items-center justify-center h-64 text-gray-500">
-          <Activity className="w-8 h-8 animate-spin mr-3" /> Analyzing system events...
+          <Activity className="w-8 h-8 animate-spin mr-3" /> {t("logs.fetching", "Analyzing system events...")}
         </div>
       ) : (
         <div className="space-y-4 pb-20">
@@ -111,7 +113,7 @@ export default function Logs() {
           {logs.length === 0 && (
             <div className="text-center py-20 bg-dark/20 rounded-[3rem] border-2 border-dashed border-gray-800">
               <Activity className="w-12 h-12 mx-auto text-gray-800 mb-4" />
-              <p className="text-gray-500 font-medium">No activity logs found yet.</p>
+              <p className="text-gray-500 font-medium">{t("logs.no_logs_found", "No activity logs found yet.")}</p>
             </div>
           )}
         </div>

@@ -17,6 +17,7 @@ CREATE TABLE app (
   owner_id INT NOT NULL,
   name VARCHAR(100) NOT NULL,
   secret_key VARCHAR(255) NOT NULL,
+  broadcast_message VARCHAR(255) NULL,
   is_paused BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (owner_id) REFERENCES user(id) ON DELETE CASCADE
