@@ -2,10 +2,11 @@ export interface User {
   id: number;
   username: string;
   email: string;
-  password_hash: string;
+  password?: string;
   role: "admin" | "user";
-  created_at: Date | string;
+  created_at?: Date | string;
 }
+
 
 export interface AuthUser {
   id: number;
