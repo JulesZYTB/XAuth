@@ -19,6 +19,7 @@ import { Link } from "react-router";
 import ConfirmModal from "../components/ConfirmModal";
 import WebhookModal from "../components/WebhookModal";
 import ReleaseModal from "../components/ReleaseModal";
+import { useTranslation } from "../hooks/useTranslation";
 
 
 
@@ -31,6 +32,7 @@ type App = {
 };
 
 export default function Apps() {
+  const { t } = useTranslation();
   const [apps, setApps] = useState<App[]>([]);
   const [newAppName, setNewAppName] = useState("");
   const [loading, setLoading] = useState(true);
@@ -233,9 +235,10 @@ export default function Apps() {
                     <code className="text-sm font-mono text-gray-300 truncate max-w-[200px]">{app.secret_key}</code>
                     <button 
                       type="button"
-                      className="text-[10px] text-accent font-black uppercase opacity-0 group-hover/key:opacity-100 transition-all"
+                      onClick={() => navigator.clipboard.writeText(app.secret_key)}
+                      className="text-[10px] text-accent font-black uppercase opacity-0 group-hover/key:opacity-100 transition-all cursor-pointer"
                     >
-                      Copy
+                      {t("copy")}
                     </button>
                   </div>
                 </div>

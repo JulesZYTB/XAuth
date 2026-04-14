@@ -50,6 +50,16 @@ CREATE TABLE webhook (
   FOREIGN KEY (app_id) REFERENCES app(id) ON DELETE CASCADE
 );
 
+-- Session Table
+CREATE TABLE session (
+  id VARCHAR(36) PRIMARY KEY,
+  nonce VARCHAR(255) NOT NULL,
+  app_id INT NOT NULL,
+  expires_at DATETIME NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (app_id) REFERENCES app(id) ON DELETE CASCADE
+);
+
 -- Enterprise Analytics & Telemetry Layer
 CREATE TABLE validation_log (
   id INT PRIMARY KEY AUTO_INCREMENT,
@@ -80,13 +90,18 @@ CREATE TABLE app_release (
 -- Audit Log Table
 CREATE TABLE audit_log (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  user_id INT NOT NULL,
+  user_id INT NULL,
+  app_id INT NULL,
   action VARCHAR(100) NOT NULL,
   details TEXT,
+  ip_address VARCHAR(45) NULL,
+  user_agent TEXT NULL,
+  session_id VARCHAR(255) NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+  FOREIGN KEY (app_id) REFERENCES app(id) ON DELETE CASCADE
 );
 
 -- Seed System Admin (password: admin123)
 INSERT INTO user (username, email, password, role) 
-VALUES ('system_admin', 'admin@xauth.io', '$2b$10$wT6c7WXZF.9/O6bS2z.8.Ou6vJd.G0fN1Yx6F/W5u6uLz9U8w2Y2e', 'admin');
+VALUES ('system_admin', 'admin@xauth.monster', '$2b$10$D47xnYd1BrlSCV1akPpZdO44higeVEuCe2JV27iI2IOy1/o1FAYIG', 'admin');

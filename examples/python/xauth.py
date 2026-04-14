@@ -6,11 +6,29 @@ import hashlib
 from Crypto.Cipher import AES
 
 class XAuthUltra:
-    def __init__(self, app_secret, base_url="http://localhost:3310"):
+    def __init__(self, app_id, app_secret, base_url="http://localhost:3310"):
+        self.app_id = app_id
         self.app_secret = app_secret
         self.base_url = base_url
-        # Key must be 32 bytes (SHA-256 of the secret)
-        self.key = hashlib.sha256(app_secret.encode()).digest()
+        self.session_id = None
+        self.nonce = None
+
+    def initialize(self):
+        """Step 1: Initialize the session to get a nonce"""
+        payload = {"app_id": self.app_id}
+        try:
+            response = requests.post(f"{self.base_url}/api/v1/client/initialize", json=payload)
+            if response.status_code == 200:
+                data = response.json()
+                self.session_id = data.get("session_id")
+                self.nonce = data.get("nonce")
+                return True
+            else:
+                print(f"[XAuth] Initialize Failed: {response.text}")
+                return False
+        except Exception as e:
+            print(f"[XAuth] Network Error (Init): {e}")
+            return False
 
     def decrypt_response(self, encrypted_data):
         try:
@@ -21,7 +39,11 @@ class XAuthUltra:
             tag = base64.b64decode(tag_b64)
             ciphertext = base64.b64decode(data_b64)
             
-            cipher = AES.new(self.key, AES.MODE_GCM, nonce=iv)
+            # The session nonce is appended to the secret to form the true encryption key
+            raw_key = (self.app_secret + self.nonce).encode('utf-8')
+            key = hashlib.sha256(raw_key).digest()
+
+            cipher = AES.new(key, AES.MODE_GCM, nonce=iv)
             decrypted = cipher.decrypt_and_verify(ciphertext, tag)
             
             return json.loads(decrypted.decode('utf-8'))
@@ -30,12 +52,18 @@ class XAuthUltra:
             return None
 
     def validate_license(self, license_key):
+        # Ensure session is initialized
+        if not self.session_id or not self.nonce:
+            if not self.initialize():
+                return False
+
         hwid = str(uuid.getnode())
 
         payload = {
             "license_key": license_key,
             "hwid": hwid,
-            "app_secret": self.app_secret
+            "app_secret": self.app_secret,
+            "session_id": self.session_id
         }
 
         try:
@@ -53,26 +81,31 @@ class XAuthUltra:
                 if decrypted_data and decrypted_data.get("status") == "success":
                     print(f"[XAuth] Secure validation successful!")
                     print(f"[XAuth] Expiry: {decrypted_data.get('expiry')}")
+                    print(f"[XAuth] Broadcast: {decrypted_data.get('broadcast')}")
                     return True
                 else:
                     print("[XAuth] Failed to verify secure response.")
                     return False
             else:
-                error_data = response.json()
-                print(f"[XAuth] Request Failed: {error_data.get('message', 'Unknown error')}")
+                try:
+                    error_data = response.json()
+                    print(f"[XAuth] Request Failed: {error_data.get('message', 'Unknown error')}")
+                except Exception:
+                    print(f"[XAuth] Request Failed: {response.text}")
                 return False
         except Exception as e:
-            print(f"[XAuth] Network Error: {e}")
+            print(f"[XAuth] Network Error (Validation): {e}")
             return False
 
 if __name__ == "__main__":
     print("--- XAuth Ultra Secure Client ---")
-    SECRET = "REPLACE_WITH_YOUR_SECRET"
+    APP_ID = 1  # Replace with actual App ID
+    SECRET = "2681a8a09f95130269a51f4e699271fc"
+    LICENSE_KEY = "40TQT-MLJVS-EOV89" # No more input(), hardcoded or arguments
+
+    auth = XAuthUltra(app_id=APP_ID, app_secret=SECRET)
     
-    auth = XAuthUltra(SECRET)
-    
-    key = input("Enter License Key: ")
-    if auth.validate_license(key):
+    if auth.validate_license(LICENSE_KEY):
         print("Welcome, authenticated user.")
     else:
         print("Access denied. Please check your license.")
