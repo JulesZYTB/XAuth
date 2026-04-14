@@ -2,12 +2,8 @@ import type { RequestHandler } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import userRepository from "./userRepository";
+import type { AuthUser, User } from "../../types";
 
-interface AuthUser {
-  id: number;
-  username: string;
-  role: string;
-}
 
 const login: RequestHandler = async (req, res, next) => {
   try {

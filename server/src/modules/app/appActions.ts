@@ -1,12 +1,8 @@
 import type { RequestHandler } from "express";
 import crypto from "node:crypto";
 import appRepository from "./appRepository";
+import type { AuthUser } from "../../types";
 
-interface AuthUser {
-  id: number;
-  username: string;
-  role: string;
-}
 
 const browse: RequestHandler = async (req, res, next) => {
   try {

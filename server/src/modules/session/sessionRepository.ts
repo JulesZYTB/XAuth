@@ -1,12 +1,6 @@
 import databaseClient from "../../../database/client";
 import type { Result, Rows } from "../../../database/client";
-
-type Session = {
-  id: string;
-  nonce: string;
-  app_id: number;
-  expires_at: Date;
-};
+import type { Session } from "../../types";
 
 class SessionRepository {
   async create(session: Session) {

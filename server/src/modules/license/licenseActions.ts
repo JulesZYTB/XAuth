@@ -5,13 +5,8 @@ import appRepository from "../app/appRepository";
 import sessionRepository from "../session/sessionRepository";
 import securityService from "../../services/security";
 import auditLogRepository from "../audit/auditLogRepository";
+import type { AuthUser } from "../../types";
 
-
-interface AuthUser {
-  id: number;
-  username: string;
-  role: string;
-}
 
 // Dashboard action: Create a new license
 const add: RequestHandler = async (req, res, next) => {
@@ -147,7 +142,35 @@ const resetHwid: RequestHandler = async (req, res, next) => {
 };
 
 
+// Helper for generating randomized keys
+function generateRandomKey(pattern = "XXXX-XXXX-XXXX") {
+  return pattern.replace(/X/g, () => crypto.randomBytes(1).toString("hex").charAt(0).toUpperCase());
+}
+
+const regenerateKey: RequestHandler = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const actor = (req as any).auth as AuthUser;
+    const newKey = generateRandomKey();
+    
+    await licenseRepository.updateKey(id, newKey);
+    
+    await auditLogRepository.create({
+      action: "KEY_REGENERATE",
+      details: `License key regenerated for ID: ${id}`,
+      user_id: actor.id,
+      ip_address: req.ip,
+      user_agent: req.headers["user-agent"]
+    });
+
+    res.json({ newKey });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const browse: RequestHandler = async (req, res, next) => {
+
   try {
     const appId = Number(req.params.appId);
     const licenses = await licenseRepository.readByAppId(appId);
@@ -203,4 +226,4 @@ const destroy: RequestHandler = async (req, res, next) => {
   }
 };
 
-export default { add, validate, browse, ban, unban, resetHwid, myLicenses, redeem, modify, destroy };
+export default { add, validate, browse, ban, unban, resetHwid, regenerateKey, myLicenses, redeem, modify, destroy };

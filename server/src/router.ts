@@ -46,7 +46,9 @@ router.patch("/api/licenses/:id", licenseActions.modify);
 router.patch("/api/licenses/:id/ban", licenseActions.ban);
 router.patch("/api/licenses/:id/unban", licenseActions.unban);
 router.patch("/api/licenses/:id/reset-hwid", licenseActions.resetHwid);
+router.patch("/api/licenses/:id/regenerate", licenseActions.regenerateKey);
 router.delete("/api/licenses/:id", licenseActions.destroy);
+
 
 // AUDIT LOGS
 router.get("/api/logs", auditLogActions.browse);

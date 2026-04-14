@@ -1,11 +1,7 @@
 import type { RequestHandler } from "express";
 import auditLogRepository from "./auditLogRepository";
+import type { AuthUser } from "../../types";
 
-interface AuthUser {
-  id: number;
-  username: string;
-  role: string;
-}
 
 const browse: RequestHandler = async (req, res, next) => {
   try {

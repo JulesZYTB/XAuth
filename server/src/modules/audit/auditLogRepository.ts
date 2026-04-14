@@ -1,22 +1,19 @@
 import databaseClient from "../../../database/client";
 import type { Rows } from "../../../database/client";
+import type { AuditLog } from "../../types";
 
-type AuditLog = {
-  id: number;
-  action: string;
-  details: string;
-  ip_address: string;
-  user_agent: string;
-  session_id: string;
-  created_at: string;
-  app_id?: number;
-  user_id?: number;
-  app_name?: string;
-  username?: string;
-};
 
 class AuditLogRepository {
+  async create(log: Omit<AuditLog, "id" | "created_at" | "app_name" | "username">) {
+    const [result] = await databaseClient.query(
+      "insert into audit_log (action, details, ip_address, user_agent, session_id, app_id, user_id) values (?, ?, ?, ?, ?, ?, ?)",
+      [log.action, log.details, log.ip_address, log.user_agent, log.session_id, log.app_id, log.user_id]
+    );
+    return result;
+  }
+
   async readAll() {
+
     const [rows] = await databaseClient.query<Rows>(
       `select l.*, a.name as app_name, u.username 
        from audit_log l 

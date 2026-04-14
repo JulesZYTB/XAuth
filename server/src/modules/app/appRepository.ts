@@ -1,14 +1,6 @@
 import databaseClient from "../../../database/client";
 import type { Result, Rows } from "../../../database/client";
-
-type App = {
-  id: number;
-  name: string;
-  secret_key: string;
-  broadcast_message?: string;
-  is_paused: boolean;
-  owner_id: number;
-};
+import type { App } from "../../types";
 
 class AppRepository {
   async create(app: Omit<App, "id">) {

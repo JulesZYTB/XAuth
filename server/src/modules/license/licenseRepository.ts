@@ -1,19 +1,7 @@
 import databaseClient from "../../../database/client";
 import type { Result, Rows } from "../../../database/client";
 import securityService from "../../services/security";
-
-type License = {
-  id: number;
-  license_key: string;
-  hwid?: string;
-  expiry_date: Date;
-  status: string;
-  app_id: number;
-  variables?: string;
-  ip_lock?: string;
-  user_id?: number;
-  app_name?: string;
-};
+import type { License } from "../../types";
 
 class LicenseRepository {
   async create(license: Omit<License, "id">) {
@@ -123,7 +111,17 @@ class LicenseRepository {
     return result.affectedRows;
   }
 
+  async updateKey(id: number, newKey: string) {
+    const encryptedKey = securityService.dbEncrypt(newKey);
+    const [result] = await databaseClient.query<Result>(
+      "update license set license_key = ? where id = ?",
+      [encryptedKey, id]
+    );
+    return result.affectedRows;
+  }
+
   async delete(id: number) {
+
     const [result] = await databaseClient.query<Result>(
       "delete from license where id = ?",
       [id]

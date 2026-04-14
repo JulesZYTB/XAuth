@@ -1,13 +1,7 @@
 import databaseClient from "../../../database/client";
 import type { Result, Rows } from "../../../database/client";
+import type { User } from "../../types";
 
-type User = {
-  id: number;
-  username: string;
-  email: string;
-  password?: string;
-  role: "admin" | "user";
-};
 
 class UserRepository {
   async readByEmail(email: string) {
