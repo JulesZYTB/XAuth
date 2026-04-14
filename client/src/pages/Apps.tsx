@@ -19,7 +19,7 @@ import { Link } from "react-router";
 import ConfirmModal from "../components/ConfirmModal";
 import WebhookModal from "../components/WebhookModal";
 import ReleaseModal from "../components/ReleaseModal";
-import { useTranslation } from "../hooks/useTranslation";
+import { useTranslation } from "react-i18next";
 
 
 
@@ -227,6 +227,22 @@ export default function Apps() {
               </div>
 
               <div className="space-y-6">
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center gap-2 text-[10px] text-gray-600 uppercase font-black px-1">
+                    <Package className="w-3 h-3" /> App ID
+                  </div>
+                  <div className="bg-dark/50 p-4 rounded-2xl border border-gray-800/50 flex justify-between items-center group/key">
+                    <code className="text-sm font-mono text-gray-300 truncate max-w-[200px]">{app.id}</code>
+                    <button 
+                      type="button"
+                      onClick={() => navigator.clipboard.writeText(app.id.toString())}
+                      className="text-[10px] text-accent font-black uppercase opacity-0 group-hover/key:opacity-100 transition-all cursor-pointer"
+                    >
+                      {t("copy")}
+                    </button>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-[10px] text-gray-600 uppercase font-black px-1">
                     <Key className="w-3 h-3" /> App Secret Key

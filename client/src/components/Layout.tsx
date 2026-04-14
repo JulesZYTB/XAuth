@@ -10,8 +10,10 @@ import {
   ChevronRight,
   User 
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function Layout() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [user, setUser] = useState<{ id: number; username: string; role: string } | null>(null);
@@ -37,25 +39,25 @@ export default function Layout() {
 
   const menuItems = [
     { 
-      label: user?.role === "admin" ? "Global Dashboard" : "My Licenses", 
+      label: user?.role === "admin" ? t("menu.global_dashboard", "Global Dashboard") : t("menu.my_licenses", "My Licenses"), 
       icon: LayoutDashboard, 
       path: "/", 
       roles: ["admin", "user"] 
     },
     { 
-      label: "Applications", 
+      label: t("menu.applications", "Applications"), 
       icon: Rocket, 
       path: "/apps", 
       roles: ["admin"] 
     },
     { 
-      label: "User Management", 
+      label: t("menu.user_management", "User Management"), 
       icon: Users, 
       path: "/users", 
       roles: ["admin"] 
     },
     { 
-      label: "Audit Logs", 
+      label: t("menu.audit_logs", "Audit Logs"), 
       icon: Terminal, 
       path: "/logs", 
       roles: ["admin", "user"] 
@@ -117,7 +119,7 @@ export default function Layout() {
             aria-label="Log out of your account"
           >
             <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-            Sign Out
+            {t("menu.sign_out", "Sign Out")}
           </button>
         </div>
       </nav>
@@ -128,8 +130,13 @@ export default function Layout() {
         id="main-content"
       >
         <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-accent/5 blur-[120px] rounded-full -z-10 animate-pulse" />
-        <div className="max-w-6xl mx-auto">
-          <Outlet />
+        <div className="max-w-6xl mx-auto min-h-[85vh] flex flex-col">
+          <div className="flex-1">
+            <Outlet />
+          </div>
+          <footer className="mt-12 pt-8 border-t border-gray-800 text-center text-xs text-gray-600 font-medium opacity-50 select-none pb-8 uppercase tracking-widest pointer-events-none">
+            {atob("Q29weVJpZ2h0IFhBdXRoIGRldiBieSBCbG91bWUgU0FT")}
+          </footer>
         </div>
       </main>
     </div>
