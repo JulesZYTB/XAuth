@@ -134,7 +134,7 @@ export default function Layout() {
           <div className="flex-1">
             <Outlet />
           </div>
-          <footer className="mt-12 pt-8 border-t border-gray-800 text-center text-xs text-gray-600 font-medium opacity-50 select-none pb-8 uppercase tracking-widest pointer-events-none">
+          <footer className="absolute bottom-4 left-0 w-full text-center text-[9px] text-gray-500 font-medium opacity-20 select-none uppercase tracking-[0.3em] pointer-events-none">
             {atob("Q29weVJpZ2h0IFhBdXRoIGRldiBieSBCbG91bWUgU0FT")}
           </footer>
         </div>

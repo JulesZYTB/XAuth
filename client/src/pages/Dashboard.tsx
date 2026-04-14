@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { 
   Users, 
   ShieldCheck, 
@@ -10,7 +11,8 @@ import {
   Activity,
   Globe,
   ShieldAlert,
-  BarChart3
+  BarChart3,
+  Download
 } from "lucide-react";
 
 import { 
@@ -41,6 +43,7 @@ type Stats = {
 };
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -82,31 +85,53 @@ export default function Dashboard() {
     return (
       <div className="flex flex-col items-center justify-center h-[80vh] text-gray-500 gap-4">
         <Activity className="w-12 h-12 animate-spin text-accent" />
-        <p className="font-black uppercase tracking-widest text-xs">Synchronizing Core Metrics...</p>
+        <p className="font-black uppercase tracking-widest text-xs">{t("dashboard.syncing", "Synchronizing Core Metrics...")}</p>
       </div>
     );
   }
 
+  const exportReport = () => {
+    if (!stats) return;
+    const blob = new Blob([JSON.stringify(stats, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `xauth_report_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const statCards = [
-    { label: "Active Licenses", value: stats.activeLicenses, growth: "Live", icon: ShieldCheck, color: "text-accent" },
-    { label: "Total Users", value: stats.totalUsers, growth: "+All", icon: Users, color: "text-blue-500" },
-    { label: "Total Apps", value: stats.totalApps, growth: "Stable", icon: Zap, color: "text-orange-500" },
-    { label: "Global Reach", value: stats.mapData.length, growth: "Countries", icon: Globe, color: "text-green-500" },
+    { label: t("dashboard.active_licenses", "Active Licenses"), value: stats.activeLicenses, growth: t("dashboard.live", "Live"), icon: ShieldCheck, color: "text-accent" },
+    { label: t("dashboard.total_users", "Total Users"), value: stats.totalUsers, growth: t("dashboard.all", "+All"), icon: Users, color: "text-blue-500" },
+    { label: t("dashboard.total_apps", "Total Apps"), value: stats.totalApps, growth: t("dashboard.stable", "Stable"), icon: Zap, color: "text-orange-500" },
+    { label: t("dashboard.global_reach", "Global Reach"), value: stats.mapData.length, growth: t("dashboard.countries", "Countries"), icon: Globe, color: "text-green-500" },
   ];
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
-          <h2 className="text-4xl font-black text-white tracking-tighter">System Overview</h2>
-          <p className="text-gray-400 mt-1 font-medium">Real-time telemetrics for XAuth Omega infrastructure</p>
+          <h2 className="text-4xl font-black text-white tracking-tighter">{t("dashboard.title", "System Overview")}</h2>
+          <p className="text-gray-400 mt-1 font-medium">{t("dashboard.subtitle", "Real-time telemetrics for XAuth Omega infrastructure")}</p>
         </div>
-        <div className="bg-secondary px-6 py-3 rounded-2xl border border-gray-800 flex items-center gap-3">
-          <span className="text-[10px] text-gray-500 uppercase font-black">Node Status:</span>
-          <span className="text-sm font-bold text-green-500 flex items-center gap-1.5">
-             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /> Operational
-          </span>
-          <ChevronRight className="w-4 h-4 text-gray-600" />
+        <div className="flex flex-col md:flex-row items-center gap-4">
+          <div className="bg-secondary px-6 py-3 rounded-2xl border border-gray-800 flex items-center gap-3">
+            <span className="text-[10px] text-gray-500 uppercase font-black">{t("dashboard.node_status", "Node Status:")}</span>
+            <span className="text-sm font-bold text-green-500 flex items-center gap-1.5">
+               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" /> {t("dashboard.operational", "Operational")}
+            </span>
+            <ChevronRight className="w-4 h-4 text-gray-600" />
+          </div>
+          <button 
+            onClick={exportReport}
+            className="flex items-center gap-2 bg-accent/10 border border-accent/20 text-accent px-5 py-3 rounded-2xl text-[10px] font-black uppercase hover:bg-accent/20 transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            {t("dashboard.export", "Export Report")}
+          </button>
         </div>
       </header>
 
@@ -134,8 +159,8 @@ export default function Dashboard() {
         <div className="bg-secondary p-10 rounded-[3rem] border border-gray-800 shadow-2xl relative overflow-hidden">
           <div className="flex justify-between items-start mb-10">
             <div>
-              <h3 className="text-xl font-black text-white mb-1">Retention & DAU</h3>
-              <p className="text-sm text-gray-500 font-medium">Daily Active Users over 30 days</p>
+              <h3 className="text-xl font-black text-white mb-1">{t("dashboard.retention", "Retention & DAU")}</h3>
+              <p className="text-sm text-gray-500 font-medium">{t("dashboard.retention_desc", "Daily Active Users over 30 days")}</p>
             </div>
             <BarChart3 className="w-6 h-6 text-blue-500 opacity-50" />
           </div>
@@ -168,17 +193,17 @@ export default function Dashboard() {
         <div className="lg:col-span-2 bg-secondary p-10 rounded-[3rem] border border-gray-800 shadow-2xl relative overflow-hidden">
           <div className="flex justify-between items-start mb-10">
             <div>
-              <h3 className="text-xl font-black text-white mb-1">Anomaly Detection</h3>
-              <p className="text-sm text-gray-500 font-medium">Tracking failed vs successful validations (Crack Attempts)</p>
+              <h3 className="text-xl font-black text-white mb-1">{t("dashboard.anomaly", "Anomaly Detection")}</h3>
+              <p className="text-sm text-gray-500 font-medium">{t("dashboard.anomaly_desc", "Tracking failed vs successful validations (Crack Attempts)")}</p>
             </div>
             <div className="flex items-center gap-4">
                <div className="flex items-center gap-2">
                  <div className="w-2 h-2 bg-accent rounded-full" />
-                 <span className="text-[10px] font-black text-gray-500 uppercase">Successes</span>
+                 <span className="text-[10px] font-black text-gray-500 uppercase">{t("dashboard.successes", "Successes")}</span>
                </div>
                <div className="flex items-center gap-2">
                  <div className="w-2 h-2 bg-red-500 rounded-full" />
-                 <span className="text-[10px] font-black text-gray-500 uppercase">Failures</span>
+                 <span className="text-[10px] font-black text-gray-500 uppercase">{t("dashboard.failures", "Failures")}</span>
                </div>
             </div>
           </div>
@@ -217,7 +242,7 @@ export default function Dashboard() {
 
         <div className="bg-secondary p-10 rounded-[3rem] border border-gray-800 shadow-2xl flex flex-col">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xl font-black text-white">Live Feed</h3>
+            <h3 className="text-xl font-black text-white">{t("dashboard.live_feed", "Live Feed")}</h3>
             <ActivityIcon className="w-5 h-5 text-accent animate-pulse" />
           </div>
           <div className="space-y-4 flex-1">
@@ -242,9 +267,9 @@ export default function Dashboard() {
           </div>
           <button 
             type="button"
-            className="w-full mt-8 bg-dark p-4 rounded-2xl border border-gray-800 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors flex items-center justify-center gap-2"
+            className="w-full mt-8 bg-dark p-4 rounded-2xl border border-gray-800 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors flex items-center justify-center gap-2 cursor-pointer"
           >
-            Security Auditor <ShieldAlert className="w-4 h-4" />
+            {t("dashboard.security_auditor", "Security Auditor")} <ShieldAlert className="w-4 h-4" />
           </button>
         </div>
       </div>

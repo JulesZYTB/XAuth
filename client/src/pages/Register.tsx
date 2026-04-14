@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router";
 import { UserPlus, Mail, Lock, User } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function Register() {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({ username: "", email: "", password: "", secret: "" });
 
   const [error, setError] = useState("");
@@ -39,8 +41,8 @@ export default function Register() {
         <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-accent to-transparent opacity-50" />
         
         <header className="text-center mb-10">
-          <h1 className="text-4xl font-black text-white tracking-tighter mb-2">Join XAuth</h1>
-          <p className="text-gray-400 text-sm">Create your personal license portal</p>
+          <h1 className="text-4xl font-black text-white tracking-tighter mb-2">{t("auth.register_title", "Join XAuth")}</h1>
+          <p className="text-gray-400 text-sm">{t("auth.register_subtitle", "Create your personal license portal")}</p>
         </header>
 
         {error && (
@@ -54,7 +56,7 @@ export default function Register() {
 
         <form onSubmit={handleRegister} className="space-y-5">
           <div className="space-y-2">
-            <label className="text-[10px] text-gray-500 uppercase font-black px-1" htmlFor="username">Username</label>
+            <label className="text-[10px] text-gray-500 uppercase font-black px-1" htmlFor="username">{t("auth.username", "Username")}</label>
             <div className="relative group">
               <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within:text-accent transition-colors" aria-hidden="true" />
               <input
@@ -69,7 +71,7 @@ export default function Register() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] text-gray-500 uppercase font-black px-1" htmlFor="email">Email Address</label>
+            <label className="text-[10px] text-gray-500 uppercase font-black px-1" htmlFor="email">{t("auth.email", "Email Address")}</label>
             <div className="relative group">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within:text-accent transition-colors" aria-hidden="true" />
               <input
@@ -84,7 +86,7 @@ export default function Register() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] text-gray-500 uppercase font-black px-1" htmlFor="password">Password</label>
+            <label className="text-[10px] text-gray-500 uppercase font-black px-1" htmlFor="password">{t("auth.password", "Password")}</label>
             <div className="relative group">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within:text-accent transition-colors" aria-hidden="true" />
               <input
@@ -99,7 +101,7 @@ export default function Register() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] text-gray-500 uppercase font-black px-1" htmlFor="secret">Admin Secret (Optional)</label>
+            <label className="text-[10px] text-gray-500 uppercase font-black px-1" htmlFor="secret">{t("auth.admin_secret", "Admin Secret (Optional)")}</label>
             <div className="relative group">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within:text-accent transition-colors" aria-hidden="true" />
               <input
@@ -115,16 +117,16 @@ export default function Register() {
 
           <button
             type="submit"
-            className="w-full bg-accent hover:bg-accent/80 text-white font-black py-4 rounded-2xl shadow-xl shadow-accent/20 transition-all active:scale-95 flex items-center justify-center gap-2 mt-4"
+            className="w-full bg-accent hover:bg-accent/80 text-white font-black py-4 rounded-2xl shadow-xl shadow-accent/20 transition-all active:scale-95 flex items-center justify-center gap-2 mt-4 cursor-pointer"
           >
-            <UserPlus className="w-5 h-5" /> Sign Up
+            <UserPlus className="w-5 h-5" /> {t("auth.sign_up", "Sign Up")}
           </button>
         </form>
 
         <footer className="mt-8 pt-8 border-t border-gray-800 text-center">
           <p className="text-gray-500 text-sm">
-            Already have an account?{" "}
-            <Link to="/login" className="text-accent font-bold hover:underline">Log In</Link>
+            {t("auth.already_have_account", "Already have an account?")}{" "}
+            <Link to="/login" className="text-accent font-bold hover:underline">{t("auth.log_in", "Log In")}</Link>
           </p>
         </footer>
       </main>
