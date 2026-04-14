@@ -1,0 +1,12 @@
+export interface License {
+  id: number;
+  license_key: string;
+  hwid?: string;
+  expiry_date: Date | string;
+  status: "active" | "banned";
+  app_id: number;
+  variables?: string;
+  ip_lock?: string;
+  user_id?: number;
+  app_name?: string;
+}
