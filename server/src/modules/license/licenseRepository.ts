@@ -1,7 +1,7 @@
-import databaseClient from "../../../database/client";
-import type { Result, Rows } from "../../../database/client";
-import securityService from "../../services/security";
-import type { License } from "../../types";
+import databaseClient from "../../../database/client.js";
+import type { Result, Rows } from "../../../database/client.js";
+import securityService from "../../services/security.js";
+import type { License } from "../../types/index.js";
 
 class LicenseRepository {
   async create(license: Omit<License, "id">) {
