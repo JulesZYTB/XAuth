@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
-import releaseRepository from "./releaseRepository";
-import appRepository from "./appRepository";
+import releaseRepository from "./releaseRepository.js";
+import appRepository from "./appRepository.js";
 
 /**
  * Public endpoint for clients to check for updates.
