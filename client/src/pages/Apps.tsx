@@ -22,6 +22,7 @@ import ConfirmModal from "../components/ConfirmModal";
 import WebhookModal from "../components/WebhookModal";
 import ReleaseModal from "../components/ReleaseModal";
 import { useTranslation } from "react-i18next";
+import { getApiUrl } from "../services/apiConfig.js";
 
 
 
@@ -66,7 +67,7 @@ export default function Apps() {
 
   const fetchApps = useCallback(async () => {
     try {
-      const res = await fetch("/api/apps", {
+      const res = await fetch(getApiUrl("/api/apps"), {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
@@ -89,7 +90,7 @@ export default function Apps() {
   const handleCreateApp = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await fetch("/api/apps", {
+      await fetch(getApiUrl("/api/apps"), {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -106,7 +107,7 @@ export default function Apps() {
 
   const handleTogglePause = async (app: App) => {
     try {
-      await fetch(`/api/apps/${app.id}`, {
+      await fetch(getApiUrl(`/api/apps/${app.id}`), {
         method: "PATCH",
         headers: { 
           "Content-Type": "application/json",
@@ -123,7 +124,7 @@ export default function Apps() {
   const confirmDelete = async () => {
     if (!appToDelete) return;
     try {
-      await fetch(`/api/apps/${appToDelete}`, {
+      await fetch(getApiUrl(`/api/apps/${appToDelete}`), {
         method: "DELETE",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
@@ -135,7 +136,7 @@ export default function Apps() {
 
   const handleUpdateBroadcast = async (id: number, message: string) => {
     try {
-      await fetch(`/api/apps/${id}`, {
+      await fetch(getApiUrl(`/api/apps/${id}`), {
         method: "PATCH",
         headers: { 
           "Content-Type": "application/json",
