@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 
 import { X, Webhook, Trash2, Plus, ShieldCheck, ExternalLink, Activity } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { getApiUrl } from "../services/apiConfig.js";
 
 interface WebhookData {
   id: number;
@@ -27,7 +28,7 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
 
   const fetchWebhooks = useCallback(async () => {
     try {
-      const res = await fetch(`/api/apps/${appId}/webhooks`, {
+      const res = await fetch(getApiUrl(`/api/apps/${appId}/webhooks`), {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
@@ -47,7 +48,7 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await fetch("/api/webhooks", {
+      await fetch(getApiUrl("/api/webhooks"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -70,7 +71,7 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
 
   const handleDelete = async (id: number) => {
     try {
-      await fetch(`/api/webhooks/${id}`, {
+      await fetch(getApiUrl(`/api/webhooks/${id}`), {
         method: "DELETE",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
