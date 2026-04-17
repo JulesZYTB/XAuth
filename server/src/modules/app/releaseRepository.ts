@@ -1,6 +1,6 @@
-import databaseClient from "../../../database/client";
-import type { Result, Rows } from "../../../database/client";
-import type { AppRelease } from "../../types";
+import databaseClient from "../../../database/client.js";
+import type { Result, Rows } from "../../../database/client.js";
+import type { AppRelease } from "../../types/index.js";
 
 class ReleaseRepository {
   async create(release: Omit<AppRelease, "id" | "created_at">) {
