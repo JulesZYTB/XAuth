@@ -1,6 +1,6 @@
-import databaseClient from "../../../database/client";
-import type { Result, Rows } from "../../../database/client";
-import type { Webhook } from "../../types";
+import databaseClient from "../../../database/client.js";
+import type { Result, Rows } from "../../../database/client.js";
+import type { Webhook } from "../../types/index.js";
 
 class WebhookRepository {
   async create(webhook: Omit<Webhook, "id">) {
