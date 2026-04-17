@@ -1,15 +1,15 @@
 import type { Request, RequestHandler } from "express";
 
 import crypto from "node:crypto";
-import licenseRepository from "./licenseRepository";
-import appRepository from "../app/appRepository";
-import sessionRepository from "../session/sessionRepository";
-import securityService from "../../services/security";
-import auditLogRepository from "../audit/auditLogRepository";
-import type { AuthUser } from "../../types";
-import webhookService from "../../services/webhookService";
-import geoService from "../../services/geoService";
-import validationLogRepository from "../app/validationLogRepository";
+import licenseRepository from "./licenseRepository.js";
+import appRepository from "../app/appRepository.js";
+import sessionRepository from "../session/sessionRepository.js";
+import securityService from "../../services/security.js";
+import auditLogRepository from "../audit/auditLogRepository.js";
+import type { AuthUser } from "../../types/index.js";
+import webhookService from "../../services/webhookService.js";
+import geoService from "../../services/geoService.js";
+import validationLogRepository from "../app/validationLogRepository.js";
 
 interface AuthenticatedRequest extends Request {
   auth: AuthUser;
