@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
-import webhookRepository from "../modules/app/webhookRepository";
-import type { WebhookEvent } from "../types";
+import webhookRepository from "../modules/app/webhookRepository.js";
+import type { WebhookEvent } from "../types/index.js";
 
 class WebhookService {
   /**
