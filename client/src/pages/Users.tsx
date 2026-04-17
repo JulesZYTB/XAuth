@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { User, Shield, Trash2, ShieldAlert, Activity } from "lucide-react";
 import ConfirmModal from "../components/ConfirmModal";
 import { useTranslation } from "react-i18next";
+import { getApiUrl } from "../services/apiConfig.js";
 
 type UserData = {
   id: number;
@@ -21,7 +22,7 @@ export default function Users() {
 
   const fetchUsers = useCallback(async () => {
     try {
-      const res = await fetch("/api/users", {
+      const res = await fetch(getApiUrl("/api/users"), {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
@@ -43,7 +44,7 @@ export default function Users() {
   const handleToggleRole = async (user: UserData) => {
     const newRole = user.role === "admin" ? "user" : "admin";
     try {
-      await fetch(`/api/users/${user.id}`, {
+      await fetch(getApiUrl(`/api/users/${user.id}`), {
         method: "PATCH",
         headers: { 
           "Content-Type": "application/json",
@@ -60,7 +61,7 @@ export default function Users() {
   const confirmDelete = async () => {
     if (!userToDelete) return;
     try {
-      await fetch(`/api/users/${userToDelete}`, {
+      await fetch(getApiUrl(`/api/users/${userToDelete}`), {
         method: "DELETE",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
