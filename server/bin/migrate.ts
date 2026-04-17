@@ -3,6 +3,10 @@ import "dotenv/config";
 
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Build the path to the schema SQL file
 const schema = path.join(__dirname, "../../server/database/schema.sql");
