@@ -1,4 +1,4 @@
-import AbstractSeeder from "./AbstractSeeder";
+import AbstractSeeder from "./AbstractSeeder.js";
 
 class UserSeeder extends AbstractSeeder {
   constructor() {
