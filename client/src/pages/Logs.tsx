@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Activity, Clock, Globe, Monitor, Box, User, Terminal } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { getApiUrl } from "../services/apiConfig.js";
 
 type AuditLog = {
   id: number;
@@ -20,7 +21,7 @@ export default function Logs() {
 
   const fetchLogs = useCallback(async () => {
     try {
-      const res = await fetch("/api/logs", {
+      const res = await fetch(getApiUrl("/api/logs"), {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
