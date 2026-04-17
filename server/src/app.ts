@@ -38,26 +38,20 @@ const apiLimiter = rateLimit({
 // Apply rate limiting to client auth endpoints
 app.use("/api/v1/client", apiLimiter);
 
-// Configuration des origines autorisées
-const allowedOrigins = [
-  "https://xauth.monster", // Votre domaine de production
-  process.env.CLIENT_URL,   // Via .env (Pterodactyl)
-].filter(Boolean) as string[];
+if (process.env.CLIENT_URL != null) {
+  app.use(cors({ origin: [process.env.CLIENT_URL] }));
+}
 
+
+// If you need to allow extra origins, you can add something like this:
+
+/*
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Autoriser les requêtes sans origine (comme Postman ou curl) 
-      // ou si l'origine est dans notre liste
-      if (!origin || allowedOrigins.includes(origin) || origin.startsWith("http://localhost")) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
+    origin: ["http://mysite.com", "http://another-domain.com"],
+  }),
 );
+*/
 
 // With ["http://mysite.com", "http://another-domain.com"]
 // to be replaced with an array of your trusted origins
@@ -132,14 +126,17 @@ if (fs.existsSync(clientBuildPath)) {
 
 import type { ErrorRequestHandler } from "express";
 
-// Define a middleware function to log errors
+// Define a middleware function to log and return errors
 const logErrors: ErrorRequestHandler = (err, req, res, next) => {
-  // Log the error to the console for debugging purposes
-  console.error(err);
-  console.error("on req:", req.method, req.path);
-
-  // Pass the error to the next middleware in the stack
-  next(err);
+  // Log l'erreur dans la console du serveur (Pterodactyl)
+  console.error("❌ ERROR:", err.message);
+  console.error("Path:", req.method, req.path);
+  
+  // Renvoie l'erreur au format JSON pour qu'elle soit visible dans l'onglet Network du navigateur
+  res.status(err.status || 500).json({
+    message: err.message,
+    error: process.env.NODE_ENV === "development" ? err : {},
+  });
 };
 
 // Mount the logErrors middleware globally
