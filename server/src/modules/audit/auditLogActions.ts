@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
-import auditLogRepository from "./auditLogRepository";
-import type { AuthUser } from "../../types";
+import auditLogRepository from "./auditLogRepository.js";
+import type { AuthUser } from "../../types/index.js";
 
 
 const browse: RequestHandler = async (req, res, next) => {
