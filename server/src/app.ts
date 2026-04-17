@@ -4,6 +4,9 @@ import express from "express";
 
 const app = express();
 
+// Trust the Nginx reverse proxy to correctly identify user IPs for rate limiting
+app.set("trust proxy", 1);
+
 // Configure it
 
 /* ************************************************************************* */
