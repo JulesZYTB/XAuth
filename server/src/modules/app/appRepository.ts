@@ -1,6 +1,6 @@
-import databaseClient from "../../../database/client";
-import type { Result, Rows } from "../../../database/client";
-import type { App } from "../../types";
+import databaseClient from "../../../database/client.js";
+import type { Result, Rows } from "../../../database/client.js";
+import type { App } from "../../types/index.js";
 
 class AppRepository {
   async create(app: Omit<App, "id">) {
