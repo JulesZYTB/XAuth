@@ -1,14 +1,14 @@
 {
-  "name": "@this-is-to-learn/js-monorepo",
+  "name": "xauth",
   "version": "0.0.1",
   "description": "",
-  "homepage": "https://github.com/WildCodeSchool/js-monorepo#readme",
+  "homepage": "https://github.com/JulesZYTB/XAuth#readme",
   "bugs": {
-    "url": "https://github.com/WildCodeSchool/js-monorepo/issues"
+    "url": "https://github.com/JulesZYTB/XAuth/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/WildCodeSchool/js-monorepo.git"
+    "url": "git+https://github.com/JulesZYTB/XAuth.git"
   },
   "workspaces": ["client", "server"],
   "scripts": {
@@ -26,7 +26,7 @@
     "test": "npm run test --workspaces --if-present"
   },
   "keywords": [],
-  "author": "WildCodeSchool",
+  "author": "BloumeSAS",
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "1.9.4",

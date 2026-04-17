@@ -5,7 +5,6 @@ import {
   ShieldCheck, 
   Activity as ActivityIcon, 
   Zap, 
-  TrendingUp, 
   ChevronRight,
   Terminal,
   Activity,
@@ -24,8 +23,7 @@ import {
   XAxis,
   YAxis,
   BarChart,
-  Bar,
-  Legend
+  Bar
 } from "recharts";
 
 import WorldMap from "../components/WorldMap";

@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
-import { ShieldCheck, Zap, Globe, Key, ArrowRight, Activity } from "lucide-react";
+import { ShieldCheck, Zap, Key, ArrowRight, Activity } from "lucide-react";
 
 export default function Home() {
   const { t } = useTranslation();
