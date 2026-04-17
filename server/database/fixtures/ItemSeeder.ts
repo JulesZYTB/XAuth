@@ -1,8 +1,8 @@
-import AbstractSeeder from "./AbstractSeeder";
+import AbstractSeeder from "./AbstractSeeder.js";
 
 // Import seeders that must be executed before this one
 // Follow your foreign keys to find the right order ;)
-import UserSeeder from "./UserSeeder";
+import UserSeeder from "./UserSeeder.js";
 
 class ItemSeeder extends AbstractSeeder {
   constructor() {
