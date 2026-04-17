@@ -113,7 +113,8 @@ export default function Licenses() {
     }
 
     try {
-      const res = await fetch(url, {
+      const res = await fetch(getApiUrl(url), {
+        credentials: "include",
         method,
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
