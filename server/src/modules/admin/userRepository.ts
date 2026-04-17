@@ -1,6 +1,6 @@
-import databaseClient from "../../../database/client";
-import type { Result, Rows } from "../../../database/client";
-import type { User } from "../../types";
+import databaseClient from "../../../database/client.js";
+import type { Result, Rows } from "../../../database/client.js";
+import type { User } from "../../types/index.js";
 
 
 class UserRepository {
