@@ -1,7 +1,7 @@
 import type { Request, RequestHandler } from "express";
 import crypto from "node:crypto";
-import appRepository from "./appRepository";
-import type { AuthUser } from "../../types";
+import appRepository from "./appRepository.js";
+import type { AuthUser } from "../../types/index.js";
 
 interface AuthenticatedRequest extends Request {
   auth: AuthUser;
