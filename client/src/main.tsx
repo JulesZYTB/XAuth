@@ -16,14 +16,47 @@ import Logs from "./pages/Logs";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 
-const IndexRoute = () => {
+import { Navigate } from "react-router";
+
+/**
+ * Authentication Guards
+ */
+
+// ProtectedRoute: Only allows access if a token is present
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem("token");
-  if (!token) return <Login />;
+  if (!token) return <Navigate to="/login" replace />;
+  
+  // Optional: check expiration here
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (payload.exp * 1000 < Date.now()) {
+      localStorage.removeItem("token");
+      return <Navigate to="/login" replace />;
+    }
+  } catch (e) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+};
+
+// PublicRoute: Redirects to dashboard if already logged in (prevents accessing login/register while auth)
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  const token = localStorage.getItem("token");
+  if (token) return <Navigate to="/dashboard" replace />;
+  return children;
+};
+
+// Logic for the dashboard pivot (Admin vs User)
+const DashboardPivot = () => {
+  const token = localStorage.getItem("token");
+  if (!token) return <Navigate to="/login" replace />;
   try {
     const user = JSON.parse(atob(token.split(".")[1]));
     return user?.role === "admin" ? <Dashboard /> : <UserHub />;
   } catch (e) {
-    return <Login />;
+    return <Navigate to="/login" replace />;
   }
 };
 
@@ -34,18 +67,18 @@ const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element: <Login />,
+    element: <PublicRoute><Login /></PublicRoute>,
   },
   {
     path: "/register",
-    element: <Register />,
+    element: <PublicRoute><Register /></PublicRoute>,
   },
   {
-    element: <Layout />,
+    element: <ProtectedRoute><Layout /></ProtectedRoute>,
     children: [
       {
         path: "/dashboard",
-        element: <IndexRoute />,
+        element: <DashboardPivot />,
       },
       {
         path: "/profile",
@@ -69,6 +102,10 @@ const router = createBrowserRouter([
       },
     ],
   },
+  {
+    path: "*",
+    element: <Navigate to="/" replace />,
+  }
 ]);
 
 const rootElement = document.getElementById("root");
