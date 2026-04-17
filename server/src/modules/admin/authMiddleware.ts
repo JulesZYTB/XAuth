@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 import jwt from "jsonwebtoken";
-import type { AuthUser } from "../../types";
+import type { AuthUser } from "../../types/index.js";
 
 
 const verifyToken: RequestHandler = (req, res, next) => {
