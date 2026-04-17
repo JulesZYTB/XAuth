@@ -1,5 +1,5 @@
-import databaseClient from "../../../database/client";
-import type { Rows } from "../../../database/client";
+import databaseClient from "../../../database/client.js";
+import type { Rows } from "../../../database/client.js";
 
 class DashboardRepository {
   async getGlobalStats() {
