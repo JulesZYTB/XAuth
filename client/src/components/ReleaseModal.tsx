@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { X, Rocket, Package, ExternalLink, ShieldCheck, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { getApiUrl } from "../services/apiConfig.js";
 
 interface Release {
   id: number;
@@ -32,7 +33,7 @@ export default function ReleaseModal({ isOpen, onClose, appId, appName }: Releas
 
   const fetchReleases = useCallback(async () => {
     try {
-      const res = await fetch(`/api/apps/${appId}/releases`, {
+      const res = await fetch(getApiUrl(`/api/apps/${appId}/releases`), {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
@@ -51,7 +52,7 @@ export default function ReleaseModal({ isOpen, onClose, appId, appName }: Releas
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await fetch("/api/releases", {
+      await fetch(getApiUrl("/api/releases"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -76,7 +77,7 @@ export default function ReleaseModal({ isOpen, onClose, appId, appName }: Releas
 
   const handleDelete = async (id: number) => {
     try {
-      await fetch(`/api/releases/${id}`, {
+      await fetch(getApiUrl(`/api/releases/${id}`), {
         method: "DELETE",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
