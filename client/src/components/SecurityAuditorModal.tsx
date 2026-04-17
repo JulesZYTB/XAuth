@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, ShieldAlert, Activity, Search, AlertTriangle, Key, Ban } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { getApiUrl } from "../services/apiConfig.js";
 
 interface AuditorData {
   suspiciousIPs: { ip: string, failedAttempts: number, lastAttempt: string }[];
@@ -40,7 +41,7 @@ export default function SecurityAuditorModal({ isOpen, onClose }: SecurityAudito
     }
 
     try {
-      const res = await fetch("/api/dashboard/auditor-scan", {
+      const res = await fetch(getApiUrl("/api/dashboard/auditor-scan"), {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
       const result = await res.json();
@@ -55,7 +56,7 @@ export default function SecurityAuditorModal({ isOpen, onClose }: SecurityAudito
 
   const handleBanLicense = async (id: number) => {
     try {
-        await fetch(`/api/licenses/${id}/ban`, {
+        await fetch(getApiUrl(`/api/licenses/${id}/ban`), {
             method: "PATCH",
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
