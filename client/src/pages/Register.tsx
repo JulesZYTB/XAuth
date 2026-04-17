@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router";
 import { UserPlus, Mail, Lock, User } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { getApiUrl } from "../services/apiConfig.js";
 
 export default function Register() {
   const { t } = useTranslation();
@@ -15,7 +16,7 @@ export default function Register() {
     setError("");
 
     try {
-      const response = await fetch("/api/auth/register", {
+      const response = await fetch(getApiUrl("/api/auth/register"), {
 
         method: "POST",
         headers: { "Content-Type": "application/json" },
