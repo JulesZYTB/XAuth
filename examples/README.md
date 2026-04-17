@@ -5,7 +5,6 @@ This directory contains official implementation examples of the **XAuth Omega Pr
 ## 🌐 Official URLs
 - **Admin Dashboard**: [https://xauth.monster](https://xauth.monster)
 - **API Endpoint**: `https://api.xauth.monster`
-- **Documentation**: [https://docs.xauth.monster](https://docs.xauth.monster)
 
 ---
 
