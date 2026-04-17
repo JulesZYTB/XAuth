@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
-import releaseRepository from "./releaseRepository";
-import type { AuthUser } from "../../types";
+import releaseRepository from "./releaseRepository.js";
+import type { AuthUser } from "../../types/index.js";
 
 const browse: RequestHandler = async (req, res, next) => {
   try {
