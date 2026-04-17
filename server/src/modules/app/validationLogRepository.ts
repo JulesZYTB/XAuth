@@ -1,6 +1,6 @@
-import databaseClient from "../../../database/client";
-import type { Result, Rows } from "../../../database/client";
-import type { ValidationLog } from "../../types";
+import databaseClient from "../../../database/client.js";
+import type { Result, Rows } from "../../../database/client.js";
+import type { ValidationLog } from "../../types/index.js";
 
 class ValidationLogRepository {
   async create(log: Omit<ValidationLog, "id" | "created_at">) {
