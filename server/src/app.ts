@@ -32,21 +32,35 @@ const __dirname = path.dirname(__filename);
 
 app.use(helmet());
 
+// 1. CORS MUST be first to ensure even error responses (429, 401, 500) have the correct headers
+const allowedOrigins = [
+  "https://xauth.monster",
+  process.env.CLIENT_URL,
+].filter(Boolean) as string[];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin) || origin.startsWith("http://localhost")) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS: Origin not allowed"));
+      }
+    },
+    credentials: true,
+  })
+);
+
+// 2. Rate Limiting comes AFTER CORS
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 300, // Higher limit for general API usage
+  windowMs: 15 * 60 * 1000,
+  max: 300,
   message: { message: "Too many requests from this IP, please try again later." },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// Apply rate limiting to all API endpoints
 app.use("/api", apiLimiter);
-
-// CORS is handled by Nginx proxy for production
-// if (process.env.CLIENT_URL != null) {
-//   app.use(cors({ origin: [process.env.CLIENT_URL] }));
-// }
 
 
 // If you need to allow extra origins, you can add something like this:
