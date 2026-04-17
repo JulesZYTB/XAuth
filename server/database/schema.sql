@@ -31,7 +31,7 @@ CREATE TABLE license (
   license_key VARCHAR(255) UNIQUE NOT NULL,
   hwid VARCHAR(255) NULL,
   ip_lock VARCHAR(45) NULL,
-  status ENUM('active', 'revoked', 'expired') DEFAULT 'active',
+  status ENUM('active', 'revoked', 'expired', 'banned') DEFAULT 'active',
   expiry_date DATETIME NOT NULL,
   variables JSON DEFAULT (JSON_OBJECT()),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
