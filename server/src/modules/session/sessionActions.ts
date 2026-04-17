@@ -1,8 +1,8 @@
 import type { RequestHandler } from "express";
 import crypto from "node:crypto";
-import sessionRepository from "./sessionRepository";
-import securityService from "../../services/security";
-import appRepository from "../app/appRepository";
+import sessionRepository from "./sessionRepository.js";
+import securityService from "../../services/security.js";
+import appRepository from "../app/appRepository.js";
 
 const initialize: RequestHandler = async (req, res, next) => {
   try {
