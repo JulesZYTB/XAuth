@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
-import dashboardRepository from "./dashboardRepository";
-import type { AuthUser } from "../../types";
+import dashboardRepository from "./dashboardRepository.js";
+import type { AuthUser } from "../../types/index.js";
 
 
 const getStats: RequestHandler = async (req, res, next) => {
