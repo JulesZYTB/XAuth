@@ -6,17 +6,17 @@ const router = express.Router();
 // Define Your API Routes Here
 /* ************************************************************************* */
 
-import userActions from "./modules/admin/userActions";
-import appActions from "./modules/app/appActions";
-import licenseActions from "./modules/license/licenseActions";
-import auditLogActions from "./modules/audit/auditLogActions";
-import sessionActions from "./modules/session/sessionActions";
-import dashboardActions from "./modules/admin/dashboardActions";
-import verifyToken from "./modules/admin/authMiddleware";
-import webhookActions from "./modules/app/webhookActions";
-import analyticsActions from "./modules/app/analyticsActions";
-import releaseActions from "./modules/app/releaseActions";
-import updateActions from "./modules/app/updateActions";
+import userActions from "./modules/admin/userActions.js";
+import appActions from "./modules/app/appActions.js";
+import licenseActions from "./modules/license/licenseActions.js";
+import auditLogActions from "./modules/audit/auditLogActions.js";
+import sessionActions from "./modules/session/sessionActions.js";
+import dashboardActions from "./modules/admin/dashboardActions.js";
+import verifyToken from "./modules/admin/authMiddleware.js";
+import webhookActions from "./modules/app/webhookActions.js";
+import analyticsActions from "./modules/app/analyticsActions.js";
+import releaseActions from "./modules/app/releaseActions.js";
+import updateActions from "./modules/app/updateActions.js";
 
 
 // --- CLIENT AUTH API (Public with Secret) ---
