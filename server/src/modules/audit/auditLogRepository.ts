@@ -1,6 +1,6 @@
-import databaseClient from "../../../database/client";
-import type { Rows } from "../../../database/client";
-import type { AuditLog } from "../../types";
+import databaseClient from "../../../database/client.js";
+import type { Rows } from "../../../database/client.js";
+import type { AuditLog } from "../../types/index.js";
 
 
 class AuditLogRepository {
