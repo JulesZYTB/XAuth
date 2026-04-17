@@ -1,5 +1,5 @@
-import webhookService from '../../src/services/webhookService';
-import webhookRepository from '../../src/modules/app/webhookRepository';
+import webhookService from '../../src/services/webhookService.js';
+import webhookRepository from '../../src/modules/app/webhookRepository.js';
 
 jest.mock('../../src/modules/app/webhookRepository');
 
