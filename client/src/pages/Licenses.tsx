@@ -19,6 +19,7 @@ import ConfirmModal from "../components/ConfirmModal";
 import GenerateLicenseModal from "../components/GenerateLicenseModal";
 import EditVariablesModal from "../components/EditVariablesModal";
 import { useTranslation } from "react-i18next";
+import { getApiUrl } from "../services/apiConfig.js";
 
 
 type License = {
@@ -55,7 +56,7 @@ export default function Licenses() {
 
   const fetchLicenses = useCallback(async () => {
     try {
-      const res = await fetch(`/api/apps/${appId}/licenses`, {
+      const res = await fetch(getApiUrl(`/api/apps/${appId}/licenses`), {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
@@ -75,7 +76,7 @@ export default function Licenses() {
 
   const handleCreateKey = async (data: { license_key?: string, expiry_date: string }) => {
     try {
-      const res = await fetch("/api/licenses", {
+      const res = await fetch(getApiUrl("/api/licenses"), {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -138,7 +139,7 @@ export default function Licenses() {
   const handleUpdateVariables = async (variables: string) => {
     if (!selectedLicense) return;
     try {
-      const res = await fetch(`/api/licenses/${selectedLicense.id}`, {
+      const res = await fetch(getApiUrl(`/api/licenses/${selectedLicense.id}`), {
         method: "PATCH",
         headers: { 
           "Content-Type": "application/json",
