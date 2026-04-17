@@ -21,6 +21,11 @@ const app = express();
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 app.use(helmet());
 
@@ -75,7 +80,7 @@ app.use(express.json());
 /* ************************************************************************* */
 
 // Import the API router
-import router from "./router";
+import router from "./router.js";
 
 // Mount the API router under the "/api" endpoint
 app.use(router);
@@ -91,7 +96,6 @@ app.use(router);
 // - Redirecting unhandled requests (e.g., all requests not matching a defined API route) to the client's index.html. This allows the client to handle client-side routing.
 
 import fs from "node:fs";
-import path from "node:path";
 
 // Serve server resources
 
