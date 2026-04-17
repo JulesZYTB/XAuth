@@ -6,10 +6,10 @@ import {
   Zap, 
   Lock, 
   Code2, 
-  Github,
   ExternalLink,
   ChevronRight
 } from "lucide-react";
+
 import { useTranslation } from "react-i18next";
 
 export default function Docs() {
@@ -92,8 +92,9 @@ export default function Docs() {
                 rel="noreferrer"
                 className="flex items-center gap-3 bg-white text-black px-6 py-3 rounded-2xl font-black text-xs hover:bg-accent hover:text-white transition-all whitespace-nowrap"
               >
-                <Github className="w-4 h-4" />
+                <Code2 className="w-4 h-4" />
                 {t("docs.view_on_github")}
+
                 <ExternalLink className="w-3 h-3 ml-1" />
               </a>
             </div>
