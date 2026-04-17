@@ -1,9 +1,9 @@
 import request from 'supertest';
-import app from '../../src/app';
-import sessionRepository from '../../src/modules/session/sessionRepository';
-import licenseRepository from '../../src/modules/license/licenseRepository';
-import appRepository from '../../src/modules/app/appRepository';
-import geoService from '../../src/services/geoService';
+import app from '../../src/app.js';
+import sessionRepository from '../../src/modules/session/sessionRepository.js';
+import licenseRepository from '../../src/modules/license/licenseRepository.js';
+import appRepository from '../../src/modules/app/appRepository.js';
+import geoService from '../../src/services/geoService.js';
 
 jest.mock('../../src/modules/session/sessionRepository');
 jest.mock('../../src/modules/license/licenseRepository');
