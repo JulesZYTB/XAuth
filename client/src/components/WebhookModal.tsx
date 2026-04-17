@@ -29,6 +29,7 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
   const fetchWebhooks = useCallback(async () => {
     try {
       const res = await fetch(getApiUrl(`/api/apps/${appId}/webhooks`), {
+        credentials: "include",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
@@ -49,6 +50,7 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
     e.preventDefault();
     try {
       await fetch(getApiUrl("/api/webhooks"), {
+        credentials: "include",
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -72,6 +74,7 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
   const handleDelete = async (id: number) => {
     try {
       await fetch(getApiUrl(`/api/webhooks/${id}`), {
+        credentials: "include",
         method: "DELETE",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });

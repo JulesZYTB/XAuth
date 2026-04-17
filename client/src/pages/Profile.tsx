@@ -27,6 +27,7 @@ export default function Profile() {
     setStatus(null);
     try {
       const response = await fetch(getApiUrl("/api/auth/profile"), {
+        credentials: "include",
         method: "PUT",
         headers: { 
           "Content-Type": "application/json",

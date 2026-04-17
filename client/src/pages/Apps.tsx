@@ -68,6 +68,7 @@ export default function Apps() {
   const fetchApps = useCallback(async () => {
     try {
       const res = await fetch(getApiUrl("/api/apps"), {
+        credentials: "include",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
@@ -91,6 +92,7 @@ export default function Apps() {
     e.preventDefault();
     try {
       await fetch(getApiUrl("/api/apps"), {
+        credentials: "include",
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -108,6 +110,7 @@ export default function Apps() {
   const handleTogglePause = async (app: App) => {
     try {
       await fetch(getApiUrl(`/api/apps/${app.id}`), {
+        credentials: "include",
         method: "PATCH",
         headers: { 
           "Content-Type": "application/json",
@@ -125,6 +128,7 @@ export default function Apps() {
     if (!appToDelete) return;
     try {
       await fetch(getApiUrl(`/api/apps/${appToDelete}`), {
+        credentials: "include",
         method: "DELETE",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
@@ -137,6 +141,7 @@ export default function Apps() {
   const handleUpdateBroadcast = async (id: number, message: string) => {
     try {
       await fetch(getApiUrl(`/api/apps/${id}`), {
+        credentials: "include",
         method: "PATCH",
         headers: { 
           "Content-Type": "application/json",

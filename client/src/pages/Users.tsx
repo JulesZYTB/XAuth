@@ -23,6 +23,7 @@ export default function Users() {
   const fetchUsers = useCallback(async () => {
     try {
       const res = await fetch(getApiUrl("/api/users"), {
+        credentials: "include",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
@@ -45,6 +46,7 @@ export default function Users() {
     const newRole = user.role === "admin" ? "user" : "admin";
     try {
       await fetch(getApiUrl(`/api/users/${user.id}`), {
+        credentials: "include",
         method: "PATCH",
         headers: { 
           "Content-Type": "application/json",
@@ -62,6 +64,7 @@ export default function Users() {
     if (!userToDelete) return;
     try {
       await fetch(getApiUrl(`/api/users/${userToDelete}`), {
+        credentials: "include",
         method: "DELETE",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });

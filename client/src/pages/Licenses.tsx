@@ -57,6 +57,7 @@ export default function Licenses() {
   const fetchLicenses = useCallback(async () => {
     try {
       const res = await fetch(getApiUrl(`/api/apps/${appId}/licenses`), {
+        credentials: "include",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
@@ -77,6 +78,7 @@ export default function Licenses() {
   const handleCreateKey = async (data: { license_key?: string, expiry_date: string }) => {
     try {
       const res = await fetch(getApiUrl("/api/licenses"), {
+        credentials: "include",
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -140,6 +142,7 @@ export default function Licenses() {
     if (!selectedLicense) return;
     try {
       const res = await fetch(getApiUrl(`/api/licenses/${selectedLicense.id}`), {
+        credentials: "include",
         method: "PATCH",
         headers: { 
           "Content-Type": "application/json",

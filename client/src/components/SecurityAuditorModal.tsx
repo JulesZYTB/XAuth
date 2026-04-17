@@ -42,6 +42,7 @@ export default function SecurityAuditorModal({ isOpen, onClose }: SecurityAudito
 
     try {
       const res = await fetch(getApiUrl("/api/dashboard/auditor-scan"), {
+        credentials: "include",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
       const result = await res.json();
@@ -57,6 +58,7 @@ export default function SecurityAuditorModal({ isOpen, onClose }: SecurityAudito
   const handleBanLicense = async (id: number) => {
     try {
         await fetch(getApiUrl(`/api/licenses/${id}/ban`), {
+        credentials: "include",
             method: "PATCH",
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });

@@ -53,10 +53,14 @@ export default function Dashboard() {
       const headers = { Authorization: `Bearer ${localStorage.getItem("token")}` };
       
       const [coreRes, mapRes, dauRes, anomalyRes] = await Promise.all([
-        fetch(getApiUrl("/api/dashboard/stats"), { headers }),
-        fetch(getApiUrl("/api/dashboard/map"), { headers }),
-        fetch(getApiUrl("/api/dashboard/dau"), { headers }),
-        fetch(getApiUrl("/api/dashboard/anomalies"), { headers })
+        fetch(getApiUrl("/api/dashboard/stats"), {
+        credentials: "include", headers }),
+        fetch(getApiUrl("/api/dashboard/map"), {
+        credentials: "include", headers }),
+        fetch(getApiUrl("/api/dashboard/dau"), {
+        credentials: "include", headers }),
+        fetch(getApiUrl("/api/dashboard/anomalies"), {
+        credentials: "include", headers })
       ]);
 
       const [core, map, dau, anomaly] = await Promise.all([

@@ -34,6 +34,7 @@ export default function ReleaseModal({ isOpen, onClose, appId, appName }: Releas
   const fetchReleases = useCallback(async () => {
     try {
       const res = await fetch(getApiUrl(`/api/apps/${appId}/releases`), {
+        credentials: "include",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
@@ -53,6 +54,7 @@ export default function ReleaseModal({ isOpen, onClose, appId, appName }: Releas
     e.preventDefault();
     try {
       await fetch(getApiUrl("/api/releases"), {
+        credentials: "include",
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -78,6 +80,7 @@ export default function ReleaseModal({ isOpen, onClose, appId, appName }: Releas
   const handleDelete = async (id: number) => {
     try {
       await fetch(getApiUrl(`/api/releases/${id}`), {
+        credentials: "include",
         method: "DELETE",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });

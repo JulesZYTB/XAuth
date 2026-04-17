@@ -22,6 +22,7 @@ export default function UserHub() {
   const fetchMyLicenses = useCallback(async () => {
     try {
       const res = await fetch(getApiUrl("/api/my-licenses"), {
+        credentials: "include",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
@@ -45,6 +46,7 @@ export default function UserHub() {
     setRedeemStatus(null);
     try {
       const res = await fetch(getApiUrl("/api/licenses/redeem"), {
+        credentials: "include",
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

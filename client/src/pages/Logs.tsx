@@ -22,6 +22,7 @@ export default function Logs() {
   const fetchLogs = useCallback(async () => {
     try {
       const res = await fetch(getApiUrl("/api/logs"), {
+        credentials: "include",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();

@@ -17,6 +17,7 @@ export default function Register() {
 
     try {
       const response = await fetch(getApiUrl("/api/auth/register"), {
+        credentials: "include",
 
         method: "POST",
         headers: { "Content-Type": "application/json" },
