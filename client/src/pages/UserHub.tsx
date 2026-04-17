@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { ShieldCheck, Cpu, Calendar, Activity, Key, CreditCard, CheckCircle2, XCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { getApiUrl } from "../services/apiConfig.js";
 
 type License = {
   id: number;
@@ -20,7 +21,7 @@ export default function UserHub() {
 
   const fetchMyLicenses = useCallback(async () => {
     try {
-      const res = await fetch("/api/my-licenses", {
+      const res = await fetch(getApiUrl("/api/my-licenses"), {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
@@ -43,7 +44,7 @@ export default function UserHub() {
     e.preventDefault();
     setRedeemStatus(null);
     try {
-      const res = await fetch("/api/licenses/redeem", {
+      const res = await fetch(getApiUrl("/api/licenses/redeem"), {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
