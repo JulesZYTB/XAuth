@@ -1,6 +1,6 @@
 import request from 'supertest';
-import app from '../../src/app';
-import userRepository from '../../src/modules/admin/userRepository';
+import app from '../../src/app.js';
+import userRepository from '../../src/modules/admin/userRepository.js';
 
 jest.mock('../../src/modules/admin/userRepository');
 
