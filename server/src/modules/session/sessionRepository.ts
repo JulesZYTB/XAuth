@@ -1,6 +1,6 @@
-import databaseClient from "../../../database/client";
-import type { Result, Rows } from "../../../database/client";
-import type { Session } from "../../types";
+import databaseClient from "../../../database/client.js";
+import type { Result, Rows } from "../../../database/client.js";
+import type { Session } from "../../types/index.js";
 
 class SessionRepository {
   async create(session: Session) {
