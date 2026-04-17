@@ -28,6 +28,7 @@ import {
 
 import WorldMap from "../components/WorldMap";
 import SecurityAuditorModal from "../components/SecurityAuditorModal";
+import { getApiUrl } from "../services/apiConfig.js";
 
 type Stats = {
   totalUsers: number;
@@ -52,10 +53,10 @@ export default function Dashboard() {
       const headers = { Authorization: `Bearer ${localStorage.getItem("token")}` };
       
       const [coreRes, mapRes, dauRes, anomalyRes] = await Promise.all([
-        fetch("/api/dashboard/stats", { headers }),
-        fetch("/api/dashboard/map", { headers }),
-        fetch("/api/dashboard/dau", { headers }),
-        fetch("/api/dashboard/anomalies", { headers })
+        fetch(getApiUrl("/api/dashboard/stats"), { headers }),
+        fetch(getApiUrl("/api/dashboard/map"), { headers }),
+        fetch(getApiUrl("/api/dashboard/dau"), { headers }),
+        fetch(getApiUrl("/api/dashboard/anomalies"), { headers })
       ]);
 
       const [core, map, dau, anomaly] = await Promise.all([
