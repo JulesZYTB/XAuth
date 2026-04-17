@@ -15,8 +15,10 @@ import Users from "./pages/Users";
 import Logs from "./pages/Logs";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
+import Docs from "./pages/Docs";
 
 import { Navigate } from "react-router";
+
 
 /**
  * Authentication Guards
@@ -100,8 +102,13 @@ const router = createBrowserRouter([
         path: "/logs",
         element: <Logs />,
       },
+      {
+        path: "/docs",
+        element: <Docs />,
+      },
     ],
   },
+
   {
     path: "*",
     element: <Navigate to="/" replace />,

@@ -6,8 +6,30 @@
     "applications": "Applications",
     "user_management": "Gestion des Utilisateurs",
     "audit_logs": "Journaux d'Audit",
+    "documentation": "Documentation",
     "sign_out": "Déconnexion"
   },
+  "docs": {
+    "title": "Documentation Technique",
+    "subtitle": "Guide d'intégration pour l'infrastructure XAuth Omega",
+    "getting_started": "Démarrage Rapide",
+    "gs_desc": "Suivez ces étapes pour protéger votre logiciel avec XAuth.",
+    "step1": "Créez votre application dans le tableau de bord",
+    "step2": "Récupérez votre ID d'App et votre Clé Secrète",
+    "step3": "Implémentez le handshake du Protocole Omega",
+    "protocol_arch": "Architecture du Protocole Omega",
+    "handshake": "1. Handshake",
+    "handshake_desc": "Le client commence par demander une session. Le serveur renvoie un session_id et un nonce aléatoire.",
+    "validation": "2. Validation",
+    "validation_desc": "Le client envoie la clé de licence, le HWID, le Secret d'App et l'ID de Session. La communication est chiffrée en AES-GCM.",
+    "security_tips": "Bonnes Pratiques de Sécurité",
+    "tip_obfuscation": "Obfusquez toujours vos binaires pour empêcher le patch dynamique des vérifications.",
+    "tip_secrets": "Ne codez jamais vos secrets en dur en clair.",
+    "examples_title": "Exemples de Code",
+    "examples_desc": "Implémentations officielles pour différents langages.",
+    "view_on_github": "Voir sur GitHub"
+  },
+
   "common": {
     "cancel": "Annuler",
     "confirm_action": "Confirmer l'Action",

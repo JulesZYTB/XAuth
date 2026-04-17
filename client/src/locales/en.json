@@ -6,8 +6,30 @@
     "applications": "Applications",
     "user_management": "User Management",
     "audit_logs": "Audit Logs",
+    "documentation": "Documentation",
     "sign_out": "Sign Out"
   },
+  "docs": {
+    "title": "Technical Documentation",
+    "subtitle": "Integration guide for XAuth Omega Infrastructure",
+    "getting_started": "Getting Started",
+    "gs_desc": "Follow these steps to protect your software with XAuth.",
+    "step1": "Create your application in the dashboard",
+    "step2": "Retrieve your App ID and Secret Key",
+    "step3": "Implement the Omega Protocol handshake",
+    "protocol_arch": "Omega Protocol Architecture",
+    "handshake": "1. Handshake",
+    "handshake_desc": "Client starts by requesting a session. Server returns a session_id and a randomized nonce.",
+    "validation": "2. Validation",
+    "validation_desc": "Client sends the license key, HWID, App Secret, and Session ID. The communication is AES-GCM encrypted.",
+    "security_tips": "Security Best Practices",
+    "tip_obfuscation": "Always obfuscate your binaries to prevent check dynamic patching.",
+    "tip_secrets": "Never hardcode your secrets in plain text.",
+    "examples_title": "Code Examples",
+    "examples_desc": "Official implementations for various languages.",
+    "view_on_github": "View on GitHub"
+  },
+
   "common": {
     "cancel": "Cancel",
     "confirm_action": "Confirm Action",

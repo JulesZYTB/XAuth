@@ -8,8 +8,10 @@ import {
   Terminal, 
   LogOut,
   ChevronRight,
-  User 
+  User,
+  Book
 } from "lucide-react";
+
 import { useTranslation } from "react-i18next";
 
 export default function Layout() {
@@ -62,7 +64,14 @@ export default function Layout() {
       path: "/logs", 
       roles: ["admin", "user"] 
     },
+    { 
+      label: t("menu.documentation", "Documentation"), 
+      icon: Book, 
+      path: "/docs", 
+      roles: ["admin", "user"] 
+    },
   ];
+
 
   return (
     <div className="flex min-h-screen bg-dark text-white font-sans selection:bg-accent selection:text-white">
