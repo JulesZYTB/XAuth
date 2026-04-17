@@ -19,7 +19,8 @@
     "express-rate-limit": "^8.3.2",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
-    "mysql2": "^3.14.0"
+    "mysql2": "^3.14.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.6.0",

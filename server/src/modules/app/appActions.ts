@@ -20,10 +20,19 @@ const browse: RequestHandler = async (req, res, next) => {
   }
 };
 
+import { appSchema } from "../security/schemas.js";
+
 const add: RequestHandler = async (req, res, next) => {
   try {
-    const { name } = req.body;
+    const validation = appSchema.safeParse(req.body);
+    if (!validation.success) {
+      res.status(400).json({ message: "Invalid input", errors: validation.error.format() });
+      return;
+    }
+
+    const { name } = validation.data;
     const ownerId = (req as unknown as AuthenticatedRequest).auth.id;
+
 
 
 
@@ -45,17 +54,22 @@ const add: RequestHandler = async (req, res, next) => {
 
 const edit: RequestHandler = async (req, res, next) => {
   try {
+    const validation = appSchema.partial().safeParse(req.body);
+    if (!validation.success) {
+      res.status(400).json({ message: "Invalid input", errors: validation.error.format() });
+      return;
+    }
+
     const id = Number(req.params.id);
     const ownerId = (req as unknown as AuthenticatedRequest).auth.id;
 
-
-
-    await appRepository.update(id, ownerId, req.body);
+    await appRepository.update(id, ownerId, validation.data);
     res.sendStatus(204);
   } catch (err) {
     next(err);
   }
 };
+
 
 const togglePause: RequestHandler = async (req, res, next) => {
   try {

@@ -16,10 +16,18 @@ interface AuthenticatedRequest extends Request {
 }
 
 
+import { licenseCreateSchema, licenseRedeemSchema } from "../security/schemas.js";
+
 // Dashboard action: Create a new license
 const add: RequestHandler = async (req, res, next) => {
   try {
-    const { license_key, expiry_date, app_id } = req.body;
+    const validation = licenseCreateSchema.safeParse(req.body);
+    if (!validation.success) {
+      res.status(400).json({ message: "Invalid input", errors: validation.error.format() });
+      return;
+    }
+
+    const { license_key, expiry_date, app_id } = validation.data;
 
     const id = await licenseRepository.create({
       license_key,
@@ -33,6 +41,7 @@ const add: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
+
 
 // Client action: Validate a license (Omega Edition)
 const validate: RequestHandler = async (req, res, next) => {
@@ -318,8 +327,15 @@ const myLicenses: RequestHandler = async (req, res, next) => {
 
 const redeem: RequestHandler = async (req, res, next) => {
   try {
-    const { license_key } = req.body;
+    const validation = licenseRedeemSchema.safeParse(req.body);
+    if (!validation.success) {
+      res.status(400).json({ message: "Invalid input", errors: validation.error.format() });
+      return;
+    }
+
+    const { license_key } = validation.data;
     const userId = (req as unknown as AuthenticatedRequest).auth.id;
+
 
 
     

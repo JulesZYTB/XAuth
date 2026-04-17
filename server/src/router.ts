@@ -1,6 +1,19 @@
 import express from "express";
+import rateLimit from "express-rate-limit";
 
 const router = express.Router();
+
+/**
+ * Security: Strict Rate Limiting for Authentication
+ * Prevents brute-force attacks on login and registration.
+ */
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 requests per windowMs
+  message: { message: "Too many authentication attempts, please try again after 15 minutes." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 /* ************************************************************************* */
 // Define Your API Routes Here
@@ -12,7 +25,7 @@ import licenseActions from "./modules/license/licenseActions.js";
 import auditLogActions from "./modules/audit/auditLogActions.js";
 import sessionActions from "./modules/session/sessionActions.js";
 import dashboardActions from "./modules/admin/dashboardActions.js";
-import verifyToken from "./modules/admin/authMiddleware.js";
+import { verifyToken, isAdmin } from "./modules/admin/authMiddleware.js";
 import webhookActions from "./modules/app/webhookActions.js";
 import analyticsActions from "./modules/app/analyticsActions.js";
 import releaseActions from "./modules/app/releaseActions.js";
@@ -26,15 +39,19 @@ router.post("/api/v1/client/validate", licenseActions.validate);
 // --- PUBLIC UPDATE GATEWAY ---
 router.get("/api/update/:appId/:channel", updateActions.check);
 
-// --- IDENTITY API (Public) ---
-router.post("/api/auth/login", userActions.login);
-router.post("/api/auth/register", userActions.register);
+// --- IDENTITY API (Public with Strict Rate Limiting) ---
+router.post("/api/auth/login", authLimiter, userActions.login);
+router.post("/api/auth/register", authLimiter, userActions.register);
 
-// Protected routes
+// Protected routes (Requires valid JWT)
 router.use(verifyToken);
 
 // PROFILE (Self)
 router.put("/api/auth/profile", userActions.updateProfile);
+
+// --- ADMIN ONLY ROUTES ---
+// We apply isAdmin middleware to secure these sensitive endpoints
+router.use(isAdmin);
 
 // USERS CRUD
 router.get("/api/users", userActions.browse);

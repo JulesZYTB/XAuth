@@ -34,12 +34,14 @@ app.use(helmet());
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 300, // Higher limit for general API usage
   message: { message: "Too many requests from this IP, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
-// Apply rate limiting to client auth endpoints
-app.use("/api/v1/client", apiLimiter);
+// Apply rate limiting to all API endpoints
+app.use("/api", apiLimiter);
 
 // CORS is handled by Nginx proxy for production
 // if (process.env.CLIENT_URL != null) {

@@ -3,11 +3,20 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import userRepository from "./userRepository.js";
 import type { AuthUser, User } from "../../types/index.js";
+import { loginSchema, registerSchema } from "../security/schemas.js";
 
+const APP_SECRET = process.env.APP_SECRET;
 
 const login: RequestHandler = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    // Schema Validation
+    const validation = loginSchema.safeParse(req.body);
+    if (!validation.success) {
+      res.status(400).json({ message: "Invalid input", errors: validation.error.format() });
+      return;
+    }
+
+    const { email, password } = validation.data;
     const user = await userRepository.readByEmail(email);
 
     if (!user || !user.password) {
@@ -21,9 +30,13 @@ const login: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    if (!APP_SECRET && process.env.NODE_ENV === "production") {
+      throw new Error("APP_SECRET is not configured");
+    }
+
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role, username: user.username },
-      process.env.APP_SECRET || "default_secret",
+      APP_SECRET || "default_secret",
       { expiresIn: "1h" }
     );
 
@@ -35,13 +48,14 @@ const login: RequestHandler = async (req, res, next) => {
 
 const register: RequestHandler = async (req, res, next) => {
   try {
-    const { username, email, password } = req.body;
-
-    // Basic validation
-    if (!username || !email || !password) {
-      res.status(400).json({ message: "All fields are required" });
+    // Schema Validation
+    const validation = registerSchema.safeParse(req.body);
+    if (!validation.success) {
+      res.status(400).json({ message: "Invalid input", errors: validation.error.format() });
       return;
     }
+
+    const { username, email, password, secret } = validation.data;
 
     // Check if user already exists
     const existingUser = await userRepository.readByEmail(email);
@@ -50,11 +64,17 @@ const register: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12); // Increased salt rounds
 
     // Check for admin secret to grant elevated privileges
-    const registrationSecret = process.env.ADMIN_REGISTRATION_SECRET || "change_me_immediately";
-    const role = (req.body.secret === registrationSecret) ? "admin" : "user";
+    const registrationSecret = process.env.ADMIN_REGISTRATION_SECRET;
+    let role = "user";
+    
+    if (secret && registrationSecret && secret === registrationSecret) {
+      role = "admin";
+    } else if (secret && !registrationSecret) {
+      console.warn("ADMIN_REGISTRATION_SECRET is not set, admin registration blocked.");
+    }
 
     const insertId = await userRepository.create({
       username,
@@ -72,6 +92,7 @@ const register: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
+
 
 const browse: RequestHandler = async (req, res, next) => {
   try {
