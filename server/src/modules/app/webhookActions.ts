@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
-import webhookRepository from "./webhookRepository";
-import type { AuthUser } from "../../types";
+import webhookRepository from "./webhookRepository.js";
+import type { AuthUser } from "../../types/index.js";
 
 const browse: RequestHandler = async (req, res, next) => {
   try {
