@@ -1,4 +1,4 @@
-import securityService from '../../src/services/security';
+import securityService from '../../src/services/security.js';
 
 describe('Security Service - Unit Tests', () => {
   const secretKey = 'super_secret_app_key_123';
