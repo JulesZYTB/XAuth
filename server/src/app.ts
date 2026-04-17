@@ -38,20 +38,26 @@ const apiLimiter = rateLimit({
 // Apply rate limiting to client auth endpoints
 app.use("/api/v1/client", apiLimiter);
 
-if (process.env.CLIENT_URL != null) {
-  app.use(cors({ origin: [process.env.CLIENT_URL] }));
-}
+// Configuration des origines autorisées
+const allowedOrigins = [
+  "https://xauth.monster", // Votre domaine de production
+  process.env.CLIENT_URL,   // Via .env (Pterodactyl)
+].filter(Boolean) as string[];
 
-
-// If you need to allow extra origins, you can add something like this:
-
-/*
 app.use(
   cors({
-    origin: ["http://mysite.com", "http://another-domain.com"],
-  }),
+    origin: (origin, callback) => {
+      // Autoriser les requêtes sans origine (comme Postman ou curl) 
+      // ou si l'origine est dans notre liste
+      if (!origin || allowedOrigins.includes(origin) || origin.startsWith("http://localhost")) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
 );
-*/
 
 // With ["http://mysite.com", "http://another-domain.com"]
 // to be replaced with an array of your trusted origins
