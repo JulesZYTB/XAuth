@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { User, Mail, ShieldAlert, CheckCircle2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { getApiUrl } from "../services/apiConfig.js";
 
 export default function Profile() {
   const { t } = useTranslation();
@@ -25,7 +26,7 @@ export default function Profile() {
     e.preventDefault();
     setStatus(null);
     try {
-      const response = await fetch("/api/auth/profile", {
+      const response = await fetch(getApiUrl("/api/auth/profile"), {
         method: "PUT",
         headers: { 
           "Content-Type": "application/json",
