@@ -1,6 +1,6 @@
 import type { Request, RequestHandler } from "express";
-import validationLogRepository from "./validationLogRepository";
-import type { AuthUser } from "../../types";
+import validationLogRepository from "./validationLogRepository.js";
+import type { AuthUser } from "../../types/index.js";
 
 interface AuthenticatedRequest extends Request {
   auth: AuthUser;
