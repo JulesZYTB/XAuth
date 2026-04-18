@@ -163,7 +163,7 @@ export default function Docs() {
                       { code: "403", label: t("docs.api.error_403") },
                     ],
                   },
-                ].map((endpoint, i) => (
+                ].map((endpoint) => (
                   <div
                     key={endpoint.title}
                     className="p-6 bg-dark/50 border border-gray-800/50 rounded-3xl hover:border-accent/30 transition-all flex flex-col md:flex-row gap-6"
