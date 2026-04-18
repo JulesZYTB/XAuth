@@ -115,7 +115,7 @@ class DashboardRepository {
   }
 
   async getRecentThreats(appId?: number) {
-    const sql = `SELECT v.*, l.license_key, u.username 
+    const sql = `SELECT v.*, l.license_key, l.hwid, u.username 
                  FROM validation_log v
                  LEFT JOIN license l ON v.license_id = l.id
                  LEFT JOIN user u ON l.user_id = u.id
