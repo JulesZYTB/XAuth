@@ -102,6 +102,7 @@ router.get("/api/apps/:appId/dashboard/map", dashboardActions.getMap);
 router.get("/api/apps/:appId/dashboard/dau", dashboardActions.getDau);
 router.get("/api/apps/:appId/dashboard/anomalies", dashboardActions.getAnomalies);
 router.get("/api/apps/:appId/dashboard/auditor-scan", dashboardActions.getAuditorScan);
+router.delete("/api/apps/:appId/dashboard/threats", dashboardActions.clearThreats);
 
 
 
@@ -122,6 +123,7 @@ router.get("/api/dashboard/map", dashboardActions.getMap);
 router.get("/api/dashboard/dau", dashboardActions.getDau);
 router.get("/api/dashboard/anomalies", dashboardActions.getAnomalies);
 router.get("/api/dashboard/auditor-scan", dashboardActions.getAuditorScan);
+router.delete("/api/dashboard/threats", dashboardActions.clearThreats);
 
 
 export default router;
