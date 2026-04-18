@@ -43,15 +43,20 @@ export default function SecurityAuditorModal({ isOpen, onClose, appId }: Securit
 
     try {
       const url = appId 
-        ? getApiUrl(`/api/apps/${appId}/dashboard/anomalies`) 
+        ? getApiUrl(`/api/apps/${appId}/dashboard/auditor-scan`) 
         : getApiUrl("/api/dashboard/auditor-scan");
       
       const res = await fetch(url, {
         credentials: "include",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
-      const result = await res.json();
-      setData(result);
+      if (res.ok) {
+        const result = await res.json();
+        setData({
+          suspiciousIPs: Array.isArray(result.suspiciousIPs) ? result.suspiciousIPs : [],
+          sharedKeys: Array.isArray(result.sharedKeys) ? result.sharedKeys : []
+        });
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -112,11 +117,11 @@ export default function SecurityAuditorModal({ isOpen, onClose, appId }: Securit
                   <AlertTriangle className="w-5 h-5 text-red-500" />
                   <h4 className="text-white font-black">{t("dashboard.auditor_ips", "Suspicious IP Addresses")}</h4>
                   <span className="ml-auto bg-red-500/20 text-red-500 text-[10px] font-black px-2 py-1 rounded-lg">
-                    {data.suspiciousIPs.length} {t("dashboard.auditor_found", "Found")}
+                    {data?.suspiciousIPs?.length || 0} {t("dashboard.auditor_found", "Found")}
                   </span>
                 </div>
                 <div className="p-0 overflow-x-auto">
-                  {data.suspiciousIPs.length === 0 ? (
+                  {(!data?.suspiciousIPs || data.suspiciousIPs.length === 0) ? (
                     <div className="p-8 text-center text-gray-500 text-sm font-medium">{t("dashboard.auditor_no_ips", "No brute-force or massive failed attempts detected recently.")}</div>
                   ) : (
                     <table className="w-full text-left">
@@ -146,11 +151,11 @@ export default function SecurityAuditorModal({ isOpen, onClose, appId }: Securit
                   <Key className="w-5 h-5 text-orange-500" />
                   <h4 className="text-white font-black">{t("dashboard.auditor_keys", "Potentially Shared Keys")}</h4>
                   <span className="ml-auto bg-orange-500/20 text-orange-500 text-[10px] font-black px-2 py-1 rounded-lg">
-                    {data.sharedKeys.length} {t("dashboard.auditor_found", "Found")}
+                    {data?.sharedKeys?.length || 0} {t("dashboard.auditor_found", "Found")}
                   </span>
                 </div>
                 <div className="p-0 overflow-x-auto">
-                  {data.sharedKeys.length === 0 ? (
+                  {(!data?.sharedKeys || data.sharedKeys.length === 0) ? (
                     <div className="p-8 text-center text-gray-500 text-sm font-medium">{t("dashboard.auditor_no_keys", "No suspicious license sharing detected (Based on unique countries/IPs per key).")}</div>
                   ) : (
                     <table className="w-full text-left">
