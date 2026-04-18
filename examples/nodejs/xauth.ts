@@ -29,6 +29,18 @@ export interface XAuthValidationResult {
     variables?: Record<string, any>;
 }
 
+export interface XAuthVersionResult {
+    success: boolean;
+    message?: string;
+    version?: string;
+    channel?: string;
+    url?: string;
+    checksum?: string;
+    publishedAt?: string;
+    updateAvailable?: boolean;
+    broadcast?: string;
+}
+
 export class XAuth {
     private appId: number;
     private appSecret: string;
@@ -131,5 +143,44 @@ export class XAuth {
         } catch (e: any) {
             return { success: false, message: `Network error: ${e.message}` };
         }
+    }
+
+    async checkVersion(currentVersion?: string, channel: string = "stable"): Promise<XAuthVersionResult> {
+        try {
+            const res = await fetch(`${this.baseUrl}/api/v1/client/verify-version`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    app_id: this.appId,
+                    app_secret: this.appSecret,
+                    channel: channel,
+                    current_version: currentVersion
+                })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                return {
+                    success: true,
+                    version: data.version,
+                    channel: data.channel,
+                    url: data.url,
+                    checksum: data.checksum,
+                    publishedAt: data.published_at,
+                    updateAvailable: data.update_available,
+                    broadcast: data.broadcast
+                };
+            } else {
+                try {
+                    const errBody = await res.json();
+                    return { success: false, message: errBody.message || "Version check failed" };
+                } catch {
+                    return { success: false, message: await res.text() };
+                }
+            }
+        } catch (e: any) {
+            return { success: false, message: `Network error: ${e.message}` };
+        }
+    
     }
 }
