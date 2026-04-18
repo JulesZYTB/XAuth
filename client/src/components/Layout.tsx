@@ -50,7 +50,7 @@ export default function Layout() {
       label: t("menu.applications", "Applications"), 
       icon: Rocket, 
       path: "/apps", 
-      roles: ["admin"] 
+      roles: ["admin", "user"] 
     },
     { 
       label: t("menu.user_management", "User Management"), 
@@ -62,8 +62,9 @@ export default function Layout() {
       label: t("menu.audit_logs", "Audit Logs"), 
       icon: Terminal, 
       path: "/logs", 
-      roles: ["admin", "user"] 
+      roles: ["admin"] 
     },
+
     { 
       label: t("menu.documentation", "Documentation"), 
       icon: Book, 
