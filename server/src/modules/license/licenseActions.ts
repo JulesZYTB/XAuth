@@ -74,15 +74,52 @@ const validate: RequestHandler = async (req, res, next) => {
     // 0. Manual Security Signal (Debugger/Bypass detected by client)
     if (error_type === "BYPASS_DETECTED" || error_type === "DEBUGGER_DETECTED") {
       const license = await licenseRepository.readByKey(license_key);
-      await validationLogRepository.create({
-        app_id: license?.app_id || 0,
-        license_id: license?.id || undefined,
-        ip_address: ip,
-        country: "Unknown",
-        country_code: "??",
-        status: "failed",
-        error_type: error_type
-      });
+      const geo = await geoService.lookup(ip);
+
+      if (license) {
+        await validationLogRepository.create({
+          app_id: license.app_id,
+          license_id: license.id,
+          ip_address: ip,
+          country: geo.country || "Unknown",
+          country_code: geo.countryCode || "??",
+          status: "failed",
+          error_type: error_type,
+          details: details
+        });
+
+        // Intelligent Auto-Ban System
+        const threatCount = await validationLogRepository.countBypassAttempts(license.id);
+        if (threatCount >= 3 && license.status !== "banned") {
+          await licenseRepository.updateStatus(license.id, "banned");
+          
+          // Log the auto-ban
+          await auditLogRepository.create({
+            action: "AUTO_BAN",
+            details: `License auto-banned after ${threatCount} security violations. Last trigger: ${error_type}.`,
+            ip_address: ip,
+            app_id: license.app_id
+          });
+          
+          // Dispatch webhook for automation
+          await webhookService.dispatch(license.app_id, "BAN", { 
+            license_id: license.id, 
+            key: license.license_key,
+            reason: "AUTO_BAN_SECURITY_VIOLATION",
+            attempts: threatCount
+          });
+        }
+      } else {
+         await validationLogRepository.create({
+          app_id: 0,
+          ip_address: ip,
+          country: geo.country || "Unknown",
+          country_code: geo.countryCode || "??",
+          status: "failed",
+          error_type: error_type,
+          details: details
+        });
+      }
 
       // Log to audit trial for persistent visibility
       await auditLogRepository.create({
@@ -107,6 +144,31 @@ const validate: RequestHandler = async (req, res, next) => {
     if (!license) {
       res.status(404).json({ message: "License not found" });
       return;
+    }
+
+    // HWID Blacklist System (Sticky Banning)
+    if (hwid) {
+      const hwidHash = securityService.hash(hwid);
+      if (await licenseRepository.isHwidBlacklisted(hwidHash)) {
+        if (license.status !== "banned") {
+          await licenseRepository.updateStatus(license.id, "banned");
+          
+          await auditLogRepository.create({
+            action: "AUTO_BAN_HWID_BLACKLIST",
+            details: `License auto-banned: hardware ID belongs to a previously banned user.`,
+            ip_address: ip,
+            app_id: license.app_id
+          });
+          
+          await webhookService.dispatch(license.app_id, "BAN", { 
+            license_id: license.id, 
+            key: license.license_key, 
+            reason: "HWID_BLACKLISTED" 
+          });
+        }
+        res.status(403).json({ message: "Security Violation: Hardware ID is blacklisted." });
+        return;
+      }
     }
 
     // Resolve geography once
