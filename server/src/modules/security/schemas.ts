@@ -37,3 +37,10 @@ export const appSchema = z.object({
   broadcast_message: z.string().optional(),
   is_paused: z.boolean().optional(),
 });
+
+export const versionVerifySchema = z.object({
+  app_id: z.number().int().positive(),
+  app_secret: z.string().min(1),
+  channel: z.enum(["stable", "beta"]).default("stable"),
+  current_version: z.string().optional(),
+});
