@@ -58,6 +58,23 @@
       "success_201": "Resource created",
       "error_400": "Invalid parameters",
       "error_403": "Forbidden (Check Key/Ownership)"
+    },
+    "help": {
+      "title": "Need Help?",
+      "subtitle": "Join our developer community to get expert support for your integration.",
+      "join_discord": "Join Discord"
+    },
+    "antidebug": {
+      "title": "Anti-Debug & Bypass Reporting",
+      "subtitle": "Protect your intellectual property from reverse engineering.",
+      "integrity_title": "Integrity Reporting",
+      "integrity_desc": "XAuth Omega allows you to report specialized threats detected locally by your software. When you detect tools like <strong>HTTPDebugger</strong>, <strong>Fiddler</strong>, or <strong>x64dbg</strong>, send a validation request with the <code>error_type</code> parameter set to <code>BYPASS_DETECTED</code>.",
+      "debugger_title": "Debugger Detected",
+      "debugger_desc": "API returns 403. The IP is instantly flagged in the dashboard Threat Feed.",
+      "debugger_alert": "CRITICAL ALERT",
+      "memory_title": "Memory Tampering",
+      "memory_desc": "If detected, send bypass signal to auto-ban the license key permanently.",
+      "memory_protocol": "AUTO-BAN PROTOCOL"
     }
   },
 
@@ -100,8 +117,6 @@
     "anomaly_desc": "Tracking failed vs successful validations (Crack Attempts)",
     "successes": "Successes",
     "failures": "Failures",
-    "live_feed": "Live Feed",
-    "security_auditor": "Security Auditor",
     "export": "Export Report",
     "auditor_title": "Security Auditor",
     "auditor_subtitle": "Automated threat detection and anomalies scan",
@@ -113,7 +128,23 @@
     "auditor_keys": "Potentially Shared Keys",
     "auditor_no_keys": "No suspicious license sharing detected (Based on unique countries/IPs per key).",
     "auditor_completed": "Scan completed. {{count}} potential issues found.",
-    "auditor_rescan": "Run New Scan"
+    "auditor_rescan": "Run New Scan",
+    "threat_intel": "Threat Intelligence",
+    "active_threats": "Live Bypass Attempts",
+    "retention_app": "Detailed App Stats",
+    "retention_app_desc": "Specific user retention and activity for this application only.",
+    "app_activity": "App Activity",
+    "anomaly_app_desc": "Crack attempts specific to this application"
+  },
+  "threats": {
+    "no_threats": "No immediate threats detected",
+    "suspicious": "Suspicious Attempt",
+    "anonymous": "Anonymous Bypass",
+    "pattern_label": "Bypass Pattern:",
+    "details": "Details",
+    "pattern_secret": "Key Inject/Secret Leak",
+    "pattern_hwid": "HWID Spoof",
+    "pattern_toolkit": "Toolkit Detected"
   },
   "auth": {
     "hub_subtitle": "Enterprise Security Hub",
