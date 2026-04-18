@@ -7,6 +7,7 @@ export interface ValidationLog {
   country_code: string;
   status: "success" | "failed";
   error_type?: string;
+  details?: string;
   created_at: string;
 }
 
