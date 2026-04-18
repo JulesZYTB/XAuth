@@ -113,6 +113,19 @@ class DashboardRepository {
     const [rows] = await databaseClient.query<Rows>(sql, appId ? [appId] : []);
     return rows;
   }
+
+  async getRecentThreats(appId?: number) {
+    const sql = `SELECT v.*, l.license_key, u.username 
+                 FROM validation_log v
+                 LEFT JOIN license l ON v.license_id = l.id
+                 LEFT JOIN user u ON l.user_id = u.id
+                 WHERE v.status = 'failed' 
+                 ${appId ? "AND v.app_id = ?" : ""}
+                 ORDER BY v.created_at DESC 
+                 LIMIT 10`;
+    const [rows] = await databaseClient.query<Rows>(sql, appId ? [appId] : []);
+    return rows;
+  }
 }
 
 export default new DashboardRepository();

@@ -28,11 +28,13 @@ const getStats: RequestHandler = async (req, res, next) => {
     const stats = await dashboardRepository.getStats(appId);
     const trafficData = await dashboardRepository.getTrafficData(appId);
     const recentActivity = await dashboardRepository.getRecentActivity(appId);
+    const recentThreats = await dashboardRepository.getRecentThreats(appId);
 
     res.json({
       ...stats,
       trafficData: trafficData.reverse(),
-      recentActivity
+      recentActivity,
+      recentThreats
     });
   } catch (err) {
     next(err);
