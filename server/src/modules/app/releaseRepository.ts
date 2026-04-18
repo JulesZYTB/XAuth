@@ -12,6 +12,14 @@ class ReleaseRepository {
     return result.insertId;
   }
 
+  async read(id: number) {
+    const [rows] = await databaseClient.query<Rows>(
+      "select * from app_release where id = ?",
+      [id]
+    );
+    return rows[0] as AppRelease;
+  }
+
   async readByAppId(appId: number) {
     const [rows] = await databaseClient.query<Rows>(
       "select * from app_release where app_id = ? order by created_at desc",

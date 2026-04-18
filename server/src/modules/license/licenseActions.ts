@@ -51,9 +51,9 @@ const add: RequestHandler = async (req, res, next) => {
     }
 
     const id = await licenseRepository.create({
-      license_key,
-      expiry_date: new Date(expiry_date),
-      app_id,
+      license_key: license_key as string,
+      expiry_date: new Date(expiry_date as string),
+      app_id: Number(app_id),
       status: "active",
     });
 
@@ -68,9 +68,33 @@ const add: RequestHandler = async (req, res, next) => {
 // Client action: Validate a license (Omega Edition)
 const validate: RequestHandler = async (req, res, next) => {
   try {
-    const { license_key, hwid, app_secret, session_id } = req.body;
+    const { license_key, hwid, app_secret, session_id, error_type, details } = req.body;
     const ip = req.ip || req.socket.remoteAddress || "0.0.0.0";
 
+    // 0. Manual Security Signal (Debugger/Bypass detected by client)
+    if (error_type === "BYPASS_DETECTED" || error_type === "DEBUGGER_DETECTED") {
+      const license = await licenseRepository.readByKey(license_key);
+      await validationLogRepository.create({
+        app_id: license?.app_id || 0,
+        license_id: license?.id || undefined,
+        ip_address: ip,
+        country: "Unknown",
+        country_code: "??",
+        status: "failed",
+        error_type: error_type
+      });
+
+      // Log to audit trial for persistent visibility
+      await auditLogRepository.create({
+        action: "BYPASS_DETECTED",
+        details: details || `Bypass tool detected by client. License: ${license_key}`,
+        ip_address: ip,
+        app_id: license?.app_id || 0
+      });
+
+      res.status(403).json({ message: "Security Integrity Violation Detected" });
+      return;
+    }
 
     // 1. Session check
     const session = await sessionRepository.read(session_id);

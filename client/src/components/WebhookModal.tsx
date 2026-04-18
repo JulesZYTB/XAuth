@@ -1,6 +1,14 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-import { X, Webhook, Trash2, Plus, ShieldCheck, ExternalLink, Activity } from "lucide-react";
+import {
+  Activity,
+  ExternalLink,
+  Plus,
+  ShieldCheck,
+  Trash2,
+  Webhook,
+  X,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { getApiUrl } from "../services/apiConfig.js";
 
@@ -19,7 +27,12 @@ interface WebhookModalProps {
   appName: string;
 }
 
-export default function WebhookModal({ isOpen, onClose, appId, appName }: WebhookModalProps) {
+export default function WebhookModal({
+  isOpen,
+  onClose,
+  appId,
+  appName,
+}: WebhookModalProps) {
   const { t } = useTranslation();
   const [webhooks, setWebhooks] = useState<WebhookData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,7 +57,6 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
   useEffect(() => {
     if (isOpen) fetchWebhooks();
   }, [isOpen, fetchWebhooks]);
-
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,21 +107,37 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
               <Webhook className="w-6 h-6 text-accent" />
             </div>
             <div>
-              <h3 className="text-xl font-black text-white">{t("apps.webhook_title", "Event Webhooks")}</h3>
-              <p className="text-xs text-gray-400">{t("apps.webhook_notif", "Notifications for")} <span className="text-accent font-bold">{appName}</span></p>
+              <h3 className="text-xl font-black text-white">
+                {t("apps.webhook_title", "Event Webhooks")}
+              </h3>
+              <p className="text-xs text-gray-400">
+                {t("apps.webhook_notif", "Notifications for")}{" "}
+                <span className="text-accent font-bold">{appName}</span>
+              </p>
             </div>
           </div>
-          <button type="button" onClick={onClose} className="p-2 hover:bg-gray-800 rounded-xl transition-all text-gray-500 hover:text-white">
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 hover:bg-gray-800 rounded-xl transition-all text-gray-500 hover:text-white"
+          >
             <X className="w-6 h-6" />
           </button>
         </header>
 
-
         <div className="p-8 space-y-8 max-h-[60vh] overflow-y-auto">
           {/* Create Webhook Form */}
-          <form onSubmit={handleCreate} className="space-y-4 bg-dark/30 p-6 rounded-3xl border border-gray-800/50">
+          <form
+            onSubmit={handleCreate}
+            className="space-y-4 bg-dark/30 p-6 rounded-3xl border border-gray-800/50"
+          >
             <div className="space-y-2">
-              <label htmlFor="webhook-url" className="text-[10px] text-gray-500 uppercase font-black px-1">{t("apps.webhook_dest", "Destination URL")}</label>
+              <label
+                htmlFor="webhook-url"
+                className="text-[10px] text-gray-500 uppercase font-black px-1"
+              >
+                {t("apps.webhook_dest", "Destination URL")}
+              </label>
               <input
                 id="webhook-url"
                 type="url"
@@ -122,7 +150,12 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label htmlFor="webhook-secret" className="text-[10px] text-gray-500 uppercase font-black px-1">{t("apps.webhook_secret", "Secret (Optional)")}</label>
+                <label
+                  htmlFor="webhook-secret"
+                  className="text-[10px] text-gray-500 uppercase font-black px-1"
+                >
+                  {t("apps.webhook_secret", "Secret (Optional)")}
+                </label>
                 <input
                   id="webhook-secret"
                   type="text"
@@ -134,11 +167,12 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
               </div>
 
               <div className="flex items-end">
-                <button 
+                <button
                   type="submit"
                   className="w-full bg-accent h-[46px] rounded-2xl text-white text-xs font-black flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-xl shadow-accent/20 cursor-pointer"
                 >
-                  <Plus className="w-4 h-4" /> {t("apps.webhook_add", "Add Webhook")}
+                  <Plus className="w-4 h-4" />{" "}
+                  {t("apps.webhook_add", "Add Webhook")}
                 </button>
               </div>
             </div>
@@ -147,32 +181,52 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
           {/* Webhook List */}
           <div className="space-y-4">
             <h4 className="text-[10px] text-gray-500 uppercase font-black px-1 flex items-center gap-2">
-              <Activity className="w-3 h-3" /> {t("apps.webhook_active", "Active Endpoints")}
+              <Activity className="w-3 h-3" />{" "}
+              {t("apps.webhook_active", "Active Endpoints")}
             </h4>
-            
+
             {loading ? (
-              <div className="py-12 text-center text-xs text-gray-600 font-bold animate-pulse">{t("apps.webhook_loading", "Loading endpoints...")}</div>
+              <div className="py-12 text-center text-xs text-gray-600 font-bold animate-pulse">
+                {t("apps.webhook_loading", "Loading endpoints...")}
+              </div>
             ) : webhooks.length === 0 ? (
               <div className="py-12 text-center border-2 border-dashed border-gray-800 rounded-3xl text-gray-600 italic text-sm">
-                {t("apps.webhook_empty", "No webhooks configured for this app yet.")}
+                {t(
+                  "apps.webhook_empty",
+                  "No webhooks configured for this app yet.",
+                )}
               </div>
             ) : (
               webhooks.map((hook) => (
-                <div key={hook.id} className="bg-dark/20 border border-gray-800 rounded-2xl p-4 flex justify-between items-center group">
+                <div
+                  key={hook.id}
+                  className="bg-dark/20 border border-gray-800 rounded-2xl p-4 flex justify-between items-center group"
+                >
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center border border-green-500/20">
                       <ShieldCheck className="w-5 h-5 text-green-500" />
                     </div>
                     <div className="max-w-md truncate">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-gray-200 truncate">{hook.url}</span>
-                        {hook.secret && <span className="bg-accent/10 text-accent text-[8px] font-black px-1.5 py-0.5 rounded border border-accent/20">HMAC SECURE</span>}
+                        <span className="text-sm font-bold text-gray-200 truncate">
+                          {hook.url}
+                        </span>
+                        {hook.secret && (
+                          <span className="bg-accent/10 text-accent text-[8px] font-black px-1.5 py-0.5 rounded border border-accent/20">
+                            HMAC SECURE
+                          </span>
+                        )}
                       </div>
-                      <div className="text-[10px] text-gray-500 font-medium">{t("apps.webhook_events", "Events:")} <span className="text-gray-400 capitalize">{hook.event_types}</span></div>
+                      <div className="text-[10px] text-gray-500 font-medium">
+                        {t("apps.webhook_events", "Events:")}{" "}
+                        <span className="text-gray-400 capitalize">
+                          {hook.event_types}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                    <button 
+                    <button
                       type="button"
                       onClick={() => window.open(hook.url, "_blank")}
                       className="p-2 text-gray-500 hover:text-accent transition-all cursor-pointer"
@@ -180,7 +234,7 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
                     >
                       <ExternalLink className="w-4 h-4" />
                     </button>
-                    <button 
+                    <button
                       type="button"
                       onClick={() => handleDelete(hook.id)}
                       className="p-2 text-gray-500 hover:text-red-500 transition-all cursor-pointer"
@@ -189,7 +243,6 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
-
                 </div>
               ))
             )}
@@ -197,7 +250,7 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
         </div>
 
         <footer className="p-8 bg-dark/20 flex justify-end">
-          <button 
+          <button
             type="button"
             onClick={onClose}
             className="px-8 py-3 bg-gray-800 hover:bg-gray-700 rounded-2xl text-white text-xs font-black transition-all cursor-pointer"
@@ -205,7 +258,6 @@ export default function WebhookModal({ isOpen, onClose, appId, appName }: Webhoo
             {t("common.finished", "Finished")}
           </button>
         </footer>
-
       </div>
     </div>
   );

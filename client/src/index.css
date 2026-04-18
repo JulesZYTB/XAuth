@@ -10,8 +10,7 @@
   body {
     background-color: var(--color-dark);
     color: #ededed;
-    font-family: 'Inter', sans-serif;
+    font-family: "Inter", sans-serif;
     @apply m-0 p-0;
   }
 }
-

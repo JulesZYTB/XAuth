@@ -68,7 +68,7 @@
       "title": "Anti-Debug & Bypass Reporting",
       "subtitle": "Protect your intellectual property from reverse engineering.",
       "integrity_title": "Integrity Reporting",
-      "integrity_desc": "XAuth Omega allows you to report specialized threats detected locally by your software. When you detect tools like <strong>HTTPDebugger</strong>, <strong>Fiddler</strong>, or <strong>x64dbg</strong>, send a validation request with the <code>error_type</code> parameter set to <code>BYPASS_DETECTED</code>.",
+      "integrity_desc": "XAuth Omega allows you to report specialized threats detected locally by your software. When you detect tools like HTTPDebugger, Fiddler, or x64dbg, send a validation request with the error_type parameter set to BYPASS_DETECTED.",
       "debugger_title": "Debugger Detected",
       "debugger_desc": "API returns 403. The IP is instantly flagged in the dashboard Threat Feed.",
       "debugger_alert": "CRITICAL ALERT",

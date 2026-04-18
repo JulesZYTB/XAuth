@@ -1,32 +1,29 @@
-import { useState, useEffect, useCallback } from "react";
-import { 
-  Rocket, 
-  Plus, 
-  Trash2, 
-  Key, 
-  MessageSquare, 
-  Pause, 
-  Play, 
-  ChevronRight,
-  ShieldCheck,
-  Settings2,
-  Webhook,
-  Package,
+import {
+  BarChart3,
   CheckCircle2,
+  ChevronRight,
+  Key,
+  MessageSquare,
+  Package,
+  Pause,
+  Play,
+  Plus,
+  Rocket,
+  Settings2,
   ShieldAlert,
-  BarChart3
+  ShieldCheck,
+  Trash2,
+  Webhook,
 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
-
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import ConfirmModal from "../components/ConfirmModal";
-import WebhookModal from "../components/WebhookModal";
-import ReleaseModal from "../components/ReleaseModal";
-import { useTranslation } from "react-i18next";
-import { getApiUrl } from "../services/apiConfig.js";
 import PageSEO from "../components/PageSEO";
-
-
+import ReleaseModal from "../components/ReleaseModal";
+import WebhookModal from "../components/WebhookModal";
+import { getApiUrl } from "../services/apiConfig.js";
 
 type App = {
   id: number;
@@ -41,7 +38,7 @@ export default function Apps() {
   const [apps, setApps] = useState<App[]>([]);
   const [newAppName, setNewAppName] = useState("");
   const [loading, setLoading] = useState(true);
-  
+
   // Modal states
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [appToDelete, setAppToDelete] = useState<number | null>(null);
@@ -49,9 +46,15 @@ export default function Apps() {
   const [appForWebhook, setAppForWebhook] = useState<App | null>(null);
   const [isReleaseModalOpen, setIsReleaseModalOpen] = useState(false);
   const [appForRelease, setAppForRelease] = useState<App | null>(null);
-  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
 
-  const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+  const showNotification = (
+    message: string,
+    type: "success" | "error" = "success",
+  ) => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 4000);
   };
@@ -64,8 +67,6 @@ export default function Apps() {
     showNotification(`${label} ${t("common.copied", "Copied!")}`, "success");
     setTimeout(() => setCopiedId(null), 2000);
   };
-
-
 
   const fetchApps = useCallback(async () => {
     try {
@@ -80,7 +81,6 @@ export default function Apps() {
         console.error("Invalid apps data:", data);
         setApps([]);
       }
-
     } catch (err) {
       console.error(err);
     } finally {
@@ -88,7 +88,9 @@ export default function Apps() {
     }
   }, []);
 
-  useEffect(() => { fetchApps(); }, [fetchApps]);
+  useEffect(() => {
+    fetchApps();
+  }, [fetchApps]);
 
   const handleCreateApp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,9 +98,9 @@ export default function Apps() {
       await fetch(getApiUrl("/api/apps"), {
         credentials: "include",
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}` 
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({ name: newAppName }),
       });
@@ -114,9 +116,9 @@ export default function Apps() {
       await fetch(getApiUrl(`/api/apps/${app.id}`), {
         credentials: "include",
         method: "PATCH",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}` 
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({ is_paused: !app.is_paused }),
       });
@@ -145,9 +147,9 @@ export default function Apps() {
       await fetch(getApiUrl(`/api/apps/${id}`), {
         credentials: "include",
         method: "PATCH",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}` 
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({ broadcast_message: message }),
       });
@@ -161,12 +163,18 @@ export default function Apps() {
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000 relative">
       <PageSEO title={t("seo.apps_title", "Application Hub")} />
       {notification && (
-        <div className={`fixed top-8 right-8 z-[100] flex items-center gap-3 px-6 py-4 rounded-2xl border shadow-2xl animate-in slide-in-from-top-12 duration-500 ${
-          notification.type === 'success' 
-            ? "bg-green-500/10 border-green-500/20 text-green-500" 
-            : "bg-red-500/10 border-red-500/20 text-red-500"
-        }`}>
-          {notification.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <ShieldAlert className="w-5 h-5" />}
+        <div
+          className={`fixed top-8 right-8 z-[100] flex items-center gap-3 px-6 py-4 rounded-2xl border shadow-2xl animate-in slide-in-from-top-12 duration-500 ${
+            notification.type === "success"
+              ? "bg-green-500/10 border-green-500/20 text-green-500"
+              : "bg-red-500/10 border-red-500/20 text-red-500"
+          }`}
+        >
+          {notification.type === "success" ? (
+            <CheckCircle2 className="w-5 h-5" />
+          ) : (
+            <ShieldAlert className="w-5 h-5" />
+          )}
           <span className="text-sm font-bold">{notification.message}</span>
         </div>
       )}
@@ -174,26 +182,38 @@ export default function Apps() {
       <header className="bg-secondary/40 p-8 rounded-4xl border border-gray-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 shadow-2xl backdrop-blur-xl">
         <div className="flex items-center gap-6">
           <div className="p-5 bg-accent/20 rounded-4xl shadow-xl shadow-accent/10">
-
             <Rocket className="w-10 h-10 text-accent" aria-hidden="true" />
           </div>
           <div>
-            <h2 className="text-4xl font-black text-white tracking-tighter">{t("apps.title", "Application Hub")}</h2>
-            <p className="text-gray-400 mt-1 font-medium">{t("apps.subtitle", "Create and manage your protectable software")}</p>
+            <h2 className="text-4xl font-black text-white tracking-tighter">
+              {t("apps.title", "Application Hub")}
+            </h2>
+            <p className="text-gray-400 mt-1 font-medium">
+              {t(
+                "apps.subtitle",
+                "Create and manage your protectable software",
+              )}
+            </p>
           </div>
         </div>
 
-        <form onSubmit={handleCreateApp} className="flex w-full md:w-auto gap-3">
+        <form
+          onSubmit={handleCreateApp}
+          className="flex w-full md:w-auto gap-3"
+        >
           <input
             type="text"
-            placeholder={t("apps.app_name_placeholder", "App Name (e.g. Photoshop Plugin)")}
+            placeholder={t(
+              "apps.app_name_placeholder",
+              "App Name (e.g. Photoshop Plugin)",
+            )}
             className="flex-1 md:w-64 bg-dark/50 border border-gray-800 rounded-2xl px-5 py-4 outline-none focus:border-accent transition-all text-white text-sm"
             value={newAppName}
             onChange={(e) => setNewAppName(e.target.value)}
             required
             aria-label="New application name"
           />
-          <button 
+          <button
             type="submit"
             className="bg-accent px-8 py-5 rounded-4xl text-white text-sm font-black flex items-center gap-3 shadow-2xl shadow-accent/30 active:scale-95 transition-all cursor-pointer"
           >
@@ -203,62 +223,92 @@ export default function Apps() {
       </header>
 
       {loading ? (
-        <div className="flex items-center justify-center h-64 text-gray-500 font-bold" aria-live="polite">
-          <div className="w-2 h-2 bg-accent rounded-full animate-ping mr-4" /> {t("apps.synchronizing", "Synchronizing applications...")}
+        <div
+          className="flex items-center justify-center h-64 text-gray-500 font-bold"
+          aria-live="polite"
+        >
+          <div className="w-2 h-2 bg-accent rounded-full animate-ping mr-4" />{" "}
+          {t("apps.synchronizing", "Synchronizing applications...")}
         </div>
       ) : (
         <ul className="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-12">
           {apps.map((app) => (
-            <li 
-              key={app.id} 
+            <li
+              key={app.id}
               className="group bg-secondary border border-gray-800 rounded-[2.5rem] p-8 shadow-2xl hover:border-accent/40 transition-all outline-none relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 p-8 flex gap-2">
-                <button 
+                <button
                   type="button"
                   onClick={() => handleTogglePause(app)}
-                  className={`p-3 rounded-2xl transition-all cursor-pointer ${app.is_paused ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' : 'bg-gray-800/50 text-gray-500 hover:text-white border border-transparent'}`}
-                  title={app.is_paused ? t("apps.resume_app", "Resume App") : t("apps.pause_app", "Pause App")}
+                  className={`p-3 rounded-2xl transition-all cursor-pointer ${app.is_paused ? "bg-orange-500/10 text-orange-500 border border-orange-500/20" : "bg-gray-800/50 text-gray-500 hover:text-white border border-transparent"}`}
+                  title={
+                    app.is_paused
+                      ? t("apps.resume_app", "Resume App")
+                      : t("apps.pause_app", "Pause App")
+                  }
                 >
-                  {app.is_paused ? <Play className="w-5 h-5" fill="currentColor" /> : <Pause className="w-5 h-5" fill="currentColor" />}
+                  {app.is_paused ? (
+                    <Play className="w-5 h-5" fill="currentColor" />
+                  ) : (
+                    <Pause className="w-5 h-5" fill="currentColor" />
+                  )}
                 </button>
-                <button 
+                <button
                   type="button"
-                  onClick={() => { setAppForRelease(app); setIsReleaseModalOpen(true); }}
+                  onClick={() => {
+                    setAppForRelease(app);
+                    setIsReleaseModalOpen(true);
+                  }}
                   className="p-3 bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded-2xl hover:bg-blue-500/20 transition-all cursor-pointer"
                   title={t("apps.manage_releases", "Manage Releases")}
                 >
                   <Package className="w-5 h-5" />
                 </button>
-                <button 
+                <button
                   type="button"
-                  onClick={() => { setAppForWebhook(app); setIsWebhookModalOpen(true); }}
-
+                  onClick={() => {
+                    setAppForWebhook(app);
+                    setIsWebhookModalOpen(true);
+                  }}
                   className="p-3 bg-accent/10 text-accent border border-accent/20 rounded-2xl hover:bg-accent/20 transition-all cursor-pointer"
                   title={t("apps.config_webhooks", "Configure Webhooks")}
                 >
                   <Webhook className="w-5 h-5" />
                 </button>
-                <button 
+                <button
                   type="button"
-                  onClick={() => { setAppToDelete(app.id); setIsDeleteModalOpen(true); }}
+                  onClick={() => {
+                    setAppToDelete(app.id);
+                    setIsDeleteModalOpen(true);
+                  }}
                   className="p-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-2xl hover:bg-red-500/20 transition-all cursor-pointer"
                   aria-label={t("apps.delete_app", "Delete Application")}
                 >
                   <Trash2 className="w-5 h-5" />
                 </button>
-
               </div>
 
               <div className="flex items-center gap-4 mb-8">
                 <div className="w-14 h-14 bg-accent/10 rounded-2xl flex items-center justify-center border border-accent/20">
-                  <Settings2 className="w-7 h-7 text-accent" aria-hidden="true" />
+                  <Settings2
+                    className="w-7 h-7 text-accent"
+                    aria-hidden="true"
+                  />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-white tracking-tight">{app.name}</h3>
+                  <h3 className="text-xl font-black text-white tracking-tight">
+                    {app.name}
+                  </h3>
                   <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${app.is_paused ? 'bg-orange-500 animate-pulse' : 'bg-green-500'}`} />
-                    <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest">{app.is_paused ? t("apps.service_paused", "Service Paused") : t("apps.active_protected", "Active & Protected")}</span>
+                    <div
+                      className={`w-2 h-2 rounded-full ${app.is_paused ? "bg-orange-500 animate-pulse" : "bg-green-500"}`}
+                    />
+                    <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest">
+                      {app.is_paused
+                        ? t("apps.service_paused", "Service Paused")
+                        : t("apps.active_protected", "Active & Protected")}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -269,43 +319,72 @@ export default function Apps() {
                     <Package className="w-3 h-3" /> {t("apps.app_id", "App ID")}
                   </div>
                   <div className="bg-dark/50 p-4 rounded-2xl border border-gray-800/50 flex justify-between items-center group/key">
-                    <code className="text-sm font-mono text-gray-300 truncate max-w-[200px]">{app.id}</code>
-                    <button 
+                    <code className="text-sm font-mono text-gray-300 truncate max-w-[200px]">
+                      {app.id}
+                    </code>
+                    <button
                       type="button"
-                      onClick={() => handleCopy(app.id.toString(), `app-${app.id}-id`, t("apps.app_id", "App ID"))}
+                      onClick={() =>
+                        handleCopy(
+                          app.id.toString(),
+                          `app-${app.id}-id`,
+                          t("apps.app_id", "App ID"),
+                        )
+                      }
                       className="text-[10px] text-accent font-black uppercase opacity-0 group-hover/key:opacity-100 transition-all cursor-pointer"
                     >
-                      {copiedId === `app-${app.id}-id` ? t("common.copied", "Copied!") : t("copy", "Copy")}
+                      {copiedId === `app-${app.id}-id`
+                        ? t("common.copied", "Copied!")
+                        : t("copy", "Copy")}
                     </button>
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-[10px] text-gray-600 uppercase font-black px-1">
-                    <Key className="w-3 h-3" /> {t("apps.app_secret", "App Secret Key")}
+                    <Key className="w-3 h-3" />{" "}
+                    {t("apps.app_secret", "App Secret Key")}
                   </div>
                   <div className="bg-dark/50 p-4 rounded-2xl border border-gray-800/50 flex justify-between items-center group/key">
-                    <code className="text-sm font-mono text-gray-300 truncate max-w-[200px]">{app.secret_key}</code>
-                    <button 
+                    <code className="text-sm font-mono text-gray-300 truncate max-w-[200px]">
+                      {app.secret_key}
+                    </code>
+                    <button
                       type="button"
-                      onClick={() => handleCopy(app.secret_key, `app-${app.id}-secret`, t("apps.app_secret", "App Secret Key"))}
+                      onClick={() =>
+                        handleCopy(
+                          app.secret_key,
+                          `app-${app.id}-secret`,
+                          t("apps.app_secret", "App Secret Key"),
+                        )
+                      }
                       className="text-[10px] text-accent font-black uppercase opacity-0 group-hover/key:opacity-100 transition-all cursor-pointer"
                     >
-                      {copiedId === `app-${app.id}-secret` ? t("common.copied", "Copied!") : t("copy", "Copy")}
+                      {copiedId === `app-${app.id}-secret`
+                        ? t("common.copied", "Copied!")
+                        : t("copy", "Copy")}
                     </button>
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-[10px] text-gray-600 uppercase font-black px-1">
-                    <MessageSquare className="w-3 h-3" /> {t("apps.broadcast_message", "Broadcast Message")}
+                    <MessageSquare className="w-3 h-3" />{" "}
+                    {t("apps.broadcast_message", "Broadcast Message")}
                   </div>
                   <input
                     type="text"
-                    defaultValue={app.broadcast_message || "Welcome to XAuth Omega."}
-                    onBlur={(e) => handleUpdateBroadcast(app.id, e.target.value)}
+                    defaultValue={
+                      app.broadcast_message || "Welcome to XAuth Omega."
+                    }
+                    onBlur={(e) =>
+                      handleUpdateBroadcast(app.id, e.target.value)
+                    }
                     className="w-full bg-dark/30 border border-gray-800/50 rounded-2xl px-4 py-3 text-sm text-gray-400 focus:border-accent outline-none"
-                    placeholder={t("apps.broadcast_placeholder", "Enter message for clients...")}
+                    placeholder={t(
+                      "apps.broadcast_placeholder",
+                      "Enter message for clients...",
+                    )}
                     aria-label="Application broadcast message"
                   />
                 </div>
@@ -313,18 +392,20 @@ export default function Apps() {
 
               <div className="mt-8 pt-8 border-t border-gray-800/50 flex justify-between items-center">
                 <div className="flex gap-2">
-                  <Link 
+                  <Link
                     to={`/apps/${app.id}/dashboard`}
                     className="flex items-center gap-2 text-sm font-bold text-blue-500 hover:underline px-4 py-2 bg-blue-500/5 rounded-xl border border-blue-500/10 transition-all font-sans"
                   >
-                    <BarChart3 className="w-4 h-4" /> {t("apps.insights", "Insights")}
+                    <BarChart3 className="w-4 h-4" />{" "}
+                    {t("apps.insights", "Insights")}
                   </Link>
                 </div>
-                <Link 
+                <Link
                   to={`/apps/${app.id}/licenses`}
                   className="flex items-center gap-2 text-sm font-bold text-accent hover:underline px-4 py-2 bg-accent/5 rounded-xl border border-accent/10 transition-all font-sans"
                 >
-                  {t("apps.manage_licenses", "Manage Licenses")} <ChevronRight className="w-4 h-4" />
+                  {t("apps.manage_licenses", "Manage Licenses")}{" "}
+                  <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
             </li>
@@ -333,24 +414,34 @@ export default function Apps() {
           {apps.length === 0 && (
             <div className="col-span-full border-2 border-dashed border-gray-800 rounded-[3rem] py-32 flex flex-col items-center text-gray-600">
               <ShieldCheck className="w-16 h-16 mb-4 opacity-5" />
-              <p className="text-xl font-medium">{t("apps.no_apps_title", "No protected applications yet.")}</p>
-              <p className="text-sm opacity-50 mt-1">{t("apps.no_apps_desc", "Deploy your first app to start issuing licenses.")}</p>
+              <p className="text-xl font-medium">
+                {t("apps.no_apps_title", "No protected applications yet.")}
+              </p>
+              <p className="text-sm opacity-50 mt-1">
+                {t(
+                  "apps.no_apps_desc",
+                  "Deploy your first app to start issuing licenses.",
+                )}
+              </p>
             </div>
           )}
         </ul>
       )}
 
-      <ConfirmModal 
+      <ConfirmModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={confirmDelete}
         title={t("apps.delete_app", "Destroy Application")}
-        message={t("apps.delete_confirm_msg", "This action is irreversible. Deleting this application will instantly invalidate all associated license keys and terminate active user sessions.")}
+        message={t(
+          "apps.delete_confirm_msg",
+          "This action is irreversible. Deleting this application will instantly invalidate all associated license keys and terminate active user sessions.",
+        )}
         confirmText={t("apps.delete_confirm", "Destroy Permanently")}
       />
 
       {appForWebhook && (
-        <WebhookModal 
+        <WebhookModal
           isOpen={isWebhookModalOpen}
           onClose={() => setIsWebhookModalOpen(false)}
           appId={appForWebhook.id}
@@ -358,7 +449,7 @@ export default function Apps() {
         />
       )}
       {appForRelease && (
-        <ReleaseModal 
+        <ReleaseModal
           isOpen={isReleaseModalOpen}
           onClose={() => setIsReleaseModalOpen(false)}
           appId={appForRelease.id}
@@ -366,7 +457,5 @@ export default function Apps() {
         />
       )}
     </div>
-
-
   );
 }

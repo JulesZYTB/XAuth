@@ -80,7 +80,7 @@ const register: RequestHandler = async (req, res, next) => {
       username,
       email,
       password: hashedPassword,
-      role,
+      role: role as "user" | "admin",
     });
 
     res.status(201).json({ 
@@ -113,7 +113,7 @@ const editRole: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
     const { role } = req.body;
-    await userRepository.updateRole(id, role);
+    await userRepository.updateRole(id, role as "user" | "admin");
     res.sendStatus(204);
   } catch (err) {
     next(err);

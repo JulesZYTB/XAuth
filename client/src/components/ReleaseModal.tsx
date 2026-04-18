@@ -1,5 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
-import { X, Rocket, Package, ExternalLink, ShieldCheck, Trash2 } from "lucide-react";
+import {
+  ExternalLink,
+  Package,
+  Rocket,
+  ShieldCheck,
+  Trash2,
+  X,
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getApiUrl } from "../services/apiConfig.js";
 
@@ -20,11 +27,16 @@ interface ReleaseModalProps {
   appName: string;
 }
 
-export default function ReleaseModal({ isOpen, onClose, appId, appName }: ReleaseModalProps) {
+export default function ReleaseModal({
+  isOpen,
+  onClose,
+  appId,
+  appName,
+}: ReleaseModalProps) {
   const { t } = useTranslation();
   const [releases, setReleases] = useState<Release[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // New release form
   const [version, setVersion] = useState("");
   const [url, setUrl] = useState("");
@@ -101,20 +113,37 @@ export default function ReleaseModal({ isOpen, onClose, appId, appName }: Releas
               <Package className="w-6 h-6 text-blue-500" />
             </div>
             <div>
-              <h3 className="text-xl font-black text-white">{t("apps.release_title", "Release Management")}</h3>
-              <p className="text-xs text-gray-400">{t("apps.release_deploying", "Deploying versions for")} <span className="text-accent font-bold">{appName}</span></p>
+              <h3 className="text-xl font-black text-white">
+                {t("apps.release_title", "Release Management")}
+              </h3>
+              <p className="text-xs text-gray-400">
+                {t("apps.release_deploying", "Deploying versions for")}{" "}
+                <span className="text-accent font-bold">{appName}</span>
+              </p>
             </div>
           </div>
-          <button type="button" onClick={onClose} className="p-2 hover:bg-gray-800 rounded-xl transition-all text-gray-500 hover:text-white">
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 hover:bg-gray-800 rounded-xl transition-all text-gray-500 hover:text-white"
+          >
             <X className="w-6 h-6" />
           </button>
         </header>
 
         <div className="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
           {/* Create Release Form */}
-          <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-dark/30 p-6 rounded-3xl border border-gray-800/50">
+          <form
+            onSubmit={handleCreate}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-dark/30 p-6 rounded-3xl border border-gray-800/50"
+          >
             <div className="space-y-2">
-              <label htmlFor="ver" className="text-[10px] text-gray-500 uppercase font-black px-1">{t("apps.release_version", "Version String")}</label>
+              <label
+                htmlFor="ver"
+                className="text-[10px] text-gray-500 uppercase font-black px-1"
+              >
+                {t("apps.release_version", "Version String")}
+              </label>
               <input
                 id="ver"
                 type="text"
@@ -126,20 +155,36 @@ export default function ReleaseModal({ isOpen, onClose, appId, appName }: Releas
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="chan" className="text-[10px] text-gray-500 uppercase font-black px-1">{t("apps.release_channel", "Target Channel")}</label>
+              <label
+                htmlFor="chan"
+                className="text-[10px] text-gray-500 uppercase font-black px-1"
+              >
+                {t("apps.release_channel", "Target Channel")}
+              </label>
               <select
                 id="chan"
                 className="w-full bg-dark/50 border border-gray-800 rounded-2xl px-5 py-3 text-sm text-white outline-none focus:border-blue-500 transition-all appearance-none cursor-pointer"
                 value={channel}
-                onChange={(e) => setChannel(e.target.value as "stable" | "beta")}
+                onChange={(e) =>
+                  setChannel(e.target.value as "stable" | "beta")
+                }
               >
-                <option value="stable">{t("apps.release_stable", "Stable / Main")}</option>
-                <option value="beta">{t("apps.release_beta", "Beta / Testing")}</option>
+                <option value="stable">
+                  {t("apps.release_stable", "Stable / Main")}
+                </option>
+                <option value="beta">
+                  {t("apps.release_beta", "Beta / Testing")}
+                </option>
               </select>
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <label htmlFor="url" className="text-[10px] text-gray-500 uppercase font-black px-1">{t("apps.release_url", "Download URL (Direct Link)")}</label>
+              <label
+                htmlFor="url"
+                className="text-[10px] text-gray-500 uppercase font-black px-1"
+              >
+                {t("apps.release_url", "Download URL (Direct Link)")}
+              </label>
               <input
                 id="url"
                 type="url"
@@ -151,7 +196,12 @@ export default function ReleaseModal({ isOpen, onClose, appId, appName }: Releas
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="hash" className="text-[10px] text-gray-500 uppercase font-black px-1">{t("apps.release_hash", "SHA-256 Checksum")}</label>
+              <label
+                htmlFor="hash"
+                className="text-[10px] text-gray-500 uppercase font-black px-1"
+              >
+                {t("apps.release_hash", "SHA-256 Checksum")}
+              </label>
               <input
                 id="hash"
                 type="text"
@@ -163,44 +213,65 @@ export default function ReleaseModal({ isOpen, onClose, appId, appName }: Releas
               />
             </div>
             <div className="flex items-end">
-              <button 
+              <button
                 type="submit"
                 className="w-full bg-blue-600 h-[46px] rounded-2xl text-white text-xs font-black flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-xl shadow-blue-500/20 cursor-pointer"
               >
-                <Rocket className="w-4 h-4" /> {t("apps.release_publish", "Publish Release")}
+                <Rocket className="w-4 h-4" />{" "}
+                {t("apps.release_publish", "Publish Release")}
               </button>
             </div>
           </form>
 
           {/* Release List */}
           <div className="space-y-4">
-            <h4 className="text-[10px] text-gray-500 uppercase font-black px-1">{t("apps.release_history", "Deployment History")}</h4>
-            
+            <h4 className="text-[10px] text-gray-500 uppercase font-black px-1">
+              {t("apps.release_history", "Deployment History")}
+            </h4>
+
             {loading ? (
-              <div className="py-12 text-center text-xs text-gray-600 font-bold animate-pulse">{t("apps.release_fetching", "Fetching releases...")}</div>
+              <div className="py-12 text-center text-xs text-gray-600 font-bold animate-pulse">
+                {t("apps.release_fetching", "Fetching releases...")}
+              </div>
             ) : releases.length === 0 ? (
               <div className="py-12 text-center border-2 border-dashed border-gray-800 rounded-3xl text-gray-600 italic text-sm">
-                {t("apps.release_empty", "No releases published yet. Use the gateway to deploy your first version.")}
+                {t(
+                  "apps.release_empty",
+                  "No releases published yet. Use the gateway to deploy your first version.",
+                )}
               </div>
             ) : (
               releases.map((rel) => (
-                <div key={rel.id} className="bg-dark/20 border border-gray-800 rounded-2xl p-6 flex justify-between items-center group">
+                <div
+                  key={rel.id}
+                  className="bg-dark/20 border border-gray-800 rounded-2xl p-6 flex justify-between items-center group"
+                >
                   <div className="flex items-center gap-6">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${rel.channel === 'stable' ? 'bg-green-500/10 border-green-500/20' : 'bg-orange-500/10 border-orange-500/20'}`}>
-                      <ShieldCheck className={`w-6 h-6 ${rel.channel === 'stable' ? 'text-green-500' : 'text-orange-500'}`} />
+                    <div
+                      className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${rel.channel === "stable" ? "bg-green-500/10 border-green-500/20" : "bg-orange-500/10 border-orange-500/20"}`}
+                    >
+                      <ShieldCheck
+                        className={`w-6 h-6 ${rel.channel === "stable" ? "text-green-500" : "text-orange-500"}`}
+                      />
                     </div>
                     <div>
                       <div className="flex items-center gap-3">
-                        <span className="text-lg font-black text-white">{rel.version}</span>
-                        <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full border ${rel.channel === 'stable' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'}`}>
+                        <span className="text-lg font-black text-white">
+                          {rel.version}
+                        </span>
+                        <span
+                          className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full border ${rel.channel === "stable" ? "bg-green-500/10 text-green-500 border-green-500/20" : "bg-orange-500/10 text-orange-500 border-orange-500/20"}`}
+                        >
                           {rel.channel}
                         </span>
                       </div>
-                      <div className="text-[9px] text-gray-500 font-mono mt-1 opacity-60 truncate max-w-xs">{rel.checksum}</div>
+                      <div className="text-[9px] text-gray-500 font-mono mt-1 opacity-60 truncate max-w-xs">
+                        {rel.checksum}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all">
-                    <button 
+                    <button
                       type="button"
                       onClick={() => window.open(rel.download_url, "_blank")}
                       className="p-3 bg-blue-500/10 text-blue-500 rounded-xl hover:bg-blue-500/20 transition-all cursor-pointer"
@@ -208,7 +279,7 @@ export default function ReleaseModal({ isOpen, onClose, appId, appName }: Releas
                     >
                       <ExternalLink className="w-4 h-4" />
                     </button>
-                    <button 
+                    <button
                       type="button"
                       onClick={() => handleDelete(rel.id)}
                       className="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20 transition-all cursor-pointer"
@@ -224,7 +295,7 @@ export default function ReleaseModal({ isOpen, onClose, appId, appName }: Releas
         </div>
 
         <footer className="p-8 bg-dark/20 flex justify-end">
-          <button 
+          <button
             type="button"
             onClick={onClose}
             className="px-8 py-3 bg-gray-800 hover:bg-gray-700 rounded-2xl text-white text-xs font-black transition-all cursor-pointer"

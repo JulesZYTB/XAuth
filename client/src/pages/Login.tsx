@@ -1,9 +1,9 @@
+import { Lock, Mail, ShieldCheck } from "lucide-react";
 import { useState } from "react";
-import { useNavigate, Link } from "react-router";
-import { ShieldCheck, Mail, Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { getApiUrl } from "../services/apiConfig.js";
+import { Link, useNavigate } from "react-router";
 import PageSEO from "../components/PageSEO";
+import { getApiUrl } from "../services/apiConfig.js";
 
 export default function Login() {
   const { t } = useTranslation();
@@ -33,36 +33,53 @@ export default function Login() {
       localStorage.setItem("token", data.token);
       navigate("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+      setError(
+        err instanceof Error ? err.message : "An unexpected error occurred",
+      );
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-dark p-4 font-sans selection:bg-accent selection:text-white">
       <PageSEO title={t("seo.login_title")} />
-      
+
       <div className="max-w-md w-full bg-secondary p-12 rounded-[3rem] border border-gray-800 shadow-2xl relative overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-1000">
-        <div className="absolute top-0 left-0 w-full h-1 bg-accent/20"></div>
-        
+        <div className="absolute top-0 left-0 w-full h-1 bg-accent/20" />
+
         <header className="text-center mb-12">
           <div className="inline-flex p-4 bg-accent/10 rounded-3xl mb-6">
             <ShieldCheck className="w-12 h-12 text-accent" aria-hidden="true" />
           </div>
-          <h1 className="text-4xl font-black text-white tracking-tighter mb-2">XAuth Omega</h1>
-          <p className="text-gray-500 text-sm font-medium uppercase tracking-[0.2em]">{t("auth.hub_subtitle", "Enterprise Security Hub")}</p>
+          <h1 className="text-4xl font-black text-white tracking-tighter mb-2">
+            XAuth Omega
+          </h1>
+          <p className="text-gray-500 text-sm font-medium uppercase tracking-[0.2em]">
+            {t("auth.hub_subtitle", "Enterprise Security Hub")}
+          </p>
         </header>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-2xl mb-8 text-xs font-bold animate-shake" role="alert">
+          <div
+            className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-2xl mb-8 text-xs font-bold animate-shake"
+            role="alert"
+          >
             {error}
           </div>
         )}
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-2">
-            <label className="text-[10px] text-gray-500 uppercase font-black px-1" htmlFor="email">{t("auth.email", "Email Address")}</label>
+            <label
+              className="text-[10px] text-gray-500 uppercase font-black px-1"
+              htmlFor="email"
+            >
+              {t("auth.email", "Email Address")}
+            </label>
             <div className="relative group">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within:text-accent transition-colors" aria-hidden="true" />
+              <Mail
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within:text-accent transition-colors"
+                aria-hidden="true"
+              />
               <input
                 id="email"
                 type="email"
@@ -76,9 +93,17 @@ export default function Login() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] text-gray-500 uppercase font-black px-1" htmlFor="password">{t("auth.password", "Security Password")}</label>
+            <label
+              className="text-[10px] text-gray-500 uppercase font-black px-1"
+              htmlFor="password"
+            >
+              {t("auth.password", "Security Password")}
+            </label>
             <div className="relative group">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within:text-accent transition-colors" aria-hidden="true" />
+              <Lock
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within:text-accent transition-colors"
+                aria-hidden="true"
+              />
               <input
                 id="password"
                 type="password"
@@ -101,7 +126,12 @@ export default function Login() {
 
         <p className="mt-6 text-center text-sm text-gray-400">
           {t("auth.no_account", "Don't have an account?")}{" "}
-          <Link to="/register" className="text-accent font-bold hover:underline">{t("auth.create_one", "Create one")}</Link>
+          <Link
+            to="/register"
+            className="text-accent font-bold hover:underline"
+          >
+            {t("auth.create_one", "Create one")}
+          </Link>
         </p>
 
         <p className="mt-8 text-center text-xs text-gray-500">

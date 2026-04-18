@@ -68,7 +68,7 @@
       "title": "Anti-Debug & Signalement de Bypass",
       "subtitle": "Protégez votre propriété intellectuelle contre l'ingénierie inverse.",
       "integrity_title": "Signalement d'Intégrité",
-      "integrity_desc": "XAuth Omega vous permet de signaler des menaces spécialisées détectées localement par votre logiciel. Lorsque vous détectez des outils comme <strong>HTTPDebugger</strong>, <strong>Fiddler</strong>, ou <strong>x64dbg</strong>, envoyez une requête de validation avec le paramètre <code>error_type</code> défini sur <code>BYPASS_DETECTED</code>.",
+      "integrity_desc": "XAuth Omega vous permet de signaler des menaces spécialisées détectées localement par votre logiciel. Lorsque vous détectez des outils comme HTTPDebugger, Fiddler, ou x64dbg, envoyez une requête de validation avec le paramètre error_type défini sur BYPASS_DETECTED.",
       "debugger_title": "Débuggeur Détecté",
       "debugger_desc": "L'API renvoie 403. L'IP est instantanément signalée dans le flux de menaces du tableau de bord.",
       "debugger_alert": "ALERTE CRITIQUE",

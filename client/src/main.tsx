@@ -5,22 +5,20 @@ import { createRoot } from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router";
 
 import Layout from "./components/Layout";
-import Dashboard from "./pages/Dashboard";
-import Login from "./pages/Login";
+import AppDashboard from "./pages/AppDashboard";
 import Apps from "./pages/Apps";
+import Dashboard from "./pages/Dashboard";
+import Docs from "./pages/Docs";
+import Home from "./pages/Home";
 import Licenses from "./pages/Licenses";
+import Login from "./pages/Login";
+import Logs from "./pages/Logs";
+import Profile from "./pages/Profile";
 import Register from "./pages/Register";
 import UserHub from "./pages/UserHub";
 import Users from "./pages/Users";
-import Logs from "./pages/Logs";
-import Home from "./pages/Home";
-import Profile from "./pages/Profile";
-import Docs from "./pages/Docs";
-import AppDashboard from "./pages/AppDashboard";
-
 
 import { Navigate } from "react-router";
-
 
 /**
  * Authentication Guards
@@ -30,7 +28,7 @@ import { Navigate } from "react-router";
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem("token");
   if (!token) return <Navigate to="/login" replace />;
-  
+
   // Optional: check expiration here
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
@@ -41,7 +39,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   } catch (e) {
     return <Navigate to="/login" replace />;
   }
-  
+
   return children;
 };
 
@@ -71,14 +69,26 @@ const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element: <PublicRoute><Login /></PublicRoute>,
+    element: (
+      <PublicRoute>
+        <Login />
+      </PublicRoute>
+    ),
   },
   {
     path: "/register",
-    element: <PublicRoute><Register /></PublicRoute>,
+    element: (
+      <PublicRoute>
+        <Register />
+      </PublicRoute>
+    ),
   },
   {
-    element: <ProtectedRoute><Layout /></ProtectedRoute>,
+    element: (
+      <ProtectedRoute>
+        <Layout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: "/dashboard",
@@ -119,7 +129,7 @@ const router = createBrowserRouter([
   {
     path: "*",
     element: <Navigate to="/" replace />,
-  }
+  },
 ]);
 
 import { HelmetProvider } from "react-helmet-async";
