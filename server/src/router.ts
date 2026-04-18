@@ -38,6 +38,7 @@ import searchActions from "./modules/admin/searchActions.js";
 // --- CLIENT AUTH API (Public with Secret) ---
 router.post("/api/v1/client/initialize", sessionActions.initialize);
 router.post("/api/v1/client/validate", licenseActions.validate);
+router.post("/api/v1/client/verify-version", updateActions.verify);
 
 // --- PUBLIC UPDATE GATEWAY ---
 router.get("/api/update/:appId/:channel", updateActions.check);
