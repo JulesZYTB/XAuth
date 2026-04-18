@@ -11,9 +11,10 @@ interface AuditorData {
 interface SecurityAuditorModalProps {
   isOpen: boolean;
   onClose: () => void;
+  appId?: number;
 }
 
-export default function SecurityAuditorModal({ isOpen, onClose }: SecurityAuditorModalProps) {
+export default function SecurityAuditorModal({ isOpen, onClose, appId }: SecurityAuditorModalProps) {
   const { t } = useTranslation();
   const [data, setData] = useState<AuditorData | null>(null);
   const [scanning, setScanning] = useState(false);
@@ -41,7 +42,11 @@ export default function SecurityAuditorModal({ isOpen, onClose }: SecurityAudito
     }
 
     try {
-      const res = await fetch(getApiUrl("/api/dashboard/auditor-scan"), {
+      const url = appId 
+        ? getApiUrl(`/api/apps/${appId}/dashboard/anomalies`) 
+        : getApiUrl("/api/dashboard/auditor-scan");
+      
+      const res = await fetch(url, {
         credentials: "include",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });

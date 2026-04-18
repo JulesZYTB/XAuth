@@ -11,6 +11,14 @@ class WebhookRepository {
     return result.insertId;
   }
 
+  async read(id: number) {
+    const [rows] = await databaseClient.query<Rows>(
+      "select * from webhook where id = ?",
+      [id]
+    );
+    return rows[0] as Webhook;
+  }
+
   async readByAppId(appId: number) {
     const [rows] = await databaseClient.query<Rows>(
       "select * from webhook where app_id = ?",

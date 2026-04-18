@@ -13,8 +13,10 @@ import {
 } from "lucide-react";
 
 import { useTranslation } from "react-i18next";
+import Spotlight from "./Spotlight";
 
 export default function Layout() {
+
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
@@ -76,7 +78,9 @@ export default function Layout() {
 
   return (
     <div className="flex min-h-screen bg-dark text-white font-sans selection:bg-accent selection:text-white">
+      <Spotlight />
       {/* Sidebar Overlay for Glassmorphism */}
+
       <nav 
         className="w-72 bg-secondary border-r border-gray-800 flex flex-col p-6 shadow-2xl relative z-10"
         aria-label="Main Navigation"

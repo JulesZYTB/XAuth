@@ -6,6 +6,13 @@ const AUTH_TAG_LENGTH = 16;
 
 class SecurityService {
   /**
+   * Deterministic SHA-256 hash for fast lookups.
+   */
+  hash(text: string): string {
+    return crypto.createHash("sha256").update(text).digest("hex");
+  }
+
+  /**
    * Encrypts a payload using AES-256-GCM.
    * Returns a base64 string containing IV + AuthTag + Ciphertext.
    */

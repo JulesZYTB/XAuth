@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { ShieldCheck, Zap, Key, ArrowRight, Activity } from "lucide-react";
+import PageSEO from "../components/PageSEO";
 
 export default function Home() {
   const { t } = useTranslation();
@@ -8,6 +9,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-dark text-white font-sans selection:bg-accent selection:text-white relative overflow-hidden">
+      <PageSEO title={t("seo.home_title")} />
       {/* Background decorations */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-accent/10 blur-[120px] rounded-full -z-10 animate-pulse pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-blue-500/10 blur-[120px] rounded-full -z-10 animate-pulse pointer-events-none" />

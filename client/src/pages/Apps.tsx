@@ -13,7 +13,8 @@ import {
   Webhook,
   Package,
   CheckCircle2,
-  ShieldAlert
+  ShieldAlert,
+  BarChart3
 } from "lucide-react";
 
 
@@ -23,6 +24,7 @@ import WebhookModal from "../components/WebhookModal";
 import ReleaseModal from "../components/ReleaseModal";
 import { useTranslation } from "react-i18next";
 import { getApiUrl } from "../services/apiConfig.js";
+import PageSEO from "../components/PageSEO";
 
 
 
@@ -157,6 +159,7 @@ export default function Apps() {
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000 relative">
+      <PageSEO title={t("seo.apps_title", "Application Hub")} />
       {notification && (
         <div className={`fixed top-8 right-8 z-[100] flex items-center gap-3 px-6 py-4 rounded-2xl border shadow-2xl animate-in slide-in-from-top-12 duration-500 ${
           notification.type === 'success' 
@@ -309,8 +312,13 @@ export default function Apps() {
               </div>
 
               <div className="mt-8 pt-8 border-t border-gray-800/50 flex justify-between items-center">
-                <div className="flex -space-x-3">
-                  {[1,2,3].map(i => <div key={i} className="w-8 h-8 rounded-full bg-gray-800 border-2 border-secondary overflow-hidden flex items-center justify-center text-[10px] font-bold text-gray-600">+{i}</div>)}
+                <div className="flex gap-2">
+                  <Link 
+                    to={`/apps/${app.id}/dashboard`}
+                    className="flex items-center gap-2 text-sm font-bold text-blue-500 hover:underline px-4 py-2 bg-blue-500/5 rounded-xl border border-blue-500/10 transition-all font-sans"
+                  >
+                    <BarChart3 className="w-4 h-4" /> {t("apps.insights", "Insights")}
+                  </Link>
                 </div>
                 <Link 
                   to={`/apps/${app.id}/licenses`}

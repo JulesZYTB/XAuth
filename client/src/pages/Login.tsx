@@ -3,13 +3,14 @@ import { useNavigate, Link } from "react-router";
 import { ShieldCheck, Mail, Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { getApiUrl } from "../services/apiConfig.js";
+import PageSEO from "../components/PageSEO";
 
 export default function Login() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +39,8 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-dark p-4 font-sans selection:bg-accent selection:text-white">
+      <PageSEO title={t("seo.login_title")} />
+      
       <div className="max-w-md w-full bg-secondary p-12 rounded-[3rem] border border-gray-800 shadow-2xl relative overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-1000">
         <div className="absolute top-0 left-0 w-full h-1 bg-accent/20"></div>
         

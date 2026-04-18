@@ -1,24 +1,37 @@
-import type { RequestHandler } from "express";
+import type { Request, RequestHandler } from "express";
 import dashboardRepository from "./dashboardRepository.js";
+import appRepository from "../app/appRepository.js";
 import type { AuthUser } from "../../types/index.js";
 
+// Helper to check if user owns the app or is admin
+const checkOwnership = async (user: AuthUser, appId: number) => {
+  if (user.role === "admin") return true;
+  const app = await appRepository.read(appId);
+  return app && app.owner_id === user.id;
+};
 
 const getStats: RequestHandler = async (req, res, next) => {
   try {
     const user = (req as any).auth as AuthUser;
-    
-    if (user.role !== "admin") {
-      res.status(403).json({ message: "Forbidden" });
+    const appId = req.params.appId ? Number(req.params.appId) : undefined;
+
+    if (appId) {
+      if (!(await checkOwnership(user, appId))) {
+        res.status(403).json({ message: "Forbidden: You do not own this application" });
+        return;
+      }
+    } else if (user.role !== "admin") {
+      res.status(403).json({ message: "Forbidden: Admin access required for global stats" });
       return;
     }
 
-    const globalStats = await dashboardRepository.getGlobalStats();
-    const trafficData = await dashboardRepository.getTrafficData();
-    const recentActivity = await dashboardRepository.getRecentActivity();
+    const stats = await dashboardRepository.getStats(appId);
+    const trafficData = await dashboardRepository.getTrafficData(appId);
+    const recentActivity = await dashboardRepository.getRecentActivity(appId);
 
     res.json({
-      ...globalStats,
-      trafficData: trafficData.reverse(), // For chart chronological order
+      ...stats,
+      trafficData: trafficData.reverse(),
       recentActivity
     });
   } catch (err) {
@@ -28,7 +41,15 @@ const getStats: RequestHandler = async (req, res, next) => {
 
 const getMap: RequestHandler = async (req, res, next) => {
   try {
-    const mapData = await dashboardRepository.getMapData();
+    const user = (req as any).auth as AuthUser;
+    const appId = req.params.appId ? Number(req.params.appId) : undefined;
+
+    if (appId && !(await checkOwnership(user, appId))) {
+        res.status(403).json({ message: "Forbidden" });
+        return;
+    }
+
+    const mapData = await dashboardRepository.getMapData(appId);
     res.json(mapData);
   } catch (err) {
     next(err);
@@ -37,7 +58,15 @@ const getMap: RequestHandler = async (req, res, next) => {
 
 const getDau: RequestHandler = async (req, res, next) => {
   try {
-    const dauData = await dashboardRepository.getDauData();
+    const user = (req as any).auth as AuthUser;
+    const appId = req.params.appId ? Number(req.params.appId) : undefined;
+
+    if (appId && !(await checkOwnership(user, appId))) {
+        res.status(403).json({ message: "Forbidden" });
+        return;
+    }
+
+    const dauData = await dashboardRepository.getDauData(appId);
     res.json(dauData);
   } catch (err) {
     next(err);
@@ -46,8 +75,15 @@ const getDau: RequestHandler = async (req, res, next) => {
 
 const getAnomalies: RequestHandler = async (req, res, next) => {
   try {
-    const anomalyData = await dashboardRepository.getAnomalyData();
-    // Convert string totals to numbers because SUM returns strings in some MySQL drivers
+    const user = (req as any).auth as AuthUser;
+    const appId = req.params.appId ? Number(req.params.appId) : undefined;
+
+    if (appId && !(await checkOwnership(user, appId))) {
+        res.status(403).json({ message: "Forbidden" });
+        return;
+    }
+
+    const anomalyData = await dashboardRepository.getAnomalyData(appId);
     const formatted = anomalyData.map((row: any) => ({
       timestamp: row.timestamp,
       successes: Number(row.successes),
@@ -61,14 +97,21 @@ const getAnomalies: RequestHandler = async (req, res, next) => {
 
 const getAuditorScan: RequestHandler = async (req, res, next) => {
   try {
-    const suspiciousIPs = await dashboardRepository.getSuspiciousIPs();
-    const sharedKeys = await dashboardRepository.getSharedKeys();
+    const user = (req as any).auth as AuthUser;
+    const appId = req.params.appId ? Number(req.params.appId) : undefined;
+
+    if (appId && !(await checkOwnership(user, appId))) {
+        res.status(403).json({ message: "Forbidden" });
+        return;
+    }
+
+    const suspiciousIPs = await dashboardRepository.getSuspiciousIPs(appId);
+    const sharedKeys = await dashboardRepository.getSharedKeys(appId);
 
     res.json({ suspiciousIPs, sharedKeys });
   } catch (err) {
     next(err);
   }
 };
-
 
 export default { getStats, getMap, getDau, getAnomalies, getAuditorScan };

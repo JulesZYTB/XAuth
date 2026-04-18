@@ -16,6 +16,8 @@ import Logs from "./pages/Logs";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import Docs from "./pages/Docs";
+import AppDashboard from "./pages/AppDashboard";
+
 
 import { Navigate } from "react-router";
 
@@ -95,7 +97,12 @@ const router = createBrowserRouter([
         element: <Licenses />,
       },
       {
+        path: "/apps/:appId/dashboard",
+        element: <AppDashboard />,
+      },
+      {
         path: "/users",
+
         element: <Users />,
       },
       {
@@ -115,6 +122,8 @@ const router = createBrowserRouter([
   }
 ]);
 
+import { HelmetProvider } from "react-helmet-async";
+
 const rootElement = document.getElementById("root");
 if (rootElement == null) {
   throw new Error(`Your HTML Document should contain a <div id="root"></div>`);
@@ -122,6 +131,8 @@ if (rootElement == null) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <HelmetProvider>
+      <RouterProvider router={router} />
+    </HelmetProvider>
   </StrictMode>,
 );

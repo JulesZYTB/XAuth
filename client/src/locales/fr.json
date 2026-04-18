@@ -1,5 +1,14 @@
 {
   "copy": "Copier",
+  "seo": {
+    "default_desc": "XAuth Omega - Protection logicielle de classe entreprise et infrastructure de licences avec chiffrement de niveau militaire.",
+    "home_title": "Protection Logicielle Infaillible",
+    "docs_title": "Documentation Développeur",
+    "dashboard_title": "Centre d'Analyses Global",
+    "login_title": "Connexion Sécurisée",
+    "register_title": "Créer un Compte Développeur",
+    "profile_title": "Paramètres de Sécurité"
+  },
   "menu": {
     "global_dashboard": "Tableau de bord Global",
     "my_licenses": "Mes Licences",
@@ -27,7 +36,29 @@
     "tip_secrets": "Ne codez jamais vos secrets en dur en clair.",
     "examples_title": "Exemples de Code",
     "examples_desc": "Implémentations officielles pour différents langages.",
-    "view_on_github": "Voir sur GitHub"
+    "view_on_github": "Voir sur GitHub",
+    "api": {
+      "title": "API Développeur (Automatisation)",
+      "subtitle": "Automatisez votre infrastructure via notre API RESTful.",
+      "base_url": "URL de Base",
+      "auth_title": "Authentification",
+      "auth_desc": "Authentifiez-vous avec le header X-XAuth-Key en utilisant votre clé secrète depuis la page Profil.",
+      "endpoint_license_title": "Générer une Licence",
+      "endpoint_license_desc": "POST /api/licenses - Générer une nouvelle clé pour une application.",
+      "endpoint_apps_title": "Liste des Applications",
+      "endpoint_apps_desc": "GET /api/apps - Récupérer vos identifiants de logiciels enregistrés.",
+      "endpoint_ban_title": "Sécurité Globale",
+      "endpoint_ban_desc": "PATCH /api/licenses/:id/ban - Révoque l'accès.",
+      "payload": "Données (JSON)",
+      "responses": "Réponses & Codes",
+      "param_app_id": "ID de l'Application (voir Hub)",
+      "param_expiry": "Date ISO-8601 (AAAA-MM-JJ)",
+      "param_key": "Clé personnalisée (optionnel)",
+      "success_200": "Opération réussie",
+      "success_201": "Ressource créée",
+      "error_400": "Paramètres invalides",
+      "error_403": "Interdit (Vérifiez la clé/propriété)"
+    }
   },
 
   "common": {
@@ -35,7 +66,10 @@
     "confirm_action": "Confirmer l'Action",
     "saving": "Sauvegarde en cours...",
     "finished": "Terminé",
-    "copied": "Copié !"
+    "copied": "Copié !",
+    "generate": "Générer",
+    "close": "Fermer",
+    "never": "Jamais"
   },
   "time": {
     "1_hour": "1 Heure",
@@ -58,6 +92,8 @@
     "subtitle": "Télémétries en temps réel de l'infrastructure XAuth Omega",
     "node_status": "Statut du Nœud :",
     "operational": "Opérationnel",
+    "live_feed": "Flux en Direct",
+    "security_auditor": "Auditeur de Sécurité",
     "retention": "Rétention & Utilisateurs Actifs",
     "retention_desc": "Utilisateurs Actifs Quotidiens sur 30 jours",
     "anomaly": "Détection d'Anomalie",
@@ -117,7 +153,13 @@
     "subtitle": "Gérez vos paramètres et identifiants personnels",
     "update_success": "Profil mis à jour avec succès",
     "new_password": "Nouveau Mot de Passe (laissez vide pour conserver)",
-    "save_changes": "Enregistrer les modifications"
+    "save_changes": "Enregistrer les modifications",
+    "api_keys": "Clés API Développeur",
+    "api_keys_desc": "Authentifiez vos services externes (Sellix, Shoppy) via ces clés.",
+    "new_key_generated": "Nouvelle Clé Secrète Générée",
+    "key_warning": "Conservez cette clé précieusement ! Vous ne pourrez plus la voir ensuite.",
+    "key_name_placeholder": "Nom de la clé (ex: Intégration Sellix)",
+    "last_used": "Dernière Utilisation :"
   },
   "user_hub": {
     "title": "Portail des Licences",
@@ -151,6 +193,7 @@
     "broadcast_message": "Message de Diffusion",
     "broadcast_placeholder": "Entrez un message pour les clients...",
     "manage_licenses": "Gérer les Licences",
+    "insights": "Analyses",
     "no_apps_title": "Aucune application protégée pour le moment.",
     "no_apps_desc": "Déployez votre première app pour commencer à émettre des licences.",
     "delete_confirm_msg": "Cette action est irréversible. La suppression de cette application invalidera instantanément toutes les clés de licence associées et mettra fin aux sessions utilisateur actives.",
@@ -255,5 +298,10 @@
     "subtitle": "Activité du système et événements de sécurité en temps réel",
     "fetching": "Analyse des événements système...",
     "no_logs_found": "Aucun journal d'activité trouvé pour l'instant."
+  },
+  "search": {
+    "placeholder": "Rechercher une app, licence, utilisateur...",
+    "start_typing": "Spotlight Accès Rapide",
+    "no_results": "Aucun résultat trouvé."
   }
 }

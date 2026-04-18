@@ -1,6 +1,7 @@
 export interface License {
   id: number;
   license_key: string;
+  license_key_hash?: string;
   hwid?: string;
   expiry_date: Date | string;
   status: "active" | "banned";

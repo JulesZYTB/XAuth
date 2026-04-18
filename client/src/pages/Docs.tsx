@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { useTranslation } from "react-i18next";
+import PageSEO from "../components/PageSEO";
 
 export default function Docs() {
   const { t } = useTranslation();
@@ -19,6 +20,7 @@ export default function Docs() {
 
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <PageSEO title={t("seo.docs_title")} />
       {/* Header */}
       <header>
         <div className="flex items-center gap-3 mb-2">
@@ -72,6 +74,96 @@ export default function Docs() {
               <div className="bg-dark/40 border border-gray-800 p-6 rounded-3xl hover:border-accent/40 transition-colors">
                 <h4 className="font-black text-accent text-xs uppercase tracking-widest mb-3">{t("docs.validation")}</h4>
                 <p className="text-gray-400 text-sm leading-relaxed">{t("docs.validation_desc")}</p>
+              </div>
+            </div>
+          </section>
+
+          {/* Developer API Section */}
+          <section className="space-y-6">
+            <h3 className="text-xl font-black text-white flex items-center gap-3">
+              <Zap className="w-6 h-6 text-accent" />
+              {t("docs.api.title")}
+            </h3>
+            <p className="text-gray-400 text-sm font-medium">{t("docs.api.subtitle")}</p>
+
+            <div className="bg-dark border border-gray-800 rounded-3xl p-8 space-y-8">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-5 bg-accent/5 border border-accent/20 rounded-2xl">
+                 <div>
+                    <h4 className="text-[10px] font-black text-accent uppercase tracking-[0.2em] mb-1">{t("docs.api.base_url")}</h4>
+                    <p className="text-white font-mono text-sm">https://api.xauth.monster</p>
+                 </div>
+                 <div className="px-3 py-1 bg-accent/10 border border-accent/20 rounded-lg text-[9px] font-black text-accent uppercase tracking-widest">
+                    Production v2
+                 </div>
+              </div>
+
+              <div className="space-y-3">
+                <h4 className="text-xs font-black text-accent uppercase tracking-[0.2em]">{t("docs.api.auth_title")}</h4>
+                <p className="text-gray-400 text-xs">{t("docs.api.auth_desc")}</p>
+                <div className="bg-secondary/50 p-4 rounded-xl border border-gray-800 font-mono text-[10px] text-gray-300">
+                  X-XAuth-Key: xk_live_xxxxxxxxxxxxxxxx
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6">
+                {[
+                  { 
+                    title: t("docs.api.endpoint_license_title"), 
+                    desc: t("docs.api.endpoint_license_desc"),
+                    payload: { app_id: "int", expiry_date: "date", license_key: "string?" },
+                    responses: [
+                      { code: "201", label: t("docs.api.success_201") },
+                      { code: "400", label: t("docs.api.error_400") }
+                    ]
+                  },
+                  { 
+                    title: t("docs.api.endpoint_apps_title"), 
+                    desc: t("docs.api.endpoint_apps_desc"),
+                    payload: null,
+                    responses: [
+                      { code: "200", label: t("docs.api.success_200") }
+                    ]
+                  },
+                  { 
+                    title: t("docs.api.endpoint_ban_title"), 
+                    desc: t("docs.api.endpoint_ban_desc"),
+                    payload: null,
+                    responses: [
+                      { code: "200", label: t("docs.api.success_200") },
+                      { code: "403", label: t("docs.api.error_403") }
+                    ]
+                  }
+                ].map((endpoint, i) => (
+                  <div key={i} className="p-6 bg-dark/50 border border-gray-800/50 rounded-3xl hover:border-accent/30 transition-all flex flex-col md:flex-row gap-6">
+                    <div className="flex-1">
+                      <p className="text-white text-sm font-black mb-2">{endpoint.title}</p>
+                      <p className="text-[11px] text-gray-500 font-bold mb-4">{endpoint.desc}</p>
+                      
+                      {endpoint.payload && (
+                        <div className="space-y-2">
+                          <p className="text-[10px] font-black text-accent uppercase tracking-widest">{t("docs.api.payload")}</p>
+                          <div className="bg-dark p-3 rounded-xl border border-gray-800 font-mono text-[9px] text-gray-400">
+                             {JSON.stringify(endpoint.payload, null, 2)}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="md:w-48 space-y-3">
+                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{t("docs.api.responses")}</p>
+                       <div className="space-y-2">
+                         {endpoint.responses.map(res => (
+                           <div key={res.code} className="flex items-center gap-2">
+                             <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${res.code.startsWith('2') ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
+                               {res.code}
+                             </span>
+                             <span className="text-[10px] font-medium text-gray-500 truncate">{res.label}</span>
+                           </div>
+                         ))}
+                       </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </section>

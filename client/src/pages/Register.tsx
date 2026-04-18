@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router";
-import { UserPlus, Mail, Lock, User } from "lucide-react";
+import { UserPlus, Mail, Lock, User as UserIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { getApiUrl } from "../services/apiConfig.js";
+import PageSEO from "../components/PageSEO";
 
 export default function Register() {
   const { t } = useTranslation();
   const [formData, setFormData] = useState({ username: "", email: "", password: "", secret: "" });
-
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -18,7 +18,6 @@ export default function Register() {
     try {
       const response = await fetch(getApiUrl("/api/auth/register"), {
         credentials: "include",
-
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -36,10 +35,10 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-dark p-4 font-sans">
-      <main 
-        className="max-w-md w-full bg-secondary p-10 rounded-[2.5rem] border border-gray-800 shadow-2xl relative overflow-hidden"
-      >
+    <div className="min-h-screen flex items-center justify-center bg-dark p-4 font-sans selection:bg-accent selection:text-white">
+      <PageSEO title={t("seo.register_title")} />
+      
+      <main className="max-w-md w-full bg-secondary p-10 rounded-[2.5rem] border border-gray-800 shadow-2xl relative overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-1000">
         <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-accent to-transparent opacity-50" />
         
         <header className="text-center mb-10">
@@ -48,10 +47,7 @@ export default function Register() {
         </header>
 
         {error && (
-          <div 
-            className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-2xl mb-6 text-xs font-bold"
-            role="alert"
-          >
+          <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-2xl mb-6 text-xs font-bold" role="alert">
             {error}
           </div>
         )}
@@ -60,7 +56,7 @@ export default function Register() {
           <div className="space-y-2">
             <label className="text-[10px] text-gray-500 uppercase font-black px-1" htmlFor="username">{t("auth.username", "Username")}</label>
             <div className="relative group">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within:text-accent transition-colors" aria-hidden="true" />
+              <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within:text-accent transition-colors" aria-hidden="true" />
               <input
                 id="username"
                 type="text"
@@ -115,7 +111,6 @@ export default function Register() {
               />
             </div>
           </div>
-
 
           <button
             type="submit"

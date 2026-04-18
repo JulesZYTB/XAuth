@@ -1,5 +1,14 @@
 {
   "copy": "Copy",
+  "seo": {
+    "default_desc": "XAuth Omega - Enterprise-grade software protection and licensing infrastructure with military-grade encryption.",
+    "home_title": "Unbreakable Software Protection",
+    "docs_title": "Developer Documentation",
+    "dashboard_title": "Global Analytics Hub",
+    "login_title": "Secure Access Login",
+    "register_title": "Create Developer Account",
+    "profile_title": "Security Settings"
+  },
   "menu": {
     "global_dashboard": "Global Dashboard",
     "my_licenses": "My Licenses",
@@ -27,7 +36,29 @@
     "tip_secrets": "Never hardcode your secrets in plain text.",
     "examples_title": "Code Examples",
     "examples_desc": "Official implementations for various languages.",
-    "view_on_github": "View on GitHub"
+    "view_on_github": "View on GitHub",
+    "api": {
+      "title": "Developer API (Automation)",
+      "subtitle": "Automate your infrastructure via our RESTful API.",
+      "base_url": "Base URL",
+      "auth_title": "Authentication",
+      "auth_desc": "Authenticate with the X-XAuth-Key header using your secret key from the Profile page.",
+      "endpoint_license_title": "Provision License",
+      "endpoint_license_desc": "POST /api/licenses - Generate a new key for an application.",
+      "endpoint_apps_title": "List Applications",
+      "endpoint_apps_desc": "GET /api/apps - Retrieve your registered software IDs.",
+      "endpoint_ban_title": "Global Security",
+      "endpoint_ban_desc": "PATCH /api/licenses/:id/ban - Instantly revoke access.",
+      "payload": "Payload",
+      "responses": "Responses",
+      "param_app_id": "Application ID (found in Hub)",
+      "param_expiry": "ISO-8601 Date (YYYY-MM-DD)",
+      "param_key": "Custom string (optional)",
+      "success_200": "Operation successful",
+      "success_201": "Resource created",
+      "error_400": "Invalid parameters",
+      "error_403": "Forbidden (Check Key/Ownership)"
+    }
   },
 
   "common": {
@@ -35,7 +66,10 @@
     "confirm_action": "Confirm Action",
     "saving": "Saving...",
     "finished": "Finished",
-    "copied": "Copied!"
+    "copied": "Copied!",
+    "generate": "Generate",
+    "close": "Close",
+    "never": "Never"
   },
   "time": {
     "1_hour": "1 Hour",
@@ -58,6 +92,8 @@
     "subtitle": "Real-time telemetrics for XAuth Omega infrastructure",
     "node_status": "Node Status:",
     "operational": "Operational",
+    "live_feed": "Live Feed",
+    "security_auditor": "Security Auditor",
     "retention": "Retention & DAU",
     "retention_desc": "Daily Active Users over 30 days",
     "anomaly": "Anomaly Detection",
@@ -117,7 +153,13 @@
     "subtitle": "Manage your personal settings and identity",
     "update_success": "Profile updated successfully",
     "new_password": "New Password (Leave blank to keep)",
-    "save_changes": "Save Changes"
+    "save_changes": "Save Changes",
+    "api_keys": "Developer API Keys",
+    "api_keys_desc": "Authenticate your external services (Sellix, Shoppy) via these keys.",
+    "new_key_generated": "New Secret Key Generated",
+    "key_warning": "Store this key safely! You won't be able to see it again.",
+    "key_name_placeholder": "Key Name (e.g. Sellix Integration)",
+    "last_used": "Last Used:"
   },
   "user_hub": {
     "title": "License Hub",
@@ -151,6 +193,7 @@
     "broadcast_message": "Broadcast Message",
     "broadcast_placeholder": "Enter message for clients...",
     "manage_licenses": "Manage Licenses",
+    "insights": "Insights",
     "no_apps_title": "No protected applications yet.",
     "no_apps_desc": "Deploy your first app to start issuing licenses.",
     "delete_confirm_msg": "This action is irreversible. Deleting this application will instantly invalidate all associated license keys and terminate active user sessions.",
@@ -255,5 +298,10 @@
     "subtitle": "Real-time system activity and security events",
     "fetching": "Analyzing system events...",
     "no_logs_found": "No activity logs found yet."
+  },
+  "search": {
+    "placeholder": "Search for apps, licenses, users...",
+    "start_typing": "Quick Access Spotlight",
+    "no_results": "No matches found."
   }
 }

@@ -30,6 +30,9 @@ import webhookActions from "./modules/app/webhookActions.js";
 import analyticsActions from "./modules/app/analyticsActions.js";
 import releaseActions from "./modules/app/releaseActions.js";
 import updateActions from "./modules/app/updateActions.js";
+import apiKeyActions from "./modules/admin/apiKeyActions.js";
+import searchActions from "./modules/admin/searchActions.js";
+
 
 
 // --- CLIENT AUTH API (Public with Secret) ---
@@ -46,8 +49,15 @@ router.post("/api/auth/register", authLimiter, userActions.register);
 // Protected routes (Requires valid JWT)
 router.use(verifyToken);
 
-// PROFILE (Self)
+// PROFILE & SECURITY (Self)
 router.put("/api/auth/profile", userActions.updateProfile);
+router.get("/api/api-keys", apiKeyActions.browse);
+router.post("/api/api-keys", apiKeyActions.add);
+router.delete("/api/api-keys/:id", apiKeyActions.destroy);
+
+// GLOBAL SEARCH
+router.get("/api/search", searchActions.globalSearch);
+
 
 // --- USER / DEVELOPER PORTFOLIO (Requires Authenticated Session) ---
 // These routes handle resources owned by the user (Apps, Licenses, Webhooks)
@@ -85,6 +95,14 @@ router.patch("/api/licenses/:id/unban", licenseActions.unban);
 router.patch("/api/licenses/:id/reset-hwid", licenseActions.resetHwid);
 router.patch("/api/licenses/:id/regenerate", licenseActions.regenerateKey);
 router.delete("/api/licenses/:id", licenseActions.destroy);
+
+// APP-SPECIFIC ANALYTICS
+router.get("/api/apps/:appId/dashboard/stats", dashboardActions.getStats);
+router.get("/api/apps/:appId/dashboard/map", dashboardActions.getMap);
+router.get("/api/apps/:appId/dashboard/dau", dashboardActions.getDau);
+router.get("/api/apps/:appId/dashboard/anomalies", dashboardActions.getAnomalies);
+router.get("/api/apps/:appId/dashboard/auditor-scan", dashboardActions.getAuditorScan);
+
 
 
 // --- SYSTEM ADMINISTRATION (Admin Only) ---

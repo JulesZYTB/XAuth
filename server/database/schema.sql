@@ -29,6 +29,7 @@ CREATE TABLE license (
   app_id INT NOT NULL,
   user_id INT NULL,
   license_key VARCHAR(255) UNIQUE NOT NULL,
+  license_key_hash VARCHAR(64),
   hwid VARCHAR(255) NULL,
   ip_lock VARCHAR(45) NULL,
   status ENUM('active', 'revoked', 'expired', 'banned') DEFAULT 'active',
@@ -60,6 +61,8 @@ CREATE TABLE session (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (app_id) REFERENCES app(id) ON DELETE CASCADE
 );
+
+CREATE INDEX idx_license_key_hash ON license(license_key_hash);
 
 -- Enterprise Analytics & Telemetry Layer
 CREATE TABLE validation_log (
@@ -102,6 +105,19 @@ CREATE TABLE audit_log (
   FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
   FOREIGN KEY (app_id) REFERENCES app(id) ON DELETE CASCADE
 );
+
+-- API Keys (Developer Automation)
+CREATE TABLE api_key (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  key_prefix VARCHAR(10) NOT NULL,
+  key_hash VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_used TIMESTAMP NULL,
+  FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+);
+
 
 -- Seed System Admin (password: admin123)
 INSERT INTO user (username, email, password, role) 
