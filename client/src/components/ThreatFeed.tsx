@@ -1,5 +1,7 @@
-import { AlertCircle, ShieldAlert, Terminal, User } from "lucide-react";
+import { useState } from "react";
+import { AlertCircle, ShieldAlert, Terminal, User, FileText, Globe, Activity } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import Modal from "./Modal";
 
 type Threat = {
   id: number;
@@ -10,6 +12,7 @@ type Threat = {
   country_code: string;
   status: string;
   error_type: string | null;
+  details?: string | null;
   created_at: string;
   license_key?: string;
   username?: string;
@@ -21,6 +24,7 @@ interface ThreatFeedProps {
 
 export default function ThreatFeed({ threats }: ThreatFeedProps) {
   const { t } = useTranslation();
+  const [selectedThreat, setSelectedThreat] = useState<Threat | null>(null);
 
   if (!threats || threats.length === 0) {
     return (
@@ -109,13 +113,88 @@ export default function ThreatFeed({ threats }: ThreatFeedProps) {
             </p>
             <button
               type="button"
-              className="text-[9px] font-black text-red-500 uppercase hover:underline cursor-pointer"
+              onClick={() => setSelectedThreat(threat)}
+              className="text-[9px] font-black text-red-500 uppercase hover:underline cursor-pointer flex items-center gap-1"
             >
+              <FileText className="w-3 h-3" />
               {t("threats.details")}
             </button>
           </div>
         </div>
       ))}
+
+      {/* Threat Detail Modal */}
+      <Modal
+        isOpen={!!selectedThreat}
+        onClose={() => setSelectedThreat(null)}
+        title={t("threats.details")}
+      >
+        {selectedThreat && (
+          <div className="space-y-6">
+            <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl flex items-center gap-4">
+              <div className="p-3 bg-red-500/20 rounded-xl text-red-500">
+                <ShieldAlert className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="text-red-500 font-black uppercase tracking-widest text-xs">
+                  {getErrorTypeLabel(selectedThreat.error_type)}
+                </h4>
+                <p className="text-[10px] text-gray-400 font-medium">
+                  {new Date(selectedThreat.created_at).toLocaleString()}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3">
+              <div className="bg-white/5 border border-white/5 p-4 rounded-2xl">
+                <div className="flex items-center gap-2 text-gray-400 mb-2">
+                  <Globe className="w-3.5 h-3.5 text-accent" />
+                  <span className="text-[10px] font-black uppercase tracking-wider">{t("dashboard.global_reach")}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                   <span className="text-[11px] text-white font-bold">{selectedThreat.country} ({selectedThreat.country_code})</span>
+                   <span className="text-[10px] font-mono text-gray-500">{selectedThreat.ip_address}</span>
+                </div>
+              </div>
+
+              <div className="bg-white/5 border border-white/5 p-4 rounded-2xl">
+                <div className="flex items-center gap-2 text-gray-400 mb-2">
+                  <Activity className="w-3.5 h-3.5 text-accent" />
+                  <span className="text-[10px] font-black uppercase tracking-wider">{t("licenses.table_hwid")}</span>
+                </div>
+                <p className="text-[10px] font-mono text-white bg-dark/50 p-2 rounded-lg border border-white/5 break-all">
+                  {selectedThreat.license_key || "N/A"}
+                </p>
+              </div>
+
+               <div className="bg-red-500/5 border border-red-500/10 p-5 rounded-3xl relative overflow-hidden">
+                <div className="flex items-center gap-2 text-red-400 mb-3">
+                  <FileText className="w-3.5 h-3.5" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Metadata / Payload</span>
+                </div>
+                <div className="bg-dark/80 p-4 rounded-xl border border-red-500/10 min-h-[100px]">
+                  <p className="text-[11px] text-red-200/80 font-mono leading-relaxed whitespace-pre-wrap">
+                    {selectedThreat.details || t("threats.no_details_available") || "No detailed telemetry payload provided by the client check instance."}
+                  </p>
+                </div>
+                <div className="absolute top-0 right-0 p-4 opacity-10">
+                   <Activity className="w-12 h-12 text-red-500" />
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4">
+               <button
+                type="button"
+                onClick={() => setSelectedThreat(null)}
+                className="w-full py-4 bg-gray-800 hover:bg-gray-700 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+              >
+                {t("common.close")}
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
