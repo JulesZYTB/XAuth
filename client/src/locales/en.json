@@ -147,7 +147,10 @@
     "details": "Details",
     "pattern_secret": "Key Inject/Secret Leak",
     "pattern_hwid": "HWID Spoof",
-    "pattern_toolkit": "Debugger / Tools Detected"
+    "pattern_toolkit": "Debugger / Tools Detected",
+    "no_details_available": "No detailed telemetry payload provided by the client check instance.",
+    "clear_history": "Clear History",
+    "clear_confirm": "Confirm Purge?"
   },
   "auth": {
     "hub_subtitle": "Enterprise Security Hub",
