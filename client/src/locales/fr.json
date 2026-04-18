@@ -58,6 +58,23 @@
       "success_201": "Ressource créée",
       "error_400": "Paramètres invalides",
       "error_403": "Interdit (Vérifiez la clé/propriété)"
+    },
+    "help": {
+      "title": "Besoin d'aide ?",
+      "subtitle": "Rejoignez notre communauté de développeurs pour obtenir un support expert pour votre intégration.",
+      "join_discord": "Rejoindre Discord"
+    },
+    "antidebug": {
+      "title": "Anti-Debug & Signalement de Bypass",
+      "subtitle": "Protégez votre propriété intellectuelle contre l'ingénierie inverse.",
+      "integrity_title": "Signalement d'Intégrité",
+      "integrity_desc": "XAuth Omega vous permet de signaler des menaces spécialisées détectées localement par votre logiciel. Lorsque vous détectez des outils comme <strong>HTTPDebugger</strong>, <strong>Fiddler</strong>, ou <strong>x64dbg</strong>, envoyez une requête de validation avec le paramètre <code>error_type</code> défini sur <code>BYPASS_DETECTED</code>.",
+      "debugger_title": "Débuggeur Détecté",
+      "debugger_desc": "L'API renvoie 403. L'IP est instantanément signalée dans le flux de menaces du tableau de bord.",
+      "debugger_alert": "ALERTE CRITIQUE",
+      "memory_title": "Altération de la Mémoire",
+      "memory_desc": "Si détecté, envoyez un signal de bypass pour bannir automatiquement la clef de licence de manière permanente.",
+      "memory_protocol": "PROTOCOLE D'AUTO-BAN"
     }
   },
 
@@ -100,8 +117,6 @@
     "anomaly_desc": "Suivi des validations échouées vs réussies (Tentatives de crack)",
     "successes": "Succès",
     "failures": "Échecs",
-    "live_feed": "Flux en Direct",
-    "security_auditor": "Auditeur de Sécurité",
     "export": "Exporter le Rapport",
     "auditor_title": "Auditeur de Sécurité",
     "auditor_subtitle": "Détection automatisée des menaces et anomalies",
@@ -112,8 +127,24 @@
     "auditor_last_attempt": "Dernière Tentative",
     "auditor_keys": "Clefs Potentiellement Partagées",
     "auditor_no_keys": "Aucun partage suspect détecté (basé sur les IPs et Pays uniques).",
-    "auditor_completed": "Analyse terminée. {{count}} problèmes potentiels détectés.",
-    "auditor_rescan": "Lancer une Nouvelle Analyse"
+    "auditor_completed": "Scan terminé. {{count}} problèmes potentiels trouvés.",
+    "auditor_rescan": "Lancer un nouveau scan",
+    "threat_intel": "Intelligence des Menaces",
+    "active_threats": "Tentatives de Bypass en Direct",
+    "retention_app": "Stats Détaillées de l'App",
+    "retention_app_desc": "Rétention et activité spécifiques aux utilisateurs de cette application uniquement.",
+    "app_activity": "Activité de l'App",
+    "anomaly_app_desc": "Tentatives de crack spécifiques à cette application"
+  },
+  "threats": {
+    "no_threats": "Aucune menace immédiate détectée",
+    "suspicious": "Tentative Suspecte",
+    "anonymous": "Bypass Anonyme",
+    "pattern_label": "Type de Bypass :",
+    "details": "Détails",
+    "pattern_secret": "Injection de Clef / Fuite de Secret",
+    "pattern_hwid": "Usurpation de HWID",
+    "pattern_toolkit": "Toolkit Détecté"
   },
   "auth": {
     "hub_subtitle": "Plateforme de Sécurité d'Entreprise",
