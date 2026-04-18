@@ -88,11 +88,20 @@ class LicenseRepository {
 
   async updateHwid(id: number, hwid: string) {
     const encryptedHwid = securityService.dbEncrypt(hwid);
+    const hwidHash = securityService.hash(hwid);
     const [result] = await databaseClient.query<Result>(
-      "update license set hwid = ? where id = ?",
-      [encryptedHwid, id]
+      "update license set hwid = ?, hwid_hash = ? where id = ?",
+      [encryptedHwid, hwidHash, id]
     );
     return result.affectedRows;
+  }
+
+  async isHwidBlacklisted(hwidHash: string) {
+    const [rows] = await databaseClient.query<Rows>(
+      "SELECT COUNT(*) as count FROM license WHERE hwid_hash = ? AND status = 'banned'",
+      [hwidHash]
+    );
+    return (rows[0] as any).count > 0;
   }
 
   async updateStatus(id: number, status: string) {
