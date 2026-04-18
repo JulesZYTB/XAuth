@@ -18,6 +18,21 @@ interface AuthenticatedRequest extends Request {
 
 import { licenseCreateSchema, licenseRedeemSchema } from "../security/schemas.js";
 
+// Helper to check if user owns the app or is admin
+const checkOwnership = async (user: AuthUser, appId: number) => {
+  if (user.role === "admin") return true;
+  const app = await appRepository.read(appId);
+  return app && app.owner_id === user.id;
+};
+
+// Helper to check if user owns the license (via app ownership)
+const checkLicenseOwnership = async (user: AuthUser, licenseId: number) => {
+  if (user.role === "admin") return true;
+  const license = await licenseRepository.read(licenseId);
+  if (!license) return false;
+  return await checkOwnership(user, license.app_id);
+};
+
 // Dashboard action: Create a new license
 const add: RequestHandler = async (req, res, next) => {
   try {
@@ -28,6 +43,12 @@ const add: RequestHandler = async (req, res, next) => {
     }
 
     const { license_key, expiry_date, app_id } = validation.data;
+    const actor = (req as unknown as AuthenticatedRequest).auth;
+
+    if (!(await checkOwnership(actor, app_id))) {
+      res.status(403).json({ message: "Forbidden: You do not own this application" });
+      return;
+    }
 
     const id = await licenseRepository.create({
       license_key,
@@ -41,6 +62,7 @@ const add: RequestHandler = async (req, res, next) => {
     next(err);
   }
 };
+
 
 
 // Client action: Validate a license (Omega Edition)
@@ -206,6 +228,13 @@ const validate: RequestHandler = async (req, res, next) => {
 const ban: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
+    const actor = (req as unknown as AuthenticatedRequest).auth;
+
+    if (!(await checkLicenseOwnership(actor, id))) {
+      res.status(403).json({ message: "Forbidden: You do not own this license" });
+      return;
+    }
+
     const license = await licenseRepository.read(id);
     await licenseRepository.updateStatus(id, "banned");
     
@@ -223,6 +252,13 @@ const ban: RequestHandler = async (req, res, next) => {
 const unban: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
+    const actor = (req as unknown as AuthenticatedRequest).auth;
+
+    if (!(await checkLicenseOwnership(actor, id))) {
+      res.status(403).json({ message: "Forbidden: You do not own this license" });
+      return;
+    }
+
     const license = await licenseRepository.read(id);
     await licenseRepository.updateStatus(id, "active");
     
@@ -242,6 +278,10 @@ const resetHwid: RequestHandler = async (req, res, next) => {
     const id = Number(req.params.id);
     const actor = (req as unknown as AuthenticatedRequest).auth;
 
+    if (!(await checkLicenseOwnership(actor, id))) {
+      res.status(403).json({ message: "Forbidden: You do not own this license" });
+      return;
+    }
 
     const license = await licenseRepository.read(id);
     
@@ -278,6 +318,10 @@ const regenerateKey: RequestHandler = async (req, res, next) => {
     const id = Number(req.params.id);
     const actor = (req as unknown as AuthenticatedRequest).auth;
 
+    if (!(await checkLicenseOwnership(actor, id))) {
+      res.status(403).json({ message: "Forbidden: You do not own this license" });
+      return;
+    }
 
     const license = await licenseRepository.read(id);
     const newKey = generateRandomKey();
@@ -306,6 +350,13 @@ const regenerateKey: RequestHandler = async (req, res, next) => {
 const browse: RequestHandler = async (req, res, next) => {
   try {
     const appId = Number(req.params.appId);
+    const actor = (req as unknown as AuthenticatedRequest).auth;
+
+    if (!(await checkOwnership(actor, appId))) {
+      res.status(403).json({ message: "Forbidden: You do not own this application" });
+      return;
+    }
+
     const licenses = await licenseRepository.readByAppId(appId);
     res.json(licenses);
   } catch (err) {
@@ -361,6 +412,13 @@ const redeem: RequestHandler = async (req, res, next) => {
 const modify: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
+    const actor = (req as unknown as AuthenticatedRequest).auth;
+
+    if (!(await checkLicenseOwnership(actor, id))) {
+      res.status(403).json({ message: "Forbidden: You do not own this license" });
+      return;
+    }
+
     await licenseRepository.update(id, req.body);
     res.sendStatus(204);
   } catch (err) {
@@ -371,6 +429,13 @@ const modify: RequestHandler = async (req, res, next) => {
 const destroy: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
+    const actor = (req as unknown as AuthenticatedRequest).auth;
+
+    if (!(await checkLicenseOwnership(actor, id))) {
+      res.status(403).json({ message: "Forbidden: You do not own this license" });
+      return;
+    }
+
     await licenseRepository.delete(id);
     res.sendStatus(204);
   } catch (err) {

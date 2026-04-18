@@ -37,6 +37,17 @@ class AppRepository {
     return result.affectedRows;
   }
 
+  async updateAdmin(id: number, data: Partial<App>) {
+    const fields = Object.keys(data).map(key => `${key} = ?`).join(", ");
+    const values = Object.values(data);
+    const [result] = await databaseClient.query<Result>(
+      `update app set ${fields} where id = ?`,
+      [...values, id]
+    );
+    return result.affectedRows;
+  }
+
+
   async delete(id: number, ownerId: number) {
     const [result] = await databaseClient.query<Result>(
       "delete from app where id = ? and owner_id = ?",
@@ -44,6 +55,15 @@ class AppRepository {
     );
     return result.affectedRows;
   }
+
+  async deleteAdmin(id: number) {
+    const [result] = await databaseClient.query<Result>(
+      "delete from app where id = ?",
+      [id]
+    );
+    return result.affectedRows;
+  }
+
 }
 
 export default new AppRepository();

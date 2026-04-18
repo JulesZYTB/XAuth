@@ -49,37 +49,34 @@ router.use(verifyToken);
 // PROFILE (Self)
 router.put("/api/auth/profile", userActions.updateProfile);
 
-// --- ADMIN ONLY ROUTES ---
-// We apply isAdmin middleware to secure these sensitive endpoints
-router.use(isAdmin);
+// --- USER / DEVELOPER PORTFOLIO (Requires Authenticated Session) ---
+// These routes handle resources owned by the user (Apps, Licenses, Webhooks)
 
-// USERS CRUD
-router.get("/api/users", userActions.browse);
-router.patch("/api/users/:id", userActions.editRole);
-router.delete("/api/users/:id", userActions.destroy);
-
-// APPS CRUD
+// APPS (Full CRUD - appActions checks owner_id)
 router.get("/api/apps", appActions.browse);
 router.post("/api/apps", appActions.add);
 router.patch("/api/apps/:id", appActions.edit);
 router.patch("/api/apps/:id/toggle-pause", appActions.togglePause);
 router.delete("/api/apps/:id", appActions.destroy);
 
-// WEBHOOKS CRUD
+// WEBHOOKS (appActions/webhookActions should verify ownership)
 router.get("/api/apps/:appId/webhooks", webhookActions.browse);
 router.post("/api/webhooks", webhookActions.add);
 router.patch("/api/webhooks/:id", webhookActions.edit);
 router.delete("/api/webhooks/:id", webhookActions.destroy);
 
-// RELEASE MANAGEMENT
+// RELEASES (appActions/releaseActions should verify ownership)
 router.get("/api/apps/:appId/releases", releaseActions.browse);
 router.post("/api/releases", releaseActions.add);
 router.patch("/api/releases/:id", releaseActions.edit);
 router.delete("/api/releases/:id", releaseActions.destroy);
 
-// LICENSES CRUD
+// LICENSES - USER ACTIONS (Redeem & Browse My)
 router.get("/api/my-licenses", licenseActions.myLicenses);
 router.post("/api/licenses/redeem", licenseActions.redeem);
+
+// LICENSES - DEVELOPER ACTIONS (Manage licenses for owned apps)
+// NOTE: Ownership checks are required in these actions
 router.get("/api/apps/:appId/licenses", licenseActions.browse);
 router.post("/api/licenses", licenseActions.add);
 router.patch("/api/licenses/:id", licenseActions.modify);
@@ -90,14 +87,23 @@ router.patch("/api/licenses/:id/regenerate", licenseActions.regenerateKey);
 router.delete("/api/licenses/:id", licenseActions.destroy);
 
 
-// AUDIT LOGS
+// --- SYSTEM ADMINISTRATION (Admin Only) ---
+router.use(isAdmin);
+
+// USERS MANAGEMENT
+router.get("/api/users", userActions.browse);
+router.patch("/api/users/:id", userActions.editRole);
+router.delete("/api/users/:id", userActions.destroy);
+
+// AUDIT TRAIL
 router.get("/api/logs", auditLogActions.browse);
 
-// ADMIN DASHBOARD
+// GLOBAL DASHBOARD ANALYTICS
 router.get("/api/dashboard/stats", dashboardActions.getStats);
 router.get("/api/dashboard/map", dashboardActions.getMap);
 router.get("/api/dashboard/dau", dashboardActions.getDau);
 router.get("/api/dashboard/anomalies", dashboardActions.getAnomalies);
 router.get("/api/dashboard/auditor-scan", dashboardActions.getAuditorScan);
+
 
 export default router;

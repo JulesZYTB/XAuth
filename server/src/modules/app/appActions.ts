@@ -9,16 +9,24 @@ interface AuthenticatedRequest extends Request {
 
 const browse: RequestHandler = async (req, res, next) => {
   try {
-    const ownerId = (req as AuthenticatedRequest).auth.id;
-
-
-
-    const apps = await appRepository.readByOwnerId(ownerId);
+    const actor = (req as AuthenticatedRequest).auth;
+    
+    let apps;
+    if (actor.role === "admin") {
+      // Admins see everything
+      const [allApps] = await (await import("../../../database/client.js")).default.query("select * from app");
+      apps = allApps;
+    } else {
+      // Regular users see only their own
+      apps = await appRepository.readByOwnerId(actor.id);
+    }
+    
     res.json(apps);
   } catch (err) {
     next(err);
   }
 };
+
 
 import { appSchema } from "../security/schemas.js";
 
@@ -61,50 +69,66 @@ const edit: RequestHandler = async (req, res, next) => {
     }
 
     const id = Number(req.params.id);
-    const ownerId = (req as unknown as AuthenticatedRequest).auth.id;
+    const actor = (req as unknown as AuthenticatedRequest).auth;
 
-    await appRepository.update(id, ownerId, validation.data);
+    if (actor.role === "admin") {
+      await appRepository.updateAdmin(id, validation.data);
+    } else {
+      await appRepository.update(id, actor.id, validation.data);
+    }
     res.sendStatus(204);
   } catch (err) {
     next(err);
   }
 };
+
 
 
 const togglePause: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
-    const ownerId = (req as unknown as AuthenticatedRequest).auth.id;
+    const actor = (req as unknown as AuthenticatedRequest).auth;
 
-
-
-    
     const app = await appRepository.read(id);
-    if (!app || app.owner_id !== ownerId) {
+    if (!app || (actor.role !== "admin" && app.owner_id !== actor.id)) {
        res.status(404).json({ message: "App not found or unauthorized" });
        return;
     }
 
-    await appRepository.update(id, ownerId, { is_paused: !app.is_paused });
+    const newData = { is_paused: !app.is_paused };
+    if (actor.role === "admin") {
+      await appRepository.updateAdmin(id, newData);
+    } else {
+      await appRepository.update(id, actor.id, newData);
+    }
     res.sendStatus(204);
   } catch (err) {
     next(err);
   }
 };
+
 
 const destroy: RequestHandler = async (req, res, next) => {
-
   try {
     const id = Number(req.params.id);
-    const ownerId = (req as unknown as Request & { auth: AuthUser }).auth.id;
+    const actor = (req as unknown as Request & { auth: AuthUser }).auth;
 
+    let affected;
+    if (actor.role === "admin") {
+      affected = await appRepository.deleteAdmin(id);
+    } else {
+      affected = await appRepository.delete(id, actor.id);
+    }
 
-
-    await appRepository.delete(id, ownerId);
+    if (affected === 0) {
+      res.status(404).json({ message: "App not found or unauthorized" });
+      return;
+    }
     res.sendStatus(204);
   } catch (err) {
     next(err);
   }
 };
+
 
 export default { browse, add, destroy, edit, togglePause };
