@@ -35,4 +35,5 @@ export const appSchema = z.object({
   name: z.string().min(2).max(50),
   description: z.string().optional(),
   broadcast_message: z.string().optional(),
+  is_paused: z.boolean().optional(),
 });
