@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { AlertCircle, ShieldAlert, Terminal, User, FileText, Globe, Activity } from "lucide-react";
+import { AlertCircle, ShieldAlert, Terminal, User, FileText, Globe, Activity, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Modal from "./Modal";
 
@@ -15,16 +14,19 @@ type Threat = {
   details?: string | null;
   created_at: string;
   license_key?: string;
+  hwid?: string;
   username?: string;
 };
 
 interface ThreatFeedProps {
   threats: Threat[];
+  onClear?: () => void;
 }
 
-export default function ThreatFeed({ threats }: ThreatFeedProps) {
+export default function ThreatFeed({ threats, onClear }: ThreatFeedProps) {
   const { t } = useTranslation();
   const [selectedThreat, setSelectedThreat] = useState<Threat | null>(null);
+  const [isConfirmingClear, setIsConfirmingClear] = useState(false);
 
   if (!threats || threats.length === 0) {
     return (
@@ -33,9 +35,28 @@ export default function ThreatFeed({ threats }: ThreatFeedProps) {
         <p className="text-[10px] font-black uppercase tracking-widest">
           {t("threats.no_threats")}
         </p>
+        {onClear && (
+            <button
+                type="button"
+                onClick={() => onClear()}
+                className="mt-4 text-[9px] font-black hover:text-white transition-colors uppercase tracking-widest cursor-pointer"
+            >
+                {t("threats.clear_history")}
+            </button>
+        )}
       </div>
     );
   }
+
+  const handleClear = () => {
+    if (isConfirmingClear) {
+      onClear?.();
+      setIsConfirmingClear(false);
+    } else {
+      setIsConfirmingClear(true);
+      setTimeout(() => setIsConfirmingClear(false), 3000);
+    }
+  };
 
   const getErrorTypeLabel = (type: string | null) => {
     if (!type) return t("threats.suspicious");
@@ -54,6 +75,31 @@ export default function ThreatFeed({ threats }: ThreatFeedProps) {
 
   return (
     <div className="space-y-4">
+      {onClear && (
+        <div className="flex justify-end pb-2">
+            <button
+                type="button"
+                onClick={handleClear}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border ${
+                    isConfirmingClear 
+                    ? "bg-red-500/20 text-red-500 border-red-500/50 scale-95" 
+                    : "bg-dark/50 text-gray-400 border-white/5 hover:border-white/20 hover:text-white"
+                }`}
+            >
+                {isConfirmingClear ? (
+                    <>
+                        <AlertCircle className="w-3 h-3" />
+                        {t("threats.clear_confirm")}
+                    </>
+                ) : (
+                    <>
+                        <Trash2 className="w-3 h-3" />
+                        {t("threats.clear_history")}
+                    </>
+                )}
+            </button>
+        </div>
+      )}
       {threats.map((threat) => (
         <div
           key={threat.id}
@@ -163,7 +209,7 @@ export default function ThreatFeed({ threats }: ThreatFeedProps) {
                   <span className="text-[10px] font-black uppercase tracking-wider">{t("licenses.table_hwid")}</span>
                 </div>
                 <p className="text-[10px] font-mono text-white bg-dark/50 p-2 rounded-lg border border-white/5 break-all">
-                  {selectedThreat.license_key || "N/A"}
+                  {selectedThreat.hwid || t("user_hub.not_pooled")}
                 </p>
               </div>
 
