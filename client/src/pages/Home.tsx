@@ -1,7 +1,6 @@
 import {
   Activity,
   ArrowRight,
-  Globe,
   Key,
   Lock,
   Pause,
