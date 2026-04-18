@@ -121,6 +121,92 @@ class XAuth {
             return { success: false, message: `Network error: ${e.message}` };
         }
     }
+
+    async checkVersion(currentVersion, channel = "stable") {
+        try {
+            const res = await fetch(`${this.baseUrl}/api/v1/client/verify-version`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    app_id: this.appId,
+                    app_secret: this.appSecret,
+                    channel: channel,
+                    current_version: currentVersion
+                })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                return {
+                    success: true,
+                    version: data.version,
+                    channel: data.channel,
+                    url: data.url,
+                    checksum: data.checksum,
+                    publishedAt: data.published_at,
+                    updateAvailable: data.update_available,
+                    broadcast: data.broadcast
+                };
+            } else {
+                try {
+                    const errBody = await res.json();
+                    return { success: false, message: errBody.message || "Version check failed" };
+                } catch {
+                    return { success: false, message: await res.text() };
+                }
+            }
+        } catch (e) {
+            return { success: false, message: `Network error: ${e.message}` };
+        }
+    }
+
+    async getLatestRelease(channel = "stable") {
+        try {
+            const res = await fetch(`${this.baseUrl}/api/update/${this.appId}/${channel}`);
+            if (res.ok) {
+                const data = await res.json();
+                return {
+                    success: true,
+                    version: data.version,
+                    channel: data.channel,
+                    url: data.url,
+                    checksum: data.checksum,
+                    publishedAt: data.published_at
+                };
+            }
+            return { success: false, message: await res.text() };
+        } catch (e) {
+            return { success: false, message: e.message };
+        }
+    }
+}
+
+// Example Usage
+if (require.main === module) {
+    (async () => {
+        const auth = new XAuth(1, "your_app_secret_here");
+
+        console.log("--- XAuth Omega Node.js JS SDK Demo ---");
+
+        // 1. Public Update Check
+        console.log("\n[1] Checking for updates (Public)...");
+        const release = await auth.getLatestRelease();
+        if (release.success) {
+            console.log(`Latest Version: ${release.version} (${release.channel})`);
+        }
+
+        // 2. Secure Check
+        console.log("\n[2] Verifying version (Secure)...");
+        const ver = await auth.checkVersion("1.0.0");
+        if (ver.success) {
+            console.log(ver.updateAvailable ? "Update available!" : "Up to date.");
+        }
+
+        // 3. License Validation
+        console.log("\n[3] Validating license...");
+        const result = await auth.validateLicense("XXXX-XXXX-XXXX-XXXX");
+        console.log(result.success ? `Valid! Expiry: ${result.expiry}` : `Failed: ${result.message}`);
+    })();
 }
 
 module.exports = XAuth;
