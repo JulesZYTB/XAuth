@@ -375,7 +375,7 @@ export default function Apps() {
                   <input
                     type="text"
                     defaultValue={
-                      app.broadcast_message || "Welcome to XAuth Omega."
+                      app.broadcast_message || t("apps.broadcast_default")
                     }
                     onBlur={(e) =>
                       handleUpdateBroadcast(app.id, e.target.value)
