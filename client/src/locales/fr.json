@@ -147,7 +147,7 @@
     "details": "Détails",
     "pattern_secret": "Injection de Clef / Fuite de Secret",
     "pattern_hwid": "Usurpation de HWID",
-    "pattern_toolkit": "Toolkit Détecté"
+    "pattern_toolkit": "Outils / Débugueur Détecté"
   },
   "auth": {
     "hub_subtitle": "Plateforme de Sécurité d'Entreprise",
