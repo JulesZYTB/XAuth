@@ -102,6 +102,25 @@ export default function AppDashboard() {
     fetchStats();
   }, [fetchStats]);
 
+  const handleClearThreats = async () => {
+    try {
+      const headers = {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      };
+      const res = await fetch(getApiUrl(`/api/apps/${appId}/dashboard/threats`), {
+        method: "DELETE",
+        credentials: "include",
+        headers,
+      });
+
+      if (res.ok) {
+        setStats((prev) => prev ? { ...prev, recentThreats: [] } : null);
+      }
+    } catch (err) {
+      console.error("Failed to clear threat logs:", err);
+    }
+  };
+
   if (loading || !stats) {
     return (
       <div className="flex flex-col items-center justify-center h-[80vh] text-gray-500 gap-4">
@@ -222,7 +241,7 @@ export default function AppDashboard() {
             <ShieldAlert className="w-6 h-6 text-red-500 animate-pulse" />
           </div>
           <div className="flex-1 relative z-10">
-            <ThreatFeed threats={stats.recentThreats} />
+            <ThreatFeed threats={stats.recentThreats} onClear={handleClearThreats} />
           </div>
         </div>
 
