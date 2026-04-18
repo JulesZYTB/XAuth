@@ -1,6 +1,7 @@
 import { AlertCircle, ShieldAlert, Terminal, User, FileText, Globe, Activity, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Modal from "./Modal";
+import { useState } from "react";
 
 type Threat = {
   id: number;
