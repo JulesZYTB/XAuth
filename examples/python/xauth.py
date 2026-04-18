@@ -117,3 +117,108 @@ class XAuth:
                     return {"success": False, "message": response.text}
         except Exception as e:
             return {"success": False, "message": f"Network Error: {str(e)}"}
+
+    def check_version(self, current_version=None, channel="stable"):
+        """
+        Securely checks for application updates.
+        Returns a dict: {'success': bool, 'version'?: str, 'update_available'?: bool, ...}
+        """
+        payload = {
+            "app_id": self.app_id,
+            "app_secret": self.app_secret,
+            "channel": channel,
+            "current_version": current_version
+        }
+
+        try:
+            response = requests.post(
+                f"{self.base_url}/api/v1/client/verify-version",
+                json=payload
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                return {
+                    "success": True,
+                    "version": data.get("version"),
+                    "channel": data.get("channel"),
+                    "url": data.get("url"),
+                    "checksum": data.get("checksum"),
+                    "published_at": data.get("published_at"),
+                    "update_available": data.get("update_available"),
+                    "broadcast": data.get("broadcast")
+                }
+            else:
+                try:
+                    error_data = response.json()
+                    return {"success": False, "message": error_data.get("message", "Version check failed")}
+                except Exception:
+                    return {"success": False, "message": response.text}
+        except Exception as e:
+            return {"success": False, "message": f"Network Error: {str(e)}"}
+
+    def get_latest_release(self, channel="stable"):
+        """
+        Publicly checks for the latest application release without a secret.
+        Returns a dict: {'success': bool, 'version'?: str, ...}
+        """
+        try:
+            response = requests.get(f"{self.base_url}/api/update/{self.app_id}/{channel}")
+            if response.status_code == 200:
+                data = response.json()
+                return {
+                    "success": True,
+                    "version": data.get("version"),
+                    "channel": data.get("channel"),
+                    "url": data.get("url"),
+                    "checksum": data.get("checksum"),
+                    "published_at": data.get("published_at")
+                }
+            return {"success": False, "message": response.text}
+        except Exception as e:
+            return {"success": False, "message": str(e)}
+
+
+# Example Usage
+if __name__ == "__main__":
+    # Initialize XAuth
+    # In production, use your actual App ID and Secret Key
+    auth = XAuth(app_id=1, app_secret="your_app_secret_here")
+
+    print("--- XAuth Omega Python SDK Demo ---")
+
+    # 1. Public Update Check (GET)
+    print("\n[1] Checking for updates (Public)...")
+    release = auth.get_latest_release(channel="stable")
+    if release["success"]:
+        print(f"Latest Version: {release['version']} ({release['channel']})")
+        print(f"Download URL: {release['url']}")
+    else:
+        print(f"Update check failed: {release['message']}")
+
+    # 2. Secure Version Verification (POST)
+    print("\n[2] Verifying local version (Secure)...")
+    ver = auth.check_version(current_version="1.0.0", channel="stable")
+    if ver["success"]:
+        if ver["update_available"]:
+            print(f"A new version {ver['version']} is available!")
+        else:
+            print("You are running the latest version.")
+        
+        if ver["broadcast"]:
+            print(f"Server Message: {ver['broadcast']}")
+    else:
+        print(f"Secure check failed: {ver['message']}")
+
+    # 3. License Validation
+    print("\n[3] Validating license...")
+    license_key = "XXXX-XXXX-XXXX-XXXX" # Replace with a real key
+    result = auth.validate_license(license_key)
+    
+    if result["success"]:
+        print(f"License Valid! Expires: {result['expiry']}")
+        if result["broadcast"]:
+            print(f"Broadcast: {result['broadcast']}")
+        print(f"Variables: {result['variables']}")
+    else:
+        print(f"Validation failed: {result['message']}")
