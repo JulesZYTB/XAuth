@@ -1,4 +1,4 @@
-package xauth
+package main
 
 import (
 	"bytes"
@@ -57,6 +57,18 @@ type ValidationResult struct {
 	Expiry    string                 `json:"expiry,omitempty"`
 	Broadcast string                 `json:"broadcast,omitempty"`
 	Variables map[string]interface{} `json:"variables,omitempty"`
+}
+
+type VersionResult struct {
+	Success         bool   `json:"success"`
+	Message         string `json:"message,omitempty"`
+	Version         string `json:"version,omitempty"`
+	Channel         string `json:"channel,omitempty"`
+	URL             string `json:"url,omitempty"`
+	Checksum        string `json:"checksum,omitempty"`
+	PublishedAt     string `json:"published_at,omitempty"`
+	UpdateAvailable bool   `json:"update_available"`
+	Broadcast       string `json:"broadcast,omitempty"`
 }
 
 func NewXAuth(appID int, appSecret string, baseURL string) *XAuth {
@@ -189,4 +201,65 @@ func (x *XAuth) ValidateLicense(licenseKey string) *ValidationResult {
 		}
 	}
 	return &ValidationResult{Success: false, Message: string(bodyBytes)}
+}
+
+func (x *XAuth) CheckVersion(currentVersion string, channel string) (*VersionResult, error) {
+	if channel == "" {
+		channel = "stable"
+	}
+
+	payload, _ := json.Marshal(map[string]interface{}{
+		"app_id":          x.AppID,
+		"app_secret":      x.AppSecret,
+		"channel":         channel,
+		"current_version": currentVersion,
+	})
+
+	resp, err := http.Post(x.BaseURL+"/api/v1/client/verify-version", "application/json", bytes.NewBuffer(payload))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 200 {
+		var res VersionResult
+		if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
+			return nil, err
+		}
+		res.Success = true
+		return &res, nil
+	}
+
+	bodyBytes, _ := io.ReadAll(resp.Body)
+	var errData map[string]interface{}
+	if err := json.Unmarshal(bodyBytes, &errData); err == nil {
+		if msg, ok := errData["message"].(string); ok {
+			return &VersionResult{Success: false, Message: msg}, nil
+		}
+	}
+	return &VersionResult{Success: false, Message: string(bodyBytes)}, nil
+}
+
+func (x *XAuth) GetLatestRelease(channel string) (*VersionResult, error) {
+	if channel == "" {
+		channel = "stable"
+	}
+
+	resp, err := http.Get(fmt.Sprintf("%s/api/update/%d/%s", x.BaseURL, x.AppID, channel))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 200 {
+		var res VersionResult
+		if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
+			return nil, err
+		}
+		res.Success = true
+		return &res, nil
+	}
+
+	bodyBytes, _ := io.ReadAll(resp.Body)
+	return &VersionResult{Success: false, Message: string(bodyBytes)}, nil
 }
