@@ -160,9 +160,13 @@ function ApiKeyManager() {
       const res = await fetch(getApiUrl("/api/api-keys"), {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
-      const data = await res.json();
-      setKeys(data);
-    } catch {}
+      if (res.ok) {
+        const data = await res.json();
+        setKeys(Array.isArray(data) ? data : []);
+      }
+    } catch {
+      setKeys([]);
+    }
   };
 
   useEffect(() => { fetchKeys(); }, []);
@@ -236,7 +240,7 @@ function ApiKeyManager() {
       </div>
 
       <div className="space-y-2">
-        {keys.map(key => (
+        {Array.isArray(keys) && keys.map(key => (
           <div key={key.id} className="bg-dark/30 p-4 rounded-2xl border border-gray-800/50 flex justify-between items-center group">
             <div>
               <p className="text-sm font-bold text-white mb-1">{key.name}</p>

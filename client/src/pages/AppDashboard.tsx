@@ -60,18 +60,20 @@ export default function AppDashboard() {
       ]);
 
       const [core, map, dau, anomaly] = await Promise.all([
-        coreRes.json(),
-        mapRes.json(),
-        dauRes.json(),
-        anomalyRes.json()
+        coreRes.ok ? coreRes.json() : null,
+        mapRes.ok ? mapRes.json() : [],
+        dauRes.ok ? dauRes.json() : [],
+        anomalyRes.ok ? anomalyRes.json() : []
       ]);
       
-      setStats({
-        ...core,
-        mapData: Array.isArray(map) ? map : [],
-        dauData: Array.isArray(dau) ? dau : [],
-        anomalyData: Array.isArray(anomaly) ? anomaly : []
-      });
+      if (core) {
+        setStats({
+          ...core,
+          mapData: Array.isArray(map) ? map : [],
+          dauData: Array.isArray(dau) ? dau : [],
+          anomalyData: Array.isArray(anomaly) ? anomaly : []
+        });
+      }
 
     } catch (err) {
       console.error(err);

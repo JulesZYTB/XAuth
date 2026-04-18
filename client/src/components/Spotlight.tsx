@@ -29,9 +29,15 @@ export default function Spotlight() {
       const res = await fetch(getApiUrl(`/api/search?q=${encodeURIComponent(q)}`), {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
-      const data = await res.json();
-      setResults(data);
-    } catch {} finally {
+      if (res.ok) {
+        const data = await res.json();
+        setResults(data);
+      } else {
+        setResults({ apps: [], licenses: [], users: [] });
+      }
+    } catch {
+      setResults({ apps: [], licenses: [], users: [] });
+    } finally {
       setLoading(false);
     }
   }, []);
@@ -107,10 +113,10 @@ export default function Spotlight() {
 
           {!loading && query.length >= 2 && (
             <div className="space-y-6">
-              {results.apps.length > 0 && (
+              {results?.apps?.length > 0 && (
                 <div>
                   <h4 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] mb-3 px-3">Applications</h4>
-                  {results.apps.map(app => (
+                  {results?.apps?.map(app => (
                     <button 
                       key={app.id}
                       onClick={() => navigateTo(`/apps`)}
@@ -123,10 +129,10 @@ export default function Spotlight() {
                 </div>
               )}
 
-              {results.licenses.length > 0 && (
+              {results?.licenses?.length > 0 && (
                 <div>
                   <h4 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] mb-3 px-3">Licenses</h4>
-                  {results.licenses.map(lic => (
+                  {results?.licenses?.map(lic => (
                     <button 
                       key={lic.id}
                       onClick={() => navigateTo(`/apps/${lic.app_id}/licenses`)}
@@ -142,10 +148,10 @@ export default function Spotlight() {
                 </div>
               )}
 
-              {results.users.length > 0 && (
+              {results?.users?.length > 0 && (
                 <div>
                   <h4 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] mb-3 px-3">Users (Admin)</h4>
-                  {results.users.map(u => (
+                  {results?.users?.map(u => (
                     <button 
                       key={u.id}
                       onClick={() => navigateTo(`/users`)}
@@ -161,7 +167,7 @@ export default function Spotlight() {
                 </div>
               )}
 
-              {results.apps.length === 0 && results.licenses.length === 0 && results.users.length === 0 && (
+              {(!results?.apps || results.apps.length === 0) && (!results?.licenses || results.licenses.length === 0) && (!results?.users || results.users.length === 0) && (
                 <div className="py-12 text-center text-gray-600 text-xs font-bold uppercase tracking-widest">{t("search.no_results", "No matches found.")}</div>
               )}
             </div>
