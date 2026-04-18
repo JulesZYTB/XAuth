@@ -65,11 +65,11 @@ export default function Profile() {
       } else {
         setStatus({
           type: "error",
-          msg: data.message || "Failed to update profile",
+          msg: data.message || t("profile.error_update"),
         });
       }
     } catch (err) {
-      setStatus({ type: "error", msg: "Server error" });
+      setStatus({ type: "error", msg: t("profile.error_server") });
     }
   };
 
