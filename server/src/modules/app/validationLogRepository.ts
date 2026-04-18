@@ -6,9 +6,9 @@ class ValidationLogRepository {
   async create(log: Omit<ValidationLog, "id" | "created_at">) {
     const [result] = await databaseClient.query<Result>(
       `insert into validation_log 
-      (license_id, app_id, ip_address, country, country_code, status, error_type) 
-      values (?, ?, ?, ?, ?, ?, ?)`,
-      [log.license_id || null, log.app_id, log.ip_address, log.country || "Unknown", log.country_code || "??", log.status, log.error_type || null]
+      (license_id, app_id, ip_address, country, country_code, status, error_type, details) 
+      values (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [log.license_id || null, log.app_id, log.ip_address, log.country || "Unknown", log.country_code || "??", log.status, log.error_type || null, log.details || null]
     );
     return result.insertId;
   }
@@ -54,6 +54,14 @@ class ValidationLogRepository {
       [ownerId]
     );
     return rows;
+  }
+
+  async countBypassAttempts(licenseId: number) {
+    const [rows] = await databaseClient.query<Rows>(
+      "SELECT COUNT(*) as count FROM validation_log WHERE license_id = ? AND error_type IN ('BYPASS_DETECTED', 'DEBUGGER_DETECTED')",
+      [licenseId]
+    );
+    return (rows[0] as any).count;
   }
 }
 
