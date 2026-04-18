@@ -107,7 +107,7 @@ export default function AppDashboard() {
       <div className="flex flex-col items-center justify-center h-[80vh] text-gray-500 gap-4">
         <Activity className="w-12 h-12 animate-spin text-accent" />
         <p className="font-black uppercase tracking-widest text-xs">
-          Isolating Application Metrics...
+          {t("dashboard.isolating_metrics")}
         </p>
       </div>
     );
@@ -129,14 +129,14 @@ export default function AppDashboard() {
       color: "text-blue-500",
     },
     {
-      label: "Total Managed Keys",
+      label: t("dashboard.managed_keys"),
       value: stats.totalLicenses,
       growth: "DB",
       icon: Rocket,
       color: "text-orange-500",
     },
     {
-      label: "App Reach",
+      label: t("dashboard.app_reach"),
       value: stats.mapData.length,
       growth: "Countries",
       icon: Globe,
