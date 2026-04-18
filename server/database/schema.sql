@@ -31,6 +31,7 @@ CREATE TABLE license (
   license_key VARCHAR(255) UNIQUE NOT NULL,
   license_key_hash VARCHAR(64),
   hwid VARCHAR(255) NULL,
+  hwid_hash VARCHAR(64) NULL,
   ip_lock VARCHAR(45) NULL,
   status ENUM('active', 'revoked', 'expired', 'banned') DEFAULT 'active',
   expiry_date DATETIME NOT NULL,
@@ -63,6 +64,7 @@ CREATE TABLE session (
 );
 
 CREATE INDEX idx_license_key_hash ON license(license_key_hash);
+CREATE INDEX idx_hwid_hash ON license(hwid_hash);
 
 -- Enterprise Analytics & Telemetry Layer
 CREATE TABLE validation_log (
@@ -74,6 +76,7 @@ CREATE TABLE validation_log (
   country_code CHAR(2) DEFAULT '??',
   status ENUM('success', 'failed') NOT NULL,
   error_type VARCHAR(50) NULL,
+  details TEXT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (app_id) REFERENCES app(id) ON DELETE CASCADE
 );
