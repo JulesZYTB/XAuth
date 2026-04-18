@@ -147,7 +147,7 @@
     "details": "Details",
     "pattern_secret": "Key Inject/Secret Leak",
     "pattern_hwid": "HWID Spoof",
-    "pattern_toolkit": "Toolkit Detected"
+    "pattern_toolkit": "Debugger / Tools Detected"
   },
   "auth": {
     "hub_subtitle": "Enterprise Security Hub",
