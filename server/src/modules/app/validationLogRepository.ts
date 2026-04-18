@@ -63,6 +63,21 @@ class ValidationLogRepository {
     );
     return (rows[0] as any).count;
   }
+
+  async clearThreatLogs(appId: number) {
+    const [result] = await databaseClient.query<Result>(
+      "DELETE FROM validation_log WHERE app_id = ? AND status = 'failed'",
+      [appId]
+    );
+    return result.affectedRows;
+  }
+
+  async clearAllThreatLogs() {
+    const [result] = await databaseClient.query<Result>(
+      "DELETE FROM validation_log WHERE status = 'failed'"
+    );
+    return result.affectedRows;
+  }
 }
 
 export default new ValidationLogRepository();
