@@ -103,10 +103,10 @@ export default function Licenses() {
       });
 
       if (res.ok) {
-        showNotification("New license provisioned successfully.");
+        showNotification(t("licenses.success_provision"));
         fetchLicenses();
       } else {
-        showNotification("Provisioning failed.", "error");
+        showNotification(t("licenses.error_provision"), "error");
       }
     } catch (err) {
       console.error(err);
@@ -180,14 +180,14 @@ export default function Licenses() {
       );
 
       if (res.ok) {
-        showNotification("Metadata updated successfully.");
+        showNotification(t("licenses.success_metadata"));
         fetchLicenses();
       } else {
-        showNotification("Failed to update metadata.", "error");
+        showNotification(t("licenses.error_metadata"), "error");
       }
     } catch (err) {
       console.error(err);
-      showNotification("Operation failed.", "error");
+      showNotification(t("licenses.error_metadata"), "error");
     }
   };
 
