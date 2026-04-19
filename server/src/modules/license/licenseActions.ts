@@ -57,6 +57,15 @@ const add: RequestHandler = async (req, res, next) => {
       status: "active",
     });
 
+    await auditLogRepository.create({
+      action: "LICENSE_CREATE",
+      details: `License created for app ID: ${app_id} (License ID: ${id})`,
+      user_id: actor.id,
+      app_id: Number(app_id),
+      ip_address: req.ip || req.socket.remoteAddress,
+      user_agent: req.headers["user-agent"]
+    });
+
     res.status(201).json({ id });
   } catch (err) {
     next(err);
@@ -324,6 +333,15 @@ const ban: RequestHandler = async (req, res, next) => {
     const license = await licenseRepository.read(id);
     await licenseRepository.updateStatus(id, "banned");
     
+    await auditLogRepository.create({
+      action: "LICENSE_BAN",
+      details: `License banned (ID: ${id})`,
+      user_id: actor.id,
+      app_id: license?.app_id || 0,
+      ip_address: req.ip || req.socket.remoteAddress,
+      user_agent: req.headers["user-agent"]
+    });
+    
     // Webhook dispatch
     if (license) {
       await webhookService.dispatch(license.app_id, "BAN", { license_id: id, key: license.license_key });
@@ -347,6 +365,15 @@ const unban: RequestHandler = async (req, res, next) => {
 
     const license = await licenseRepository.read(id);
     await licenseRepository.updateStatus(id, "active");
+    
+    await auditLogRepository.create({
+      action: "LICENSE_UNBAN",
+      details: `License unbanned (ID: ${id})`,
+      user_id: actor.id,
+      app_id: license?.app_id || 0,
+      ip_address: req.ip || req.socket.remoteAddress,
+      user_agent: req.headers["user-agent"]
+    });
     
     // Webhook dispatch
     if (license) {
@@ -436,6 +463,10 @@ const regenerateKey: RequestHandler = async (req, res, next) => {
 const browse: RequestHandler = async (req, res, next) => {
   try {
     const appId = Number(req.params.appId);
+    if (isNaN(appId)) {
+      res.status(400).json({ message: "Invalid application ID" });
+      return;
+    }
     const actor = (req as unknown as AuthenticatedRequest).auth;
 
     if (!(await checkOwnership(actor, appId))) {
@@ -487,6 +518,15 @@ const redeem: RequestHandler = async (req, res, next) => {
       // Webhook dispatch
       if (license) {
         await webhookService.dispatch(license.app_id, "REDEEM", { license_id: license.id, key: license_key, user_id: userId });
+        
+        await auditLogRepository.create({
+          action: "LICENSE_REDEEM",
+          details: `License redeemed (ID: ${license.id}) by user: ${userId}`,
+          user_id: userId,
+          app_id: license.app_id,
+          ip_address: req.ip || req.socket.remoteAddress,
+          user_agent: req.headers["user-agent"]
+        });
       }
       res.json({ message: "License successfully linked to your account" });
     }
@@ -505,7 +545,17 @@ const modify: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    const license = await licenseRepository.read(id);
     await licenseRepository.update(id, req.body);
+    
+    await auditLogRepository.create({
+      action: "LICENSE_MODIFY",
+      details: `License modified (ID: ${id})`,
+      user_id: actor.id,
+      app_id: license?.app_id || 0,
+      ip_address: req.ip || req.socket.remoteAddress,
+      user_agent: req.headers["user-agent"]
+    });
     res.sendStatus(204);
   } catch (err) {
     next(err);
