@@ -2,6 +2,7 @@ import type { Request, RequestHandler } from "express";
 import crypto from "node:crypto";
 import appRepository from "./appRepository.js";
 import type { AuthUser } from "../../types/index.js";
+import auditLogRepository from "../audit/auditLogRepository.js";
 
 interface AuthenticatedRequest extends Request {
   auth: AuthUser;
@@ -54,6 +55,15 @@ const add: RequestHandler = async (req, res, next) => {
       is_paused: false,
     });
 
+    await auditLogRepository.create({
+      action: "APP_CREATE",
+      details: `Application created: ${name} (ID: ${insertId})`,
+      user_id: ownerId,
+      app_id: insertId,
+      ip_address: req.ip || req.socket.remoteAddress,
+      user_agent: req.headers["user-agent"]
+    });
+
     res.status(201).json({ insertId, secret_key });
   } catch (err) {
     next(err);
@@ -69,6 +79,10 @@ const edit: RequestHandler = async (req, res, next) => {
     }
 
     const id = Number(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ message: "Invalid application ID" });
+      return;
+    }
     const actor = (req as unknown as AuthenticatedRequest).auth;
 
     if (actor.role === "admin") {
@@ -76,6 +90,16 @@ const edit: RequestHandler = async (req, res, next) => {
     } else {
       await appRepository.update(id, actor.id, validation.data);
     }
+
+    await auditLogRepository.create({
+      action: "APP_EDIT",
+      details: `Application edited (ID: ${id})`,
+      user_id: actor.id,
+      app_id: id,
+      ip_address: req.ip || req.socket.remoteAddress,
+      user_agent: req.headers["user-agent"]
+    });
+
     res.sendStatus(204);
   } catch (err) {
     next(err);
@@ -87,6 +111,10 @@ const edit: RequestHandler = async (req, res, next) => {
 const togglePause: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ message: "Invalid application ID" });
+      return;
+    }
     const actor = (req as unknown as AuthenticatedRequest).auth;
 
     const app = await appRepository.read(id);
@@ -101,6 +129,16 @@ const togglePause: RequestHandler = async (req, res, next) => {
     } else {
       await appRepository.update(id, actor.id, newData);
     }
+
+    await auditLogRepository.create({
+      action: "APP_TOGGLE_PAUSE",
+      details: `Application pause toggled (ID: ${id}) to ${newData.is_paused}`,
+      user_id: actor.id,
+      app_id: id,
+      ip_address: req.ip || req.socket.remoteAddress,
+      user_agent: req.headers["user-agent"]
+    });
+
     res.sendStatus(204);
   } catch (err) {
     next(err);
@@ -111,6 +149,10 @@ const togglePause: RequestHandler = async (req, res, next) => {
 const destroy: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ message: "Invalid application ID" });
+      return;
+    }
     const actor = (req as unknown as Request & { auth: AuthUser }).auth;
 
     let affected;
@@ -124,6 +166,16 @@ const destroy: RequestHandler = async (req, res, next) => {
       res.status(404).json({ message: "App not found or unauthorized" });
       return;
     }
+
+    await auditLogRepository.create({
+      action: "APP_DELETE",
+      details: `Application deleted (ID: ${id})`,
+      user_id: actor.id,
+      app_id: id,
+      ip_address: req.ip || req.socket.remoteAddress,
+      user_agent: req.headers["user-agent"]
+    });
+
     res.sendStatus(204);
   } catch (err) {
     next(err);
