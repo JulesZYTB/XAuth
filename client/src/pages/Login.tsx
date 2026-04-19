@@ -41,20 +41,20 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-dark p-4 font-sans selection:bg-accent selection:text-white">
+    <div className="min-h-screen flex items-center justify-center bg-dark p-4 sm:p-6 font-sans selection:bg-accent selection:text-white">
       <PageSEO title={t("seo.login_title")} />
 
-      <div className="max-w-md w-full bg-secondary p-12 rounded-[3rem] border border-gray-800 shadow-2xl relative overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-1000">
+      <div className="max-w-md w-full bg-secondary p-8 sm:p-12 rounded-[2.5rem] sm:rounded-[3rem] border border-gray-800 shadow-2xl relative overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-1000">
         <div className="absolute top-0 left-0 w-full h-1 bg-accent/20" />
 
-        <header className="text-center mb-12">
-          <div className="inline-flex p-4 bg-accent/10 rounded-3xl mb-6">
-            <ShieldCheck className="w-12 h-12 text-accent" aria-hidden="true" />
+        <header className="text-center mb-8 sm:mb-12">
+          <div className="inline-flex p-3 sm:p-4 bg-accent/10 rounded-2xl sm:rounded-3xl mb-6">
+            <ShieldCheck className="w-10 h-10 sm:w-12 sm:h-12 text-accent" aria-hidden="true" />
           </div>
-          <h1 className="text-4xl font-black text-white tracking-tighter mb-2">
+          <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tighter mb-2">
             XAuth Omega
           </h1>
-          <p className="text-gray-500 text-sm font-medium uppercase tracking-[0.2em]">
+          <p className="text-gray-500 text-[10px] sm:text-sm font-medium uppercase tracking-[0.2em]">
             {t("auth.hub_subtitle", "Enterprise Security Hub")}
           </p>
         </header>
