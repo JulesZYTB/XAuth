@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import userRepository from "./userRepository.js";
 import type { AuthUser, User } from "../../types/index.js";
 import { loginSchema, registerSchema } from "../security/schemas.js";
+import auditLogRepository from "../audit/auditLogRepository.js";
 
 const APP_SECRET = process.env.APP_SECRET;
 
@@ -39,6 +40,14 @@ const login: RequestHandler = async (req, res, next) => {
       APP_SECRET || "default_secret",
       { expiresIn: "1h" }
     );
+
+    await auditLogRepository.create({
+      action: "USER_LOGIN",
+      details: `Successful login for user: ${user.username}`,
+      user_id: user.id,
+      ip_address: req.ip || req.socket.remoteAddress,
+      user_agent: req.headers["user-agent"]
+    });
 
     res.json({ token, user: { id: user.id, username: user.username, email: user.email, role: user.role } });
   } catch (err) {
@@ -83,6 +92,14 @@ const register: RequestHandler = async (req, res, next) => {
       role: role as "user" | "admin",
     });
 
+    await auditLogRepository.create({
+      action: "USER_REGISTER",
+      details: `New user registered: ${username} (${role})`,
+      user_id: insertId,
+      ip_address: req.ip || req.socket.remoteAddress,
+      user_agent: req.headers["user-agent"]
+    });
+
     res.status(201).json({ 
       message: role === "admin" ? "Admin registration successful" : "Registration successful", 
       insertId 
@@ -112,6 +129,10 @@ const browse: RequestHandler = async (req, res, next) => {
 const editRole: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ message: "Invalid user ID" });
+      return;
+    }
     const { role } = req.body;
     await userRepository.updateRole(id, role as "user" | "admin");
     res.sendStatus(204);
@@ -123,6 +144,10 @@ const editRole: RequestHandler = async (req, res, next) => {
 const destroy: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ message: "Invalid user ID" });
+      return;
+    }
     await userRepository.delete(id);
     res.sendStatus(204);
   } catch (err) {
