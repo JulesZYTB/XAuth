@@ -22,6 +22,10 @@ const checkWebhookOwnership = async (user: AuthUser, webhookId: number) => {
 const browse: RequestHandler = async (req, res, next) => {
   try {
     const appId = Number(req.params.appId);
+    if (isNaN(appId)) {
+      res.status(400).json({ message: "Invalid application ID" });
+      return;
+    }
     const actor = (req as any).auth as AuthUser;
 
     if (!(await checkOwnership(actor, appId))) {
@@ -64,6 +68,10 @@ const add: RequestHandler = async (req, res, next) => {
 const edit: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ message: "Invalid webhook ID" });
+      return;
+    }
     const actor = (req as any).auth as AuthUser;
 
     if (!(await checkWebhookOwnership(actor, id))) {
