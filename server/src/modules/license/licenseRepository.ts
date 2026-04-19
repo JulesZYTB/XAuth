@@ -113,8 +113,14 @@ class LicenseRepository {
   }
 
   async update(id: number, data: Partial<License>) {
-    const fields = Object.keys(data).map(key => `${key} = ?`).join(", ");
-    const values = Object.values(data);
+    const allowedFields = ["status", "expiry_date", "variables", "ip_lock", "hwid"];
+    const keys = Object.keys(data).filter(key => allowedFields.includes(key));
+    
+    if (keys.length === 0) return 0;
+
+    const fields = keys.map(key => `${key} = ?`).join(", ");
+    const values = keys.map(key => (data as any)[key]);
+    
     const [result] = await databaseClient.query<Result>(
       `update license set ${fields} where id = ?`,
       [...values, id]
