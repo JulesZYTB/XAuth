@@ -68,8 +68,36 @@ const add: RequestHandler = async (req, res, next) => {
     const actor = (req as unknown as AuthenticatedRequest).auth;
 
     if (!(await checkAppAccess(actor, app_id))) {
-      res.status(403).json({ message: "Forbidden: You do not own this application" });
+      res.status(403).json({ message: "Forbidden: You do not have access to this application" });
       return;
+    }
+
+    // If actor is a reseller, check their quotas BEFORE creation
+    if (actor.role !== "admin") {
+      const app = await appRepository.read(app_id);
+      if (app && app.owner_id !== actor.id) {
+          const reseller = await resellerRepository.getReseller(actor.id, app_id);
+          if (reseller) {
+              // 1. Check Key Quota
+              if (reseller.keys_generated >= reseller.key_quota) {
+                  res.status(403).json({ message: "Quota de revendeur atteint. Veuillez contacter l'administrateur." });
+                  return;
+              }
+
+              // 2. Check Day Quota (Duration)
+              const expiryDate = new Date(expiry_date);
+              const now = new Date();
+              const diffTime = Math.abs(expiryDate.getTime() - now.getTime());
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+              
+              if (diffDays > reseller.max_day_quota) {
+                  res.status(403).json({ 
+                    message: `Vous ne pouvez pas créer de licence de plus de ${reseller.max_day_quota} jours.` 
+                  });
+                  return;
+              }
+          }
+      }
     }
 
     const id = await licenseRepository.create({
@@ -80,18 +108,11 @@ const add: RequestHandler = async (req, res, next) => {
       created_by: actor.id
     });
 
-    // If actor is a reseller, increment their keys_generated count
+    // Increment keys_generated AFTER successful creation
     if (actor.role !== "admin") {
       const app = await appRepository.read(app_id);
       if (app && app.owner_id !== actor.id) {
-          const reseller = await resellerRepository.getReseller(actor.id, app_id);
-          if (reseller) {
-              if (reseller.keys_generated >= reseller.key_quota) {
-                  res.status(403).json({ message: "Quota de revendeur atteint. Veuillez contacter l'administrateur." });
-                  return;
-              }
-              await resellerRepository.incrementKeysGenerated(actor.id, app_id);
-          }
+          await resellerRepository.incrementKeysGenerated(actor.id, app_id);
       }
     }
 

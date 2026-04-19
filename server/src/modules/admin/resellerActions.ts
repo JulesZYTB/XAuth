@@ -35,7 +35,7 @@ const browse: RequestHandler = async (req, res, next) => {
 
 const add: RequestHandler = async (req, res, next) => {
   try {
-    const { appId, email, keyQuota } = req.body;
+    const { appId, email, keyQuota, maxDayQuota } = req.body;
     const actor = (req as unknown as AuthenticatedRequest).auth;
 
     if (!(await checkAppOwnership(actor, appId))) {
@@ -59,7 +59,8 @@ const add: RequestHandler = async (req, res, next) => {
     await resellerRepository.createReseller({
         user_id: user.id,
         app_id: appId,
-        key_quota: keyQuota
+        key_quota: keyQuota,
+        max_day_quota: maxDayQuota || 365
     });
 
     await auditLogRepository.create({

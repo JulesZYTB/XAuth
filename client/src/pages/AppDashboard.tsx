@@ -62,6 +62,7 @@ type Reseller = {
   email: string;
   key_quota: number;
   keys_generated: number;
+  max_day_quota: number;
 };
 
 export default function AppDashboard() {
@@ -76,6 +77,7 @@ export default function AppDashboard() {
   const [resellers, setResellers] = useState<Reseller[]>([]);
   const [newResellerEmail, setNewResellerEmail] = useState("");
   const [newResellerQuota, setNewResellerQuota] = useState(10);
+  const [newResellerMaxDays, setNewResellerMaxDays] = useState(30);
   const [resellerLoading, setResellerLoading] = useState(false);
 
   const fetchStats = useCallback(async () => {
@@ -144,7 +146,6 @@ export default function AppDashboard() {
     try {
       const res = await fetch(getApiUrl("/api/resellers"), {
         method: "POST",
-        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -153,6 +154,7 @@ export default function AppDashboard() {
           appId: Number(appId),
           email: newResellerEmail,
           keyQuota: newResellerQuota,
+          maxDayQuota: newResellerMaxDays
         }),
       });
 
@@ -343,6 +345,17 @@ export default function AppDashboard() {
                    onChange={(e) => setNewResellerQuota(Number(e.target.value))}
                  />
               </div>
+              <div className="space-y-2">
+                 <label className="text-[10px] text-gray-500 uppercase font-black px-1">{t("apps.reseller_max_days", "Max License Duration (Days)")}</label>
+                 <input 
+                   type="number" 
+                   required
+                   min="1"
+                   className="w-full bg-dark/50 border border-gray-800 rounded-2xl px-5 py-4 text-sm text-white outline-none focus:border-orange-500 transition-all font-mono"
+                   value={newResellerMaxDays}
+                   onChange={(e) => setNewResellerMaxDays(Number(e.target.value))}
+                 />
+              </div>
               <button 
                 type="submit" 
                 disabled={resellerLoading}
@@ -373,7 +386,7 @@ export default function AppDashboard() {
                                   />
                                </div>
                                <span className="text-[10px] font-black text-orange-500 uppercase">
-                                  {r.keys_generated} / {r.key_quota}
+                                  {r.keys_generated} / {r.key_quota} • {r.max_day_quota}d Max
                                </span>
                             </div>
                          </div>

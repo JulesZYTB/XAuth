@@ -7,6 +7,7 @@ interface Reseller {
   app_id: number;
   key_quota: number;
   keys_generated: number;
+  max_day_quota: number;
   created_at?: Date;
 }
 
@@ -28,10 +29,10 @@ class ResellerRepository {
   }
 
   async createReseller(data: Omit<Reseller, "id" | "keys_generated">) {
-    const [result] = await databaseClient.query<Result>(
-       "insert into reseller (user_id, app_id, key_quota) values (?, ?, ?)",
-       [data.user_id, data.app_id, data.key_quota]
-    );
+     const [result] = await databaseClient.query<Result>(
+        "insert into reseller (user_id, app_id, key_quota, max_day_quota) values (?, ?, ?, ?)",
+        [data.user_id, data.app_id, data.key_quota, data.max_day_quota]
+     );
     return result.insertId;
   }
 

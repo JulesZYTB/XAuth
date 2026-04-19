@@ -260,17 +260,19 @@ export default function Apps() {
                       )}
                     </button>
                   )}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAppForRelease(app);
-                    setIsReleaseModalOpen(true);
-                  }}
-                  className="p-3 bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded-2xl hover:bg-blue-500/20 transition-all cursor-pointer"
-                  title={t("apps.manage_releases", "Manage Releases")}
-                >
-                  <Package className="w-5 h-5" />
-                </button>
+                  {isOwner(app) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAppForRelease(app);
+                        setIsReleaseModalOpen(true);
+                      }}
+                      className="p-3 bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded-2xl hover:bg-blue-500/20 transition-all cursor-pointer"
+                      title={t("apps.manage_releases", "Manage Releases")}
+                    >
+                      <Package className="w-5 h-5" />
+                    </button>
+                  )}
                   {isOwner(app) && (
                     <>
                       <button
