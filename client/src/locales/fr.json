@@ -16,7 +16,9 @@
     "user_management": "Gestion des Utilisateurs",
     "audit_logs": "Journaux d'Audit",
     "documentation": "Documentation",
-    "sign_out": "Déconnexion"
+    "sign_out": "Déconnexion",
+    "toggle_menu": "Basculer le menu",
+    "home": "Accueil"
   },
   "docs": {
     "title": "Documentation Technique",
@@ -86,7 +88,8 @@
     "copied": "Copié !",
     "generate": "Générer",
     "close": "Fermer",
-    "never": "Jamais"
+    "never": "Jamais",
+    "back": "Retour"
   },
   "time": {
     "1_hour": "1 Heure",
@@ -232,7 +235,8 @@
     "no_licenses": "Aucune licence active trouvée.",
     "redeem_hint": "Activez une clé produit ci-dessus pour accéder à votre logiciel.",
     "trial_request": "Demander un Essai Gratuit (24h)",
-    "trial_success": "Essai généré avec succès ! Voici votre clé :"
+    "trial_success": "Essai généré avec succès ! Voici votre clé :",
+    "limited_offer": "Offre à durée limitée"
   },
   "apps": {
     "title": "Portail des Applications",
