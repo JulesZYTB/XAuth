@@ -78,8 +78,12 @@ const add: RequestHandler = async (req, res, next) => {
       if (app && app.owner_id !== actor.id) {
           const reseller = await resellerRepository.getReseller(actor.id, app_id);
           if (reseller) {
+              const quotaKey = Number(reseller.key_quota);
+              const quotaDay = Number(reseller.max_day_quota);
+              const currentGenerated = Number(reseller.keys_generated);
+
               // 1. Check Key Quota
-              if (reseller.keys_generated >= reseller.key_quota) {
+              if (currentGenerated >= quotaKey) {
                   res.status(403).json({ message: "Quota de revendeur atteint. Veuillez contacter l'administrateur." });
                   return;
               }
@@ -87,15 +91,19 @@ const add: RequestHandler = async (req, res, next) => {
               // 2. Check Day Quota (Duration)
               const expiryDate = new Date(expiry_date);
               const now = new Date();
-              const diffTime = Math.abs(expiryDate.getTime() - now.getTime());
+              const diffTime = expiryDate.getTime() - now.getTime();
               const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
               
-              if (diffDays > reseller.max_day_quota) {
+              if (diffDays > quotaDay) {
                   res.status(403).json({ 
-                    message: `Vous ne pouvez pas créer de licence de plus de ${reseller.max_day_quota} jours.` 
+                    message: `Validation échouée : Vous demandez ${diffDays} jours alors que votre limite est de ${quotaDay} jours.` 
                   });
                   return;
               }
+          } else {
+              // Not the owner and not a reseller? Block!
+              res.status(403).json({ message: "Forbidden: You are not authorized to create licenses for this application." });
+              return;
           }
       }
     }
