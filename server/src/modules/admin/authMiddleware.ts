@@ -51,9 +51,21 @@ const verifyToken: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const decoded = jwt.verify(token, APP_SECRET || "default_secret");
+    const decoded = jwt.verify(token, APP_SECRET || "default_secret") as AuthUser;
 
-    (req as any).auth = decoded;
+    // SECURITY HARDENING: Re-fetch user from DB to ensure they still exist and roles haven't changed
+    const user = await userRepository.read(decoded.id);
+    if (!user) {
+      res.status(401).json({ message: "User no longer exists" });
+      return;
+    }
+
+    (req as any).auth = {
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      email: user.email
+    };
 
     next();
   } catch (err) {
