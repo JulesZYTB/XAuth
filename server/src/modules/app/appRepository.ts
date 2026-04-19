@@ -28,11 +28,14 @@ class AppRepository {
   }
 
   async update(id: number, owner_id: number, data: Partial<App>) {
-    const keys = Object.keys(data);
+    const allowedFields = ["name", "broadcast_message", "is_paused"];
+    const keys = Object.keys(data).filter(key => allowedFields.includes(key));
+    
     if (keys.length === 0) return 0;
     
     const fields = keys.map(key => `${key} = ?`).join(", ");
-    const values = Object.values(data);
+    const values = keys.map(key => (data as any)[key]);
+    
     const [result] = await databaseClient.query<Result>(
       `update app set ${fields} where id = ? and owner_id = ?`,
       [...values, id, owner_id]
@@ -41,11 +44,14 @@ class AppRepository {
   }
 
   async updateAdmin(id: number, data: Partial<App>) {
-    const keys = Object.keys(data);
+    const allowedFields = ["name", "broadcast_message", "is_paused", "owner_id"];
+    const keys = Object.keys(data).filter(key => allowedFields.includes(key));
+    
     if (keys.length === 0) return 0;
 
     const fields = keys.map(key => `${key} = ?`).join(", ");
-    const values = Object.values(data);
+    const values = keys.map(key => (data as any)[key]);
+    
     const [result] = await databaseClient.query<Result>(
       `update app set ${fields} where id = ?`,
       [...values, id]
