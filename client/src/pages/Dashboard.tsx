@@ -191,32 +191,32 @@ export default function Dashboard() {
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000">
       <PageSEO title={t("seo.dashboard_title")} />
 
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+      <header className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6">
         <div>
-          <h2 className="text-4xl font-black text-white tracking-tighter">
+          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tighter">
             {t("dashboard.title", "System Overview")}
           </h2>
-          <p className="text-gray-400 mt-1 font-medium">
+          <p className="text-gray-400 mt-1 font-medium text-sm sm:text-base">
             {t(
               "dashboard.subtitle",
               "Real-time telemetrics for XAuth Omega infrastructure",
             )}
           </p>
         </div>
-        <div className="flex flex-col md:flex-row items-center gap-4">
-          <div className="bg-secondary px-6 py-3 rounded-2xl border border-gray-800 flex items-center gap-3">
-            <span className="text-[10px] text-gray-500 uppercase font-black">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full xl:w-auto">
+          <div className="bg-secondary px-6 py-3 rounded-2xl border border-gray-800 flex items-center justify-between sm:justify-start gap-3 flex-1 overflow-hidden">
+            <span className="text-[10px] text-gray-500 uppercase font-black whitespace-nowrap">
               {t("dashboard.node_status", "Node Status:")}
             </span>
-            <span className="text-sm font-bold text-green-500 flex items-center gap-1.5">
+            <span className="text-sm font-bold text-green-500 flex items-center gap-1.5 whitespace-nowrap">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />{" "}
               {t("dashboard.operational", "Operational")}
             </span>
-            <ChevronRight className="w-4 h-4 text-gray-600" />
+            <ChevronRight className="w-4 h-4 text-gray-600 hidden sm:block" />
           </div>
           <button
             onClick={exportReport}
-            className="flex items-center gap-2 bg-accent/10 border border-accent/20 text-accent px-5 py-3 rounded-2xl text-[10px] font-black uppercase hover:bg-accent/20 transition-colors"
+            className="flex items-center justify-center gap-2 bg-accent/10 border border-accent/20 text-accent px-5 py-3 rounded-2xl text-[10px] font-black uppercase hover:bg-accent/20 transition-colors cursor-pointer"
           >
             <Download className="w-4 h-4" />
             {t("dashboard.export", "Export Report")}
@@ -224,11 +224,11 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {statCards.map((stat) => (
           <div
             key={stat.label}
-            className="bg-secondary p-8 rounded-[2.5rem] border border-gray-800 shadow-xl hover:border-accent/30 transition-all group"
+            className="bg-secondary p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-gray-800 shadow-xl hover:border-accent/30 transition-all group"
           >
             <div className="flex justify-between items-start mb-6">
               <div className="p-4 rounded-2xl bg-dark/50 border border-gray-800 group-hover:border-accent/20 transition-colors">
