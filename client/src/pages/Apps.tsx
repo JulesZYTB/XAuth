@@ -239,89 +239,91 @@ export default function Apps() {
           {apps.map((app) => (
             <li
               key={app.id}
-              className="group bg-secondary border border-gray-800 rounded-[2.5rem] p-8 shadow-2xl hover:border-accent/40 transition-all outline-none relative overflow-hidden"
+              className="group bg-secondary border border-gray-800 rounded-[2.5rem] p-6 sm:p-8 shadow-2xl hover:border-accent/40 transition-all outline-none relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 p-8 flex gap-2">
-                  {isOwner(app) && (
-                    <button
-                      type="button"
-                      onClick={() => handleTogglePause(app)}
-                      className={`p-3 rounded-2xl transition-all cursor-pointer ${app.is_paused ? "bg-orange-500/10 text-orange-500 border border-orange-500/20" : "bg-gray-800/50 text-gray-500 hover:text-white border border-transparent"}`}
-                      title={
-                        app.is_paused
-                          ? t("apps.resume_app", "Resume App")
-                          : t("apps.pause_app", "Pause App")
-                      }
-                    >
-                      {app.is_paused ? (
-                        <Play className="w-5 h-5" fill="currentColor" />
-                      ) : (
-                        <Pause className="w-5 h-5" fill="currentColor" />
-                      )}
-                    </button>
-                  )}
-                  {isOwner(app) && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAppForRelease(app);
-                        setIsReleaseModalOpen(true);
-                      }}
-                      className="p-3 bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded-2xl hover:bg-blue-500/20 transition-all cursor-pointer"
-                      title={t("apps.manage_releases", "Manage Releases")}
-                    >
-                      <Package className="w-5 h-5" />
-                    </button>
-                  )}
-                  {isOwner(app) && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setAppForWebhook(app);
-                          setIsWebhookModalOpen(true);
-                        }}
-                        className="p-3 bg-accent/10 text-accent border border-accent/20 rounded-2xl hover:bg-accent/20 transition-all cursor-pointer"
-                        title={t("apps.config_webhooks", "Configure Webhooks")}
-                      >
-                        <Webhook className="w-5 h-5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setAppToDelete(app.id);
-                          setIsDeleteModalOpen(true);
-                        }}
-                        className="p-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-2xl hover:bg-red-500/20 transition-all cursor-pointer"
-                        aria-label={t("apps.delete_app", "Delete Application")}
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </>
-                  )}
-              </div>
-
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-14 h-14 bg-accent/10 rounded-2xl flex items-center justify-center border border-accent/20">
-                  <Settings2
-                    className="w-7 h-7 text-accent"
-                    aria-hidden="true"
-                  />
-                </div>
-                <div>
-                  <h3 className="text-xl font-black text-white tracking-tight">
-                    {app.name}
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`w-2 h-2 rounded-full ${app.is_paused ? "bg-orange-500 animate-pulse" : "bg-green-500"}`}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+                <div className="flex items-center gap-4 order-2 sm:order-1">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-accent/10 rounded-2xl flex items-center justify-center border border-accent/20 shrink-0">
+                    <Settings2
+                      className="w-6 h-6 sm:w-7 sm:h-7 text-accent"
+                      aria-hidden="true"
                     />
-                    <span className="text-[10px] text-gray-500 uppercase font-black tracking-widest">
-                      {app.is_paused
-                        ? t("apps.service_paused", "Service Paused")
-                        : t("apps.active_protected", "Active & Protected")}
-                    </span>
                   </div>
+                  <div>
+                    <h3 className="text-lg sm:text-xl font-black text-white tracking-tight leading-tight">
+                      {app.name}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div
+                        className={`w-2 h-2 rounded-full ${app.is_paused ? "bg-orange-500 animate-pulse" : "bg-green-500"}`}
+                      />
+                      <span className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest">
+                        {app.is_paused
+                          ? t("apps.service_paused", "Service Paused")
+                          : t("apps.active_protected", "Active & Protected")}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2 order-1 sm:order-2">
+                    {isOwner(app) && (
+                      <button
+                        type="button"
+                        onClick={() => handleTogglePause(app)}
+                        className={`p-3 rounded-2xl transition-all cursor-pointer ${app.is_paused ? "bg-orange-500/10 text-orange-500 border border-orange-500/20" : "bg-gray-800/50 text-gray-500 hover:text-white border border-transparent"}`}
+                        title={
+                          app.is_paused
+                            ? t("apps.resume_app", "Resume App")
+                            : t("apps.pause_app", "Pause App")
+                        }
+                      >
+                        {app.is_paused ? (
+                          <Play className="w-5 h-5" fill="currentColor" />
+                        ) : (
+                          <Pause className="w-5 h-5" fill="currentColor" />
+                        )}
+                      </button>
+                    )}
+                    {isOwner(app) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAppForRelease(app);
+                          setIsReleaseModalOpen(true);
+                        }}
+                        className="p-3 bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded-2xl hover:bg-blue-500/20 transition-all cursor-pointer"
+                        title={t("apps.manage_releases", "Manage Releases")}
+                      >
+                        <Package className="w-5 h-5" />
+                      </button>
+                    )}
+                    {isOwner(app) && (
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAppForWebhook(app);
+                            setIsWebhookModalOpen(true);
+                          }}
+                          className="p-3 bg-accent/10 text-accent border border-accent/20 rounded-2xl hover:bg-accent/20 transition-all cursor-pointer"
+                          title={t("apps.config_webhooks", "Configure Webhooks")}
+                        >
+                          <Webhook className="w-5 h-5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAppToDelete(app.id);
+                            setIsDeleteModalOpen(true);
+                          }}
+                          className="p-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-2xl hover:bg-red-500/20 transition-all cursor-pointer"
+                          aria-label={t("apps.delete_app", "Delete Application")}
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    )}
                 </div>
               </div>
 
