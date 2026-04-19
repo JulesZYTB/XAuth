@@ -138,12 +138,12 @@ export default function UserHub() {
 
   return (
     <div className="space-y-12 animate-in fade-in duration-700 h-full">
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-        <div>
-          <h2 className="text-3xl font-black text-white tracking-tight">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="w-full">
+          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             {t("user_hub.title", "License Hub")}
           </h2>
-          <p className="text-gray-400 mt-1">
+          <p className="text-gray-400 mt-1 text-sm md:text-base">
             {t(
               "user_hub.subtitle",
               "Manage your active software subscriptions and products",
@@ -153,9 +153,9 @@ export default function UserHub() {
 
         <form
           onSubmit={handleRedeem}
-          className="w-full md:w-auto flex flex-col gap-3"
+          className="w-full lg:w-auto flex flex-col gap-3"
         >
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative group flex-1">
               <Key
                 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-600 group-focus-within:text-accent transition-colors"
@@ -164,7 +164,7 @@ export default function UserHub() {
               <input
                 type="text"
                 placeholder="PRO-XXXX-XXXX-XXXX"
-                className="w-full md:w-64 bg-dark/50 border border-gray-800 rounded-2xl pl-12 pr-4 py-4 outline-none focus:border-accent transition-all text-white text-sm font-mono"
+                className="w-full lg:w-64 bg-dark/50 border border-gray-800 rounded-2xl pl-12 pr-4 py-4 outline-none focus:border-accent transition-all text-white text-sm font-mono"
                 value={redeemKey}
                 onChange={(e) => setRedeemKey(e.target.value)}
                 required
@@ -173,7 +173,7 @@ export default function UserHub() {
             </div>
             <button
               type="submit"
-              className="bg-white hover:bg-white/90 text-dark px-8 py-4 rounded-2xl font-black transition-all shadow-xl active:scale-95 flex items-center gap-2 cursor-pointer"
+              className="bg-white hover:bg-white/90 text-dark px-8 py-4 rounded-2xl font-black transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
               <CreditCard className="w-5 h-5" />{" "}
               {t("user_hub.redeem", "Redeem")}
@@ -181,7 +181,7 @@ export default function UserHub() {
           </div>
           {redeemStatus && (
             <div
-              className={`text-xs font-bold flex items-center gap-2 px-4 py-2 rounded-xl animate-in fade-in slide-in-from-top-2 ${redeemStatus.type === "success" ? "text-green-400 bg-green-400/10 border border-green-400/20" : "text-red-400 bg-red-400/10 border border-red-400/20"}`}
+              className={`text-[10px] font-bold flex items-center gap-2 px-4 py-2 rounded-xl animate-in fade-in slide-in-from-top-2 ${redeemStatus.type === "success" ? "text-green-400 bg-green-400/10 border border-green-400/20" : "text-red-400 bg-red-400/10 border border-red-400/20"}`}
             >
               {redeemStatus.type === "success" ? (
                 <CheckCircle2 className="w-4 h-4" />
@@ -195,46 +195,46 @@ export default function UserHub() {
       </header>
 
       {/* Trial Request CTA */}
-      <section className="bg-accent/5 border border-accent/20 rounded-[3rem] p-10 relative overflow-hidden group">
-         <div className="absolute top-0 right-0 p-12 opacity-5 scale-150 rotate-12 group-hover:scale-[1.6] transition-transform duration-1000">
+      <section className="bg-accent/5 border border-accent/20 rounded-[2rem] sm:rounded-[3rem] p-6 sm:p-10 relative overflow-hidden group">
+         <div className="absolute top-0 right-0 p-12 opacity-5 scale-150 rotate-12 group-hover:scale-[1.6] transition-transform duration-1000 hidden sm:block">
             <FlaskConical className="w-40 h-40 text-accent" />
          </div>
          
-         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
-            <div className="max-w-xl text-center md:text-left">
+         <div className="relative z-10 flex flex-col xl:flex-row items-center justify-between gap-8 md:gap-10">
+            <div className="w-full xl:max-w-xl text-center xl:text-left">
                <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 rounded-full mb-6">
                   <Clock className="w-4 h-4 text-accent" />
                   <span className="text-[10px] font-black text-accent uppercase tracking-widest">
-                     Limited Time Offer
+                     {t("user_hub.limited_offer")}
                   </span>
                </div>
-               <h3 className="text-3xl font-black text-white mb-4">
+               <h3 className="text-2xl sm:text-3xl font-black text-white mb-4">
                   {t("user_hub.trial_request", "Free 24h Omega Trial")}
                </h3>
-               <p className="text-gray-400 font-medium">
+               <p className="text-gray-400 text-sm md:text-base font-medium">
                   Experience the full power of our protected software. Generate a one-time trial key locked to your hardware instantly.
                </p>
             </div>
 
-            <div className="w-full md:w-[400px] space-y-4">
+            <div className="w-full sm:w-[400px] space-y-4">
                {trialResult ? (
                   <div className="bg-green-500/10 border border-green-500/20 p-6 rounded-3xl animate-in zoom-in duration-500">
                      <p className="text-[10px] text-green-500 font-black uppercase mb-3">{t("user_hub.trial_success")}</p>
-                     <div className="flex items-center justify-between bg-dark/50 p-4 rounded-xl border border-green-500/20">
-                        <code className="text-white font-mono text-sm">{trialResult.key}</code>
+                     <div className="flex items-center justify-between bg-dark/50 p-4 rounded-xl border border-green-500/20 gap-3">
+                        <code className="text-white font-mono text-xs sm:text-sm truncate">{trialResult.key}</code>
                         <button 
                           onClick={() => {
                             navigator.clipboard.writeText(trialResult.key);
                             setRedeemStatus({ type: "success", msg: t("common.copied") });
                           }}
-                          className="p-2 text-green-500 hover:bg-green-500/10 rounded-lg transition-all"
+                          className="p-2 text-green-500 hover:bg-green-500/10 rounded-lg transition-all flex-shrink-0"
                         >
                            <Copy className="w-4 h-4" />
                         </button>
                      </div>
                      <button 
                        onClick={() => setTrialResult(null)}
-                       className="w-full mt-4 text-[10px] text-gray-500 font-black uppercase hover:text-white transition-all"
+                       className="w-full mt-4 text-[10px] text-gray-500 font-black uppercase hover:text-white transition-all cursor-pointer"
                      >
                         Close
                      </button>
@@ -254,7 +254,7 @@ export default function UserHub() {
                      <button 
                         onClick={handleRequestTrial}
                         disabled={!selectedAppId || trialLoading}
-                        className="w-full bg-accent h-[64px] rounded-2xl text-white text-sm font-black flex items-center justify-center gap-3 shadow-2xl shadow-accent/40 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+                        className="w-full bg-accent h-[60px] sm:h-[64px] rounded-2xl text-white text-sm font-black flex items-center justify-center gap-3 shadow-2xl shadow-accent/40 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
                      >
                         {trialLoading ? <Activity className="w-5 h-5 animate-spin" /> : <FlaskConical className="w-5 h-5" />}
                         {t("user_hub.trial_request")}
