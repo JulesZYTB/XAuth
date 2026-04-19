@@ -58,7 +58,16 @@ const verify: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    // 3. Get Latest Release
+    // 3. Version Banning Check (Kill-Switch)
+    if (current_version && await releaseRepository.isVersionBanned(app_id, current_version)) {
+      res.status(403).json({ 
+        message: "Cette version est compromise ou obsolète. Veuillez télécharger la mise à jour pour continuer.",
+        banned: true 
+      });
+      return;
+    }
+
+    // 4. Get Latest Release
     const release = await releaseRepository.getLatest(app_id, channel);
     
     if (!release) {

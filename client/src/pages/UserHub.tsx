@@ -7,6 +7,9 @@ import {
   Key,
   ShieldCheck,
   XCircle,
+  FlaskConical,
+  Copy,
+  Clock
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -21,6 +24,11 @@ type License = {
   app_name: string;
 };
 
+type App = {
+  id: number;
+  name: string;
+};
+
 export default function UserHub() {
   const { t } = useTranslation();
   const [licenses, setLicenses] = useState<License[]>([]);
@@ -30,6 +38,12 @@ export default function UserHub() {
     type: "success" | "error";
     msg: string;
   } | null>(null);
+
+  // Trial states
+  const [apps, setApps] = useState<App[]>([]);
+  const [selectedAppId, setSelectedAppId] = useState<number | "">("");
+  const [trialLoading, setTrialLoading] = useState(false);
+  const [trialResult, setTrialResult] = useState<{ key: string } | null>(null);
 
   const fetchMyLicenses = useCallback(async () => {
     try {
@@ -50,9 +64,51 @@ export default function UserHub() {
     }
   }, []);
 
+  const fetchApps = useCallback(async () => {
+    try {
+      const res = await fetch(getApiUrl("/api/apps"), {
+        credentials: "include",
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      const data = await res.json();
+      if (Array.isArray(data)) setApps(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }, []);
+
   useEffect(() => {
     fetchMyLicenses();
-  }, [fetchMyLicenses]);
+    fetchApps();
+  }, [fetchMyLicenses, fetchApps]);
+
+  const handleRequestTrial = async () => {
+    if (!selectedAppId) return;
+    setTrialLoading(true);
+    setRedeemStatus(null);
+    try {
+      const res = await fetch(getApiUrl("/api/licenses/request-trial"), {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ appId: Number(selectedAppId) }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setTrialResult({ key: data.license_key });
+        fetchMyLicenses();
+      } else {
+        setRedeemStatus({ type: "error", msg: data.message });
+      }
+    } catch (err) {
+      setRedeemStatus({ type: "error", msg: "Trial request failed" });
+    } finally {
+      setTrialLoading(false);
+    }
+  };
 
   const handleRedeem = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,6 +193,77 @@ export default function UserHub() {
           )}
         </form>
       </header>
+
+      {/* Trial Request CTA */}
+      <section className="bg-accent/5 border border-accent/20 rounded-[3rem] p-10 relative overflow-hidden group">
+         <div className="absolute top-0 right-0 p-12 opacity-5 scale-150 rotate-12 group-hover:scale-[1.6] transition-transform duration-1000">
+            <FlaskConical className="w-40 h-40 text-accent" />
+         </div>
+         
+         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
+            <div className="max-w-xl text-center md:text-left">
+               <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 rounded-full mb-6">
+                  <Clock className="w-4 h-4 text-accent" />
+                  <span className="text-[10px] font-black text-accent uppercase tracking-widest">
+                     Limited Time Offer
+                  </span>
+               </div>
+               <h3 className="text-3xl font-black text-white mb-4">
+                  {t("user_hub.trial_request", "Free 24h Omega Trial")}
+               </h3>
+               <p className="text-gray-400 font-medium">
+                  Experience the full power of our protected software. Generate a one-time trial key locked to your hardware instantly.
+               </p>
+            </div>
+
+            <div className="w-full md:w-[400px] space-y-4">
+               {trialResult ? (
+                  <div className="bg-green-500/10 border border-green-500/20 p-6 rounded-3xl animate-in zoom-in duration-500">
+                     <p className="text-[10px] text-green-500 font-black uppercase mb-3">{t("user_hub.trial_success")}</p>
+                     <div className="flex items-center justify-between bg-dark/50 p-4 rounded-xl border border-green-500/20">
+                        <code className="text-white font-mono text-sm">{trialResult.key}</code>
+                        <button 
+                          onClick={() => {
+                            navigator.clipboard.writeText(trialResult.key);
+                            setRedeemStatus({ type: "success", msg: t("common.copied") });
+                          }}
+                          className="p-2 text-green-500 hover:bg-green-500/10 rounded-lg transition-all"
+                        >
+                           <Copy className="w-4 h-4" />
+                        </button>
+                     </div>
+                     <button 
+                       onClick={() => setTrialResult(null)}
+                       className="w-full mt-4 text-[10px] text-gray-500 font-black uppercase hover:text-white transition-all"
+                     >
+                        Close
+                     </button>
+                  </div>
+               ) : (
+                  <div className="space-y-4">
+                     <select 
+                        value={selectedAppId}
+                        onChange={(e) => setSelectedAppId(e.target.value === "" ? "" : Number(e.target.value))}
+                        className="w-full bg-dark/50 border border-gray-800 rounded-2xl px-6 py-4 text-sm text-white outline-none focus:border-accent transition-all appearance-none cursor-pointer"
+                     >
+                        <option value="">Select an application...</option>
+                        {apps.map(app => (
+                           <option key={app.id} value={app.id}>{app.name}</option>
+                        ))}
+                     </select>
+                     <button 
+                        onClick={handleRequestTrial}
+                        disabled={!selectedAppId || trialLoading}
+                        className="w-full bg-accent h-[64px] rounded-2xl text-white text-sm font-black flex items-center justify-center gap-3 shadow-2xl shadow-accent/40 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+                     >
+                        {trialLoading ? <Activity className="w-5 h-5 animate-spin" /> : <FlaskConical className="w-5 h-5" />}
+                        {t("user_hub.trial_request")}
+                     </button>
+                  </div>
+               )}
+            </div>
+         </div>
+      </section>
 
       {loading ? (
         <div

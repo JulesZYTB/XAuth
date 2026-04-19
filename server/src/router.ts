@@ -32,6 +32,7 @@ import releaseActions from "./modules/app/releaseActions.js";
 import updateActions from "./modules/app/updateActions.js";
 import apiKeyActions from "./modules/admin/apiKeyActions.js";
 import searchActions from "./modules/admin/searchActions.js";
+import resellerActions from "./modules/admin/resellerActions.js";
 
 
 
@@ -85,6 +86,7 @@ router.delete("/api/releases/:id", releaseActions.destroy);
 // LICENSES - USER ACTIONS (Redeem & Browse My)
 router.get("/api/my-licenses", licenseActions.myLicenses);
 router.post("/api/licenses/redeem", licenseActions.redeem);
+router.post("/api/licenses/request-trial", licenseActions.requestTrial);
 
 // LICENSES - DEVELOPER ACTIONS (Manage licenses for owned apps)
 // NOTE: Ownership checks are required in these actions
@@ -95,6 +97,7 @@ router.patch("/api/licenses/:id/ban", licenseActions.ban);
 router.patch("/api/licenses/:id/unban", licenseActions.unban);
 router.patch("/api/licenses/:id/reset-hwid", licenseActions.resetHwid);
 router.patch("/api/licenses/:id/regenerate", licenseActions.regenerateKey);
+router.patch("/api/licenses/:id/variables/set", licenseActions.setVariable);
 router.delete("/api/licenses/:id", licenseActions.destroy);
 
 // APP-SPECIFIC ANALYTICS
@@ -104,6 +107,11 @@ router.get("/api/apps/:appId/dashboard/dau", dashboardActions.getDau);
 router.get("/api/apps/:appId/dashboard/anomalies", dashboardActions.getAnomalies);
 router.get("/api/apps/:appId/dashboard/auditor-scan", dashboardActions.getAuditorScan);
 router.delete("/api/apps/:appId/dashboard/threats", dashboardActions.clearThreats);
+
+// RESELLERS MANAGEMENT
+router.get("/api/apps/:appId/resellers", resellerActions.browse);
+router.post("/api/resellers", resellerActions.add);
+router.delete("/api/apps/:appId/resellers/:userId", resellerActions.destroy);
 
 
 

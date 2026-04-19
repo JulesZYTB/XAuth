@@ -17,9 +17,9 @@ const initialize: RequestHandler = async (req, res, next) => {
     const sessionId = crypto.randomUUID();
     const nonce = securityService.generateSessionNonce();
     
-    // Session expires in 10 minutes
+    // Session expires in 1 hour
     const expiresAt = new Date();
-    expiresAt.setMinutes(expiresAt.getMinutes() + 10);
+    expiresAt.setHours(expiresAt.getHours() + 1);
 
     await sessionRepository.create({
       id: sessionId,

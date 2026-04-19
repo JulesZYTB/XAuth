@@ -8,6 +8,8 @@ import {
   ShieldAlert,
   ShieldCheck,
   Users,
+  Trash2,
+  UserPlus
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -48,6 +50,15 @@ type Stats = {
   recentThreats: any[];
 };
 
+type Reseller = {
+  user_id: number;
+  app_id: number;
+  username: string;
+  email: string;
+  key_quota: number;
+  keys_generated: number;
+};
+
 export default function AppDashboard() {
   const { t } = useTranslation();
   const { appId } = useParams();
@@ -55,6 +66,12 @@ export default function AppDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuditorOpen, setIsAuditorOpen] = useState(false);
+  
+  // Reseller states
+  const [resellers, setResellers] = useState<Reseller[]>([]);
+  const [newResellerEmail, setNewResellerEmail] = useState("");
+  const [newResellerQuota, setNewResellerQuota] = useState(10);
+  const [resellerLoading, setResellerLoading] = useState(false);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -98,9 +115,68 @@ export default function AppDashboard() {
     }
   }, [appId]);
 
+  const fetchResellers = useCallback(async () => {
+    try {
+      const res = await fetch(getApiUrl(`/api/apps/${appId}/resellers`), {
+        credentials: "include",
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      const data = await res.json();
+      if (Array.isArray(data)) setResellers(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }, [appId]);
+
   useEffect(() => {
     fetchStats();
-  }, [fetchStats]);
+    fetchResellers();
+  }, [fetchStats, fetchResellers]);
+
+  const handleAddReseller = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResellerLoading(true);
+    try {
+      const res = await fetch(getApiUrl("/api/resellers"), {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          appId: Number(appId),
+          email: newResellerEmail,
+          keyQuota: newResellerQuota,
+        }),
+      });
+
+      if (res.ok) {
+        setNewResellerEmail("");
+        fetchResellers();
+      } else {
+        const data = await res.json();
+        alert(data.message || "Error adding reseller");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setResellerLoading(false);
+    }
+  };
+
+  const handleRemoveReseller = async (userId: number) => {
+    try {
+      await fetch(getApiUrl(`/api/apps/${appId}/resellers/${userId}`), {
+        method: "DELETE",
+        credentials: "include",
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      fetchResellers();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleClearThreats = async () => {
     try {
@@ -218,6 +294,92 @@ export default function AppDashboard() {
           <p className="text-sm text-gray-500 max-w-xs">
             Specific user retention and activity for this application only.
           </p>
+        </div>
+      </div>
+
+      {/* Reseller Management Section */}
+      <div className="bg-secondary p-10 rounded-[3rem] border border-gray-800 shadow-2xl relative overflow-hidden">
+        <div className="flex items-center gap-4 mb-8">
+           <div className="p-4 bg-orange-500/10 rounded-2xl border border-orange-500/20">
+              <Users className="w-6 h-6 text-orange-500" />
+           </div>
+           <div>
+              <h3 className="text-2xl font-black text-white">{t("apps.resellers_title", "Reseller Management")}</h3>
+              <p className="text-sm text-gray-500 font-medium">Assign third-party key generation quotas</p>
+           </div>
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
+           {/* Add Reseller Form */}
+           <form onSubmit={handleAddReseller} className="bg-dark/20 p-8 rounded-4xl border border-gray-800/50 space-y-6">
+              <div className="space-y-2">
+                 <label className="text-[10px] text-gray-500 uppercase font-black px-1">{t("apps.reseller_email")}</label>
+                 <input 
+                   type="email" 
+                   required
+                   className="w-full bg-dark/50 border border-gray-800 rounded-2xl px-5 py-4 text-sm text-white outline-none focus:border-orange-500 transition-all"
+                   placeholder="reseller@partner.com"
+                   value={newResellerEmail}
+                   onChange={(e) => setNewResellerEmail(e.target.value)}
+                 />
+              </div>
+              <div className="space-y-2">
+                 <label className="text-[10px] text-gray-500 uppercase font-black px-1">{t("apps.reseller_quota")}</label>
+                 <input 
+                   type="number" 
+                   required
+                   min="1"
+                   className="w-full bg-dark/50 border border-gray-800 rounded-2xl px-5 py-4 text-sm text-white outline-none focus:border-orange-500 transition-all font-mono"
+                   value={newResellerQuota}
+                   onChange={(e) => setNewResellerQuota(Number(e.target.value))}
+                 />
+              </div>
+              <button 
+                type="submit" 
+                disabled={resellerLoading}
+                className="w-full bg-orange-600 h-[60px] rounded-3xl text-white text-sm font-black flex items-center justify-center gap-3 hover:brightness-110 active:scale-95 transition-all shadow-xl shadow-orange-500/20 disabled:opacity-50 cursor-pointer"
+              >
+                <UserPlus className="w-5 h-5" /> {t("apps.reseller_add")}
+              </button>
+           </form>
+
+           {/* Resellers List */}
+           <div className="xl:col-span-2 space-y-4">
+              {resellers.length === 0 ? (
+                 <div className="h-full flex flex-col items-center justify-center border-2 border-dashed border-gray-800 rounded-4xl py-12 text-gray-600 italic">
+                    {t("apps.reseller_empty")}
+                 </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   {resellers.map((r) => (
+                      <div key={r.user_id} className="bg-dark/30 border border-gray-800 rounded-3xl p-6 flex justify-between items-center group">
+                         <div>
+                            <p className="text-white font-black">{r.username}</p>
+                            <p className="text-[10px] text-gray-500 font-medium mb-3">{r.email}</p>
+                            <div className="flex items-center gap-3">
+                               <div className="h-1.5 w-24 bg-dark/50 rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-orange-500 rounded-full" 
+                                    style={{ width: `${Math.min((r.keys_generated / r.key_quota) * 100, 100)}%` }} 
+                                  />
+                               </div>
+                               <span className="text-[10px] font-black text-orange-500 uppercase">
+                                  {r.keys_generated} / {r.key_quota}
+                               </span>
+                            </div>
+                         </div>
+                         <button 
+                           type="button"
+                           onClick={() => handleRemoveReseller(r.user_id)}
+                           className="p-3 bg-red-500/10 text-red-500 rounded-xl opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500/20 cursor-pointer"
+                         >
+                            <Trash2 className="w-4 h-4" />
+                         </button>
+                      </div>
+                   ))}
+                </div>
+              )}
+           </div>
         </div>
       </div>
 

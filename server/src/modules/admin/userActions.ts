@@ -5,6 +5,7 @@ import userRepository from "./userRepository.js";
 import type { AuthUser, User } from "../../types/index.js";
 import { loginSchema, registerSchema } from "../security/schemas.js";
 import auditLogRepository from "../audit/auditLogRepository.js";
+import mailServerService from "../../services/mailServerService.js";
 
 const APP_SECRET = process.env.APP_SECRET;
 
@@ -65,6 +66,13 @@ const register: RequestHandler = async (req, res, next) => {
     }
 
     const { username, email, password, secret } = validation.data;
+
+    // Check if domain has a valid mail server
+    const hasMailServer = await mailServerService.checkMailServer(email);
+    if (!hasMailServer) {
+      res.status(400).json({ message: "The email domain does not appear to have a valid mail server." });
+      return;
+    }
 
     // Check if user already exists
     const existingUser = await userRepository.readByEmail(email);

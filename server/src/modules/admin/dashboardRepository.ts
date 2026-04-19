@@ -54,11 +54,14 @@ class DashboardRepository {
   async getMapData(appId?: number) {
     const sql = `SELECT country_code as country, COUNT(*) as value 
                  FROM validation_log 
-                 WHERE country_code IS NOT NULL AND country_code != '??'
+                 WHERE country_code IS NOT NULL AND country_code != ?
                  ${appId ? "AND app_id = ?" : ""}
                  GROUP BY country_code 
                  ORDER BY value DESC`;
-    const [rows] = await databaseClient.query<Rows>(sql, appId ? [appId] : []);
+    const params: (string | number)[] = ["??"];
+    if (appId) params.push(appId);
+    
+    const [rows] = await databaseClient.query<Rows>(sql, params);
     return rows;
   }
 

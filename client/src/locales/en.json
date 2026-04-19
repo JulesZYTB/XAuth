@@ -230,7 +230,9 @@
     "end_date": "End Date",
     "access_docs": "Access Product Docs",
     "no_licenses": "No active licenses found.",
-    "redeem_hint": "Redeem a product key above to activate your software."
+    "redeem_hint": "Redeem a product key above to activate your software.",
+    "trial_request": "Request 24h Free Trial",
+    "trial_success": "Trial generated successfully! Here is your key:"
   },
   "apps": {
     "title": "Application Hub",
@@ -280,7 +282,15 @@
     "release_fetching": "Fetching releases...",
     "release_empty": "No releases published yet. Use the gateway to deploy your first version.",
     "release_download": "Download Binary",
-    "release_delete": "Delete Release"
+    "release_delete": "Delete Release",
+    "release_ban": "Ban Version",
+    "release_unban": "Unban Version",
+    "release_banned": "BANNED VERSION",
+    "resellers_title": "Reseller Management",
+    "reseller_email": "Reseller Email",
+    "reseller_quota": "Key Quota",
+    "reseller_add": "Add Reseller",
+    "reseller_empty": "No resellers assigned to this application."
   },
   "licenses": {
     "title": "License Forge",
@@ -337,7 +347,11 @@
     "metadata_json": "JSON Configuration",
     "metadata_invalid_json": "Invalid JSON format. Please check your syntax.",
     "metadata_save_fail": "Failed to save configuration.",
-    "metadata_save": "Save Metadata"
+    "metadata_save": "Save Metadata",
+    "var_add": "Add Variable",
+    "var_key": "Key",
+    "var_value": "Value",
+    "var_set_success": "Variable updated."
   },
   "users": {
     "title": "Identity Center",

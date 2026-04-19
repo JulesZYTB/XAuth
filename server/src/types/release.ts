@@ -6,6 +6,7 @@ export interface AppRelease {
   download_url: string;
   checksum: string;
   is_active: boolean;
+  is_banned: boolean;
   created_at: string;
 }
 

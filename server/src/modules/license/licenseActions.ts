@@ -1,5 +1,4 @@
 import type { Request, RequestHandler } from "express";
-
 import crypto from "node:crypto";
 import licenseRepository from "./licenseRepository.js";
 import appRepository from "../app/appRepository.js";
@@ -10,6 +9,8 @@ import type { AuthUser } from "../../types/index.js";
 import webhookService from "../../services/webhookService.js";
 import geoService from "../../services/geoService.js";
 import validationLogRepository from "../app/validationLogRepository.js";
+import trialRepository from "../app/trialRepository.js";
+import resellerRepository from "../admin/resellerRepository.js";
 
 interface AuthenticatedRequest extends Request {
   auth: AuthUser;
@@ -18,11 +19,20 @@ interface AuthenticatedRequest extends Request {
 
 import { licenseCreateSchema, licenseRedeemSchema } from "../security/schemas.js";
 
+// Helper for random key generation
+const generateRandomKey = (mask: string = "XXXX-XXXX-XXXX") => {
+  return mask.replace(/X/g, () => crypto.randomBytes(1).toString("hex").substring(0, 1).toUpperCase());
+};
+
 // Helper to check if user owns the app or is admin
 const checkOwnership = async (user: AuthUser, appId: number) => {
   if (user.role === "admin") return true;
   const app = await appRepository.read(appId);
-  return app && app.owner_id === user.id;
+  if (app && app.owner_id === user.id) return true;
+  
+  // Check if user is a reseller for this app
+  const reseller = await resellerRepository.getReseller(user.id, appId);
+  return !!reseller;
 };
 
 // Helper to check if user owns the license (via app ownership)
@@ -56,6 +66,21 @@ const add: RequestHandler = async (req, res, next) => {
       app_id: Number(app_id),
       status: "active",
     });
+
+    // If actor is a reseller, increment their keys_generated count
+    if (actor.role !== "admin") {
+      const app = await appRepository.read(app_id);
+      if (app && app.owner_id !== actor.id) {
+          const reseller = await resellerRepository.getReseller(actor.id, app_id);
+          if (reseller) {
+              if (reseller.keys_generated >= reseller.key_quota) {
+                  res.status(403).json({ message: "Quota de revendeur atteint. Veuillez contacter l'administrateur." });
+                  return;
+              }
+              await resellerRepository.incrementKeysGenerated(actor.id, app_id);
+          }
+      }
+    }
 
     await auditLogRepository.create({
       action: "LICENSE_CREATE",
@@ -421,11 +446,6 @@ const resetHwid: RequestHandler = async (req, res, next) => {
 };
 
 
-// Helper for generating randomized keys
-function generateRandomKey(pattern = "XXXX-XXXX-XXXX") {
-  return pattern.replace(/X/g, () => crypto.randomBytes(1).toString("hex").charAt(0).toUpperCase());
-}
-
 const regenerateKey: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
@@ -579,4 +599,83 @@ const destroy: RequestHandler = async (req, res, next) => {
   }
 };
 
-export default { add, validate, browse, ban, unban, resetHwid, regenerateKey, myLicenses, redeem, modify, destroy };
+const setVariable: RequestHandler = async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const { key, value } = req.body;
+    const actor = (req as unknown as AuthenticatedRequest).auth;
+
+    if (!(await checkLicenseOwnership(actor, id))) {
+      res.status(403).json({ message: "Forbidden: You do not own this license" });
+      return;
+    }
+
+    const license = await licenseRepository.read(id);
+    if (!license) {
+      res.status(404).json({ message: "License not found" });
+      return;
+    }
+
+    const variables = typeof license.variables === 'string' ? JSON.parse(license.variables) : (license.variables || {});
+    variables[key] = value;
+
+    await licenseRepository.update(id, { variables: JSON.stringify(variables) });
+    
+    await auditLogRepository.create({
+      action: "LICENSE_VAR_SET",
+      details: `Variable '${key}' set for license ID: ${id}`,
+      user_id: actor.id,
+      ip_address: req.ip || req.socket.remoteAddress,
+      user_agent: req.headers["user-agent"]
+    });
+
+    res.sendStatus(204);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const requestTrial: RequestHandler = async (req, res, next) => {
+  try {
+    const { app_id, hwid } = req.body;
+    const actor = (req as unknown as AuthenticatedRequest).auth;
+    const hwidHash = securityService.hash(hwid);
+
+    if (await trialRepository.hasTrialed(app_id, hwidHash)) {
+      res.status(403).json({ message: "Vous avez déjà réclamé votre essai gratuit pour cette application." });
+      return;
+    }
+
+    // Generate 24h key
+    const trialKey = "TRIAL-" + generateRandomKey("XXXX-XXXX");
+    const expiry = new Date();
+    expiry.setHours(expiry.getHours() + 24);
+
+    const id = await licenseRepository.create({
+      license_key: trialKey,
+      expiry_date: expiry,
+      app_id: Number(app_id),
+      status: "active",
+      user_id: actor.id,
+      hwid: securityService.dbEncrypt(hwid),
+      hwid_hash: hwidHash
+    });
+
+    await trialRepository.addTrialLog(app_id, hwidHash);
+
+    await auditLogRepository.create({
+      action: "LICENSE_TRIAL_REQUEST",
+      details: `Trial license requested for app ID: ${app_id} (License ID: ${id})`,
+      user_id: actor.id,
+      ip_address: req.ip || req.socket.remoteAddress,
+      user_agent: req.headers["user-agent"]
+    });
+
+    res.status(201).json({ key: trialKey, expiry });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+export default { add, validate, browse, ban, unban, resetHwid, regenerateKey, myLicenses, redeem, modify, destroy, setVariable, requestTrial };

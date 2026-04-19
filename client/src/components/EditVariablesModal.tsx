@@ -1,4 +1,4 @@
-import { AlertTriangle, Code, Info, Save, X } from "lucide-react";
+import { AlertTriangle, Code, Info, Save, X, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -18,28 +18,57 @@ export default function EditVariablesModal({
   licenseKey,
 }: EditVariablesModalProps) {
   const { t } = useTranslation();
-  const [variables, setVariables] = useState(initialVariables);
-  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Initialize from JSON string
+  const [pairs, setPairs] = useState<{ key: string; value: string }[]>(() => {
+    try {
+      const obj = JSON.parse(initialVariables || "{}");
+      return Object.entries(obj).map(([k, v]) => ({
+        key: k,
+        value: typeof v === "string" ? v : JSON.stringify(v),
+      }));
+    } catch {
+      return [];
+    }
+  });
+
+  const handleAddPair = () => {
+    setPairs([...pairs, { key: "", value: "" }]);
+  };
+
+  const handleRemovePair = (index: number) => {
+    setPairs(pairs.filter((_, i) => i !== index));
+  };
+
+  const handleChangePair = (
+    index: number,
+    field: "key" | "value",
+    val: string,
+  ) => {
+    const next = [...pairs];
+    next[index][field] = val;
+    setPairs(next);
+  };
 
   const handleSave = async () => {
     try {
       setError(null);
-      // Validate JSON
-      JSON.parse(variables);
-
       setIsSaving(true);
-      await onSave(variables);
+
+      // Reconstruct JSON object
+      const obj: Record<string, string> = {};
+      for (const p of pairs) {
+        if (p.key.trim()) {
+          obj[p.key.trim()] = p.value;
+        }
+      }
+
+      await onSave(JSON.stringify(obj));
       onClose();
     } catch (err: unknown) {
-      setError(
-        err instanceof SyntaxError
-          ? t(
-              "licenses.metadata_invalid_json",
-              "Invalid JSON format. Please check your syntax.",
-            )
-          : t("licenses.metadata_save_fail", "Failed to save configuration."),
-      );
+      setError(t("licenses.metadata_save_fail", "Failed to save configuration."));
       console.error(err);
     } finally {
       setIsSaving(false);
@@ -88,20 +117,53 @@ export default function EditVariablesModal({
             </p>
           </div>
 
-          <div className="space-y-2">
-            <label
-              htmlFor="license-config"
-              className="text-[10px] text-gray-500 uppercase font-black px-1"
-            >
-              {t("licenses.metadata_json", "JSON Configuration")}
-            </label>
-            <textarea
-              id="license-config"
-              className="w-full h-48 bg-dark/50 border border-gray-800 rounded-3xl p-6 font-mono text-sm text-gray-300 outline-none focus:border-accent transition-all resize-none box-shadow-inner"
-              value={variables}
-              onChange={(e) => setVariables(e.target.value)}
-              placeholder='{ "vip": true, "version": "2.0" }'
-            />
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <label className="text-[10px] text-gray-500 uppercase font-black px-1">
+                {t("licenses.metadata_title", "Variables")}
+              </label>
+              <button
+                type="button"
+                onClick={handleAddPair}
+                className="flex items-center gap-1.5 text-[9px] font-black text-accent uppercase hover:underline cursor-pointer"
+              >
+                <Plus className="w-3 h-3" /> {t("licenses.var_add", "Add Variable")}
+              </button>
+            </div>
+
+            <div className="space-y-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+              {pairs.length === 0 ? (
+                <div className="py-8 text-center border-2 border-dashed border-gray-800 rounded-3xl text-gray-600 italic text-xs">
+                  Aucune variable configurée.
+                </div>
+              ) : (
+                pairs.map((p, idx) => (
+                  <div key={idx} className="flex gap-2 group animate-in slide-in-from-left-2 duration-300">
+                    <input
+                      type="text"
+                      className="flex-1 bg-dark/50 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white outline-none focus:border-accent transition-all"
+                      placeholder={t("licenses.var_key", "Key")}
+                      value={p.key}
+                      onChange={(e) => handleChangePair(idx, "key", e.target.value)}
+                    />
+                    <input
+                      type="text"
+                      className="flex-[2] bg-dark/50 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white outline-none focus:border-accent transition-all"
+                      placeholder={t("licenses.var_value", "Value")}
+                      value={p.value}
+                      onChange={(e) => handleChangePair(idx, "value", e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemovePair(idx)}
+                      className="p-2.5 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20 transition-all cursor-pointer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
 
           {error && (

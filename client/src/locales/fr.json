@@ -230,7 +230,9 @@
     "end_date": "Date de Fin",
     "access_docs": "Accéder à la Documentation",
     "no_licenses": "Aucune licence active trouvée.",
-    "redeem_hint": "Activez une clé produit ci-dessus pour accéder à votre logiciel."
+    "redeem_hint": "Activez une clé produit ci-dessus pour accéder à votre logiciel.",
+    "trial_request": "Demander un Essai Gratuit (24h)",
+    "trial_success": "Essai généré avec succès ! Voici votre clé :"
   },
   "apps": {
     "title": "Portail des Applications",
@@ -280,7 +282,15 @@
     "release_fetching": "Récupération des versions...",
     "release_empty": "Aucune version publiée pour l'instant. Utilisez le portail pour déployer votre première version.",
     "release_download": "Télécharger le Binaire",
-    "release_delete": "Supprimer la Version"
+    "release_delete": "Supprimer la Version",
+    "release_ban": "Bannir la Version",
+    "release_unban": "Débannir la Version",
+    "release_banned": "VERSION BANNIE",
+    "resellers_title": "Gestion des Revendeurs",
+    "reseller_email": "Email du Revendeur",
+    "reseller_quota": "Quota de Clés",
+    "reseller_add": "Ajouter Revendeur",
+    "reseller_empty": "Aucun revendeur assigné à cette application."
   },
   "licenses": {
     "title": "Forge de Licences",
@@ -337,7 +347,11 @@
     "metadata_json": "Configuration JSON",
     "metadata_invalid_json": "Format JSON invalide. Veuillez vérifier votre syntaxe.",
     "metadata_save_fail": "Échec de la sauvegarde de la configuration.",
-    "metadata_save": "Sauvegarder les Métadonnées"
+    "metadata_save": "Sauvegarder les Métadonnées",
+    "var_add": "Ajouter Variable",
+    "var_key": "Clé",
+    "var_value": "Valeur",
+    "var_set_success": "Variable mise à jour."
   },
   "users": {
     "title": "Centre d'Identité",

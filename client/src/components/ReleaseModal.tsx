@@ -17,6 +17,7 @@ interface Release {
   download_url: string;
   checksum: string;
   is_active: boolean;
+  is_banned: boolean;
   created_at: string;
 }
 
@@ -95,6 +96,23 @@ export default function ReleaseModal({
         credentials: "include",
         method: "DELETE",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      fetchReleases();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleToggleBan = async (rel: Release) => {
+    try {
+      await fetch(getApiUrl(`/api/releases/${rel.id}`), {
+        credentials: "include",
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ is_banned: !rel.is_banned }),
       });
       fetchReleases();
     } catch (err) {
@@ -248,10 +266,10 @@ export default function ReleaseModal({
                 >
                   <div className="flex items-center gap-6">
                     <div
-                      className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${rel.channel === "stable" ? "bg-green-500/10 border-green-500/20" : "bg-orange-500/10 border-orange-500/20"}`}
+                      className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${!!rel.is_banned ? "bg-red-500/20 border-red-500/40" : rel.channel === "stable" ? "bg-green-500/10 border-green-500/20" : "bg-orange-500/10 border-orange-500/20"}`}
                     >
                       <ShieldCheck
-                        className={`w-6 h-6 ${rel.channel === "stable" ? "text-green-500" : "text-orange-500"}`}
+                        className={`w-6 h-6 ${!!rel.is_banned ? "text-red-500" : rel.channel === "stable" ? "text-green-500" : "text-orange-500"}`}
                       />
                     </div>
                     <div>
@@ -264,6 +282,11 @@ export default function ReleaseModal({
                         >
                           {rel.channel}
                         </span>
+                        {!!rel.is_banned && (
+                          <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded-full bg-red-500 text-white border border-red-600 animate-pulse">
+                            {t("apps.release_banned", "BANNED")}
+                          </span>
+                        )}
                       </div>
                       <div className="text-[9px] text-gray-500 font-mono mt-1 opacity-60 truncate max-w-xs">
                         {rel.checksum}
@@ -271,6 +294,14 @@ export default function ReleaseModal({
                     </div>
                   </div>
                   <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleBan(rel)}
+                      className={`p-3 rounded-xl border transition-all cursor-pointer ${!!rel.is_banned ? "bg-red-500/20 text-red-500 border-red-500/40" : "bg-gray-800/50 text-gray-400 hover:text-white border-transparent"}`}
+                      title={!!rel.is_banned ? t("apps.release_unban") : t("apps.release_ban")}
+                    >
+                      <ShieldCheck className="w-4 h-4" />
+                    </button>
                     <button
                       type="button"
                       onClick={() => window.open(rel.download_url, "_blank")}

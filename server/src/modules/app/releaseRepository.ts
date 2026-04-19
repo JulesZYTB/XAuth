@@ -5,9 +5,9 @@ import type { AppRelease } from "../../types/index.js";
 class ReleaseRepository {
   async create(release: Omit<AppRelease, "id" | "created_at">) {
     const [result] = await databaseClient.query<Result>(
-      `insert into app_release (app_id, version, channel, download_url, checksum, is_active) 
-       values (?, ?, ?, ?, ?, ?)`,
-      [release.app_id, release.version, release.channel, release.download_url, release.checksum, release.is_active ?? true]
+      `insert into app_release (app_id, version, channel, download_url, checksum, is_active, is_banned) 
+       values (?, ?, ?, ?, ?, ?, ?)`,
+      [release.app_id, release.version, release.channel, release.download_url, release.checksum, release.is_active ?? true, release.is_banned ?? false]
     );
     return result.insertId;
   }
@@ -31,7 +31,7 @@ class ReleaseRepository {
   async getLatest(appId: number, channel: string) {
     const [rows] = await databaseClient.query<Rows>(
       `select * from app_release 
-       where app_id = ? and (channel = ? or channel = 'stable') and is_active = true 
+       where app_id = ? and (channel = ? or channel = 'stable') and is_active = true and is_banned = false
        order by created_at desc limit 1`,
       [appId, channel]
     );
@@ -39,7 +39,7 @@ class ReleaseRepository {
   }
 
   async update(id: number, data: Partial<AppRelease>) {
-    const allowedFields = ["version", "channel", "download_url", "checksum", "is_active"];
+    const allowedFields = ["version", "channel", "download_url", "checksum", "is_active", "is_banned"];
     const keys = Object.keys(data).filter(key => allowedFields.includes(key));
     
     if (keys.length === 0) return 0;
@@ -52,6 +52,14 @@ class ReleaseRepository {
       [...values, id]
     );
     return result.affectedRows;
+  }
+
+  async isVersionBanned(appId: number, version: string) {
+    const [rows] = await databaseClient.query<Rows>(
+      "select 1 from app_release where app_id = ? and version = ? and is_banned = true limit 1",
+      [appId, version]
+    );
+    return rows.length > 0;
   }
 
   async delete(id: number) {

@@ -90,8 +90,32 @@ CREATE TABLE app_release (
   download_url TEXT NOT NULL,
   checksum VARCHAR(255) NOT NULL,
   is_active BOOLEAN DEFAULT TRUE,
+  is_banned BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (app_id) REFERENCES app(id) ON DELETE CASCADE
+);
+
+-- Tablet Trial Log
+CREATE TABLE app_trial_log (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  app_id INT NOT NULL,
+  hwid_hash VARCHAR(64) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (app_id) REFERENCES app(id) ON DELETE CASCADE,
+  UNIQUE(app_id, hwid_hash)
+);
+
+-- Reseller Table
+CREATE TABLE reseller (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  app_id INT NOT NULL,
+  key_quota INT NOT NULL DEFAULT 0,
+  keys_generated INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+  FOREIGN KEY (app_id) REFERENCES app(id) ON DELETE CASCADE,
+  UNIQUE(user_id, app_id)
 );
 
 -- Audit Log Table
