@@ -8,8 +8,8 @@ class LicenseRepository {
     const encryptedKey = securityService.dbEncrypt(license.license_key);
     const keyHash = securityService.hash(license.license_key);
     const [result] = await databaseClient.query<Result>(
-      "insert into license (license_key, license_key_hash, expiry_date, app_id, status, variables) values (?, ?, ?, ?, ?, ?)",
-      [encryptedKey, keyHash, license.expiry_date, license.app_id, license.status, license.variables || "{}"]
+      "insert into license (license_key, license_key_hash, expiry_date, app_id, status, variables, created_by) values (?, ?, ?, ?, ?, ?, ?)",
+      [encryptedKey, keyHash, license.expiry_date, license.app_id, license.status, license.variables || "{}", license.created_by || null]
     );
     return result.insertId;
   }
@@ -69,11 +69,16 @@ class LicenseRepository {
     return null;
   }
 
-  async readByAppId(appId: number) {
-    const [rows] = await databaseClient.query<Rows>(
-      "select * from license where app_id = ?",
-      [appId]
-    );
+  async readByAppId(appId: number, creatorId?: number) {
+    let query = "select * from license where app_id = ?";
+    const params: any[] = [appId];
+
+    if (creatorId) {
+      query += " AND created_by = ?";
+      params.push(creatorId);
+    }
+
+    const [rows] = await databaseClient.query<Rows>(query, params);
     const results = rows as License[];
     for (const res of results) {
       try {

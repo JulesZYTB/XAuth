@@ -31,6 +31,7 @@ type App = {
   secret_key: string;
   broadcast_message?: string;
   is_paused: boolean;
+  owner_id: number;
 };
 
 export default function Apps() {
@@ -159,6 +160,9 @@ export default function Apps() {
     }
   };
 
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const isOwner = (app: App) => app.owner_id === user.id || user.role === "admin";
+
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000 relative">
       <PageSEO title={t("seo.apps_title", "Application Hub")} />
@@ -238,22 +242,24 @@ export default function Apps() {
               className="group bg-secondary border border-gray-800 rounded-[2.5rem] p-8 shadow-2xl hover:border-accent/40 transition-all outline-none relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 p-8 flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleTogglePause(app)}
-                  className={`p-3 rounded-2xl transition-all cursor-pointer ${app.is_paused ? "bg-orange-500/10 text-orange-500 border border-orange-500/20" : "bg-gray-800/50 text-gray-500 hover:text-white border border-transparent"}`}
-                  title={
-                    app.is_paused
-                      ? t("apps.resume_app", "Resume App")
-                      : t("apps.pause_app", "Pause App")
-                  }
-                >
-                  {app.is_paused ? (
-                    <Play className="w-5 h-5" fill="currentColor" />
-                  ) : (
-                    <Pause className="w-5 h-5" fill="currentColor" />
+                  {isOwner(app) && (
+                    <button
+                      type="button"
+                      onClick={() => handleTogglePause(app)}
+                      className={`p-3 rounded-2xl transition-all cursor-pointer ${app.is_paused ? "bg-orange-500/10 text-orange-500 border border-orange-500/20" : "bg-gray-800/50 text-gray-500 hover:text-white border border-transparent"}`}
+                      title={
+                        app.is_paused
+                          ? t("apps.resume_app", "Resume App")
+                          : t("apps.pause_app", "Pause App")
+                      }
+                    >
+                      {app.is_paused ? (
+                        <Play className="w-5 h-5" fill="currentColor" />
+                      ) : (
+                        <Pause className="w-5 h-5" fill="currentColor" />
+                      )}
+                    </button>
                   )}
-                </button>
                 <button
                   type="button"
                   onClick={() => {
@@ -265,28 +271,32 @@ export default function Apps() {
                 >
                   <Package className="w-5 h-5" />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAppForWebhook(app);
-                    setIsWebhookModalOpen(true);
-                  }}
-                  className="p-3 bg-accent/10 text-accent border border-accent/20 rounded-2xl hover:bg-accent/20 transition-all cursor-pointer"
-                  title={t("apps.config_webhooks", "Configure Webhooks")}
-                >
-                  <Webhook className="w-5 h-5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAppToDelete(app.id);
-                    setIsDeleteModalOpen(true);
-                  }}
-                  className="p-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-2xl hover:bg-red-500/20 transition-all cursor-pointer"
-                  aria-label={t("apps.delete_app", "Delete Application")}
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
+                  {isOwner(app) && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAppForWebhook(app);
+                          setIsWebhookModalOpen(true);
+                        }}
+                        className="p-3 bg-accent/10 text-accent border border-accent/20 rounded-2xl hover:bg-accent/20 transition-all cursor-pointer"
+                        title={t("apps.config_webhooks", "Configure Webhooks")}
+                      >
+                        <Webhook className="w-5 h-5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAppToDelete(app.id);
+                          setIsDeleteModalOpen(true);
+                        }}
+                        className="p-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-2xl hover:bg-red-500/20 transition-all cursor-pointer"
+                        aria-label={t("apps.delete_app", "Delete Application")}
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </>
+                  )}
               </div>
 
               <div className="flex items-center gap-4 mb-8">
@@ -380,7 +390,8 @@ export default function Apps() {
                     onBlur={(e) =>
                       handleUpdateBroadcast(app.id, e.target.value)
                     }
-                    className="w-full bg-dark/30 border border-gray-800/50 rounded-2xl px-4 py-3 text-sm text-gray-400 focus:border-accent outline-none"
+                    readOnly={!isOwner(app)}
+                    className={`w-full bg-dark/30 border border-gray-800/50 rounded-2xl px-4 py-3 text-sm text-gray-400 focus:border-accent outline-none ${!isOwner(app) ? "opacity-50 cursor-not-allowed" : ""}`}
                     placeholder={t(
                       "apps.broadcast_placeholder",
                       "Enter message for clients...",
@@ -392,13 +403,15 @@ export default function Apps() {
 
               <div className="mt-8 pt-8 border-t border-gray-800/50 flex justify-between items-center">
                 <div className="flex gap-2">
-                  <Link
-                    to={`/apps/${app.id}/dashboard`}
-                    className="flex items-center gap-2 text-sm font-bold text-blue-500 hover:underline px-4 py-2 bg-blue-500/5 rounded-xl border border-blue-500/10 transition-all font-sans"
-                  >
-                    <BarChart3 className="w-4 h-4" />{" "}
-                    {t("apps.insights", "Insights")}
-                  </Link>
+                  {isOwner(app) && (
+                    <Link
+                      to={`/apps/${app.id}/dashboard`}
+                      className="flex items-center gap-2 text-sm font-bold text-blue-500 hover:underline px-4 py-2 bg-blue-500/5 rounded-xl border border-blue-500/10 transition-all font-sans"
+                    >
+                      <BarChart3 className="w-4 h-4" />{" "}
+                      {t("apps.insights", "Insights")}
+                    </Link>
+                  )}
                 </div>
                 <Link
                   to={`/apps/${app.id}/licenses`}

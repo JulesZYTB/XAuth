@@ -10,5 +10,6 @@ export interface License {
   variables?: string;
   ip_lock?: string;
   user_id?: number;
+  created_by?: number;
   app_name?: string;
 }

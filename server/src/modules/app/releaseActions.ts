@@ -2,6 +2,7 @@ import type { RequestHandler } from "express";
 import releaseRepository from "./releaseRepository.js";
 import appRepository from "./appRepository.js";
 import type { AuthUser } from "../../types/index.js";
+import resellerRepository from "../admin/resellerRepository.js";
 
 // Helper to check ownership
 const checkOwnership = async (user: AuthUser, appId: number) => {
@@ -56,7 +57,8 @@ const add: RequestHandler = async (req, res, next) => {
       channel,
       download_url,
       checksum,
-      is_active: true
+      is_active: true,
+      is_banned: false
     });
     res.status(201).json({ id });
   } catch (err) {

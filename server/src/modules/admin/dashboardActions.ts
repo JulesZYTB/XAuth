@@ -52,6 +52,7 @@ const getStats: RequestHandler = async (req, res, next) => {
 
     res.json({
       ...stats,
+      app: appId ? await appRepository.read(appId) : null,
       trafficData: trafficData.reverse(),
       recentActivity,
       recentThreats

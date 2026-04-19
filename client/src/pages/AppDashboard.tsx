@@ -48,6 +48,11 @@ type Stats = {
   dauData: { date: string; count: number }[];
   anomalyData: { timestamp: string; successes: number; failures: number }[];
   recentThreats: any[];
+  app?: {
+    id: number;
+    owner_id: number;
+    name: string;
+  };
 };
 
 type Reseller = {
@@ -197,6 +202,9 @@ export default function AppDashboard() {
     }
   };
 
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const isOwner = stats?.app?.owner_id === user?.id || user?.role === "admin";
+
   if (loading || !stats) {
     return (
       <div className="flex flex-col items-center justify-center h-[80vh] text-gray-500 gap-4">
@@ -297,8 +305,9 @@ export default function AppDashboard() {
         </div>
       </div>
 
-      {/* Reseller Management Section */}
-      <div className="bg-secondary p-10 rounded-[3rem] border border-gray-800 shadow-2xl relative overflow-hidden">
+      {/* Reseller Management Section - Only for owners */}
+      {isOwner && (
+        <div className="bg-secondary p-10 rounded-[3rem] border border-gray-800 shadow-2xl relative overflow-hidden">
         <div className="flex items-center gap-4 mb-8">
            <div className="p-4 bg-orange-500/10 rounded-2xl border border-orange-500/20">
               <Users className="w-6 h-6 text-orange-500" />
@@ -382,6 +391,7 @@ export default function AppDashboard() {
            </div>
         </div>
       </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="bg-secondary p-10 rounded-[3rem] border border-gray-800 shadow-2xl flex flex-col relative overflow-hidden">

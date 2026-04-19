@@ -36,9 +36,11 @@ CREATE TABLE license (
   status ENUM('active', 'revoked', 'expired', 'banned') DEFAULT 'active',
   expiry_date DATETIME NOT NULL,
   variables JSON DEFAULT (JSON_OBJECT()),
+  created_by INT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (app_id) REFERENCES app(id) ON DELETE CASCADE,
-  FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE SET NULL
+  FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE SET NULL,
+  FOREIGN KEY (created_by) REFERENCES user(id) ON DELETE SET NULL
 );
 
 -- Webhook Table

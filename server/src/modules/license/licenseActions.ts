@@ -17,15 +17,15 @@ interface AuthenticatedRequest extends Request {
 }
 
 
-import { licenseCreateSchema, licenseRedeemSchema } from "../security/schemas.js";
+import { licenseCreateSchema, licenseRedeemSchema, licenseTrialSchema, licenseVariableSchema } from "../security/schemas.js";
 
 // Helper for random key generation
 const generateRandomKey = (mask: string = "XXXX-XXXX-XXXX") => {
   return mask.replace(/X/g, () => crypto.randomBytes(1).toString("hex").substring(0, 1).toUpperCase());
 };
 
-// Helper to check if user owns the app or is admin
-const checkOwnership = async (user: AuthUser, appId: number) => {
+// Helper to check if user owns the app, is a reseller, or is admin
+const checkAppAccess = async (user: AuthUser, appId: number) => {
   if (user.role === "admin") return true;
   const app = await appRepository.read(appId);
   if (app && app.owner_id === user.id) return true;
@@ -35,12 +35,24 @@ const checkOwnership = async (user: AuthUser, appId: number) => {
   return !!reseller;
 };
 
-// Helper to check if user owns the license (via app ownership)
+// Helper to check if user is the OWNER (not reseller)
+const isAppOwner = async (user: AuthUser, appId: number) => {
+  if (user.role === "admin") return true;
+  const app = await appRepository.read(appId);
+  return app && app.owner_id === user.id;
+};
+
+// Helper to check if user can manage a specific license
 const checkLicenseOwnership = async (user: AuthUser, licenseId: number) => {
   if (user.role === "admin") return true;
   const license = await licenseRepository.read(licenseId);
   if (!license) return false;
-  return await checkOwnership(user, license.app_id);
+
+  const app = await appRepository.read(license.app_id);
+  if (app && app.owner_id === user.id) return true;
+
+  // If reseller, must be the creator
+  return license.created_by === user.id;
 };
 
 // Dashboard action: Create a new license
@@ -55,7 +67,7 @@ const add: RequestHandler = async (req, res, next) => {
     const { license_key, expiry_date, app_id } = validation.data;
     const actor = (req as unknown as AuthenticatedRequest).auth;
 
-    if (!(await checkOwnership(actor, app_id))) {
+    if (!(await checkAppAccess(actor, app_id))) {
       res.status(403).json({ message: "Forbidden: You do not own this application" });
       return;
     }
@@ -65,6 +77,7 @@ const add: RequestHandler = async (req, res, next) => {
       expiry_date: new Date(expiry_date as string),
       app_id: Number(app_id),
       status: "active",
+      created_by: actor.id
     });
 
     // If actor is a reseller, increment their keys_generated count
@@ -489,12 +502,13 @@ const browse: RequestHandler = async (req, res, next) => {
     }
     const actor = (req as unknown as AuthenticatedRequest).auth;
 
-    if (!(await checkOwnership(actor, appId))) {
-      res.status(403).json({ message: "Forbidden: You do not own this application" });
+    if (!(await checkAppAccess(actor, appId))) {
+      res.status(403).json({ message: "Forbidden: You do not have access to this application" });
       return;
     }
 
-    const licenses = await licenseRepository.readByAppId(appId);
+    const isOwner = await isAppOwner(actor, appId);
+    const licenses = await licenseRepository.readByAppId(appId, isOwner ? undefined : actor.id);
     res.json(licenses);
   } catch (err) {
     next(err);
@@ -602,7 +616,13 @@ const destroy: RequestHandler = async (req, res, next) => {
 const setVariable: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
-    const { key, value } = req.body;
+    const validation = licenseVariableSchema.safeParse(req.body);
+    if (!validation.success) {
+      res.status(400).json({ message: "Invalid input", errors: validation.error.format() });
+      return;
+    }
+
+    const { key, value } = validation.data;
     const actor = (req as unknown as AuthenticatedRequest).auth;
 
     if (!(await checkLicenseOwnership(actor, id))) {
@@ -637,7 +657,13 @@ const setVariable: RequestHandler = async (req, res, next) => {
 
 const requestTrial: RequestHandler = async (req, res, next) => {
   try {
-    const { app_id, hwid } = req.body;
+    const validation = licenseTrialSchema.safeParse(req.body);
+    if (!validation.success) {
+      res.status(400).json({ message: "Invalid input", errors: validation.error.format() });
+      return;
+    }
+
+    const { app_id, hwid } = validation.data;
     const actor = (req as unknown as AuthenticatedRequest).auth;
     const hwidHash = securityService.hash(hwid);
 

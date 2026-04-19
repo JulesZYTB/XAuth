@@ -11,10 +11,12 @@ class AppRepository {
     return result.insertId;
   }
 
-  async readByOwnerId(ownerId: number) {
+  async readByOwnerId(userId: number) {
     const [rows] = await databaseClient.query<Rows>(
-      "select * from app where owner_id = ?",
-      [ownerId]
+      `SELECT DISTINCT a.* FROM app a
+       LEFT JOIN reseller r ON a.id = r.app_id
+       WHERE a.owner_id = ? OR r.user_id = ?`,
+      [userId, userId]
     );
     return rows as App[];
   }

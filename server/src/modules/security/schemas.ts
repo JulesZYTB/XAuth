@@ -44,3 +44,13 @@ export const versionVerifySchema = z.object({
   channel: z.enum(["stable", "beta"]).default("stable"),
   current_version: z.string().optional(),
 });
+
+export const licenseTrialSchema = z.object({
+  app_id: z.number().int().positive(),
+  hwid: z.string().min(1),
+});
+
+export const licenseVariableSchema = z.object({
+  key: z.string().min(1).max(50),
+  value: z.string().max(500).optional(),
+});
