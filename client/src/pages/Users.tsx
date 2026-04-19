@@ -99,77 +99,79 @@ export default function Users() {
         </div>
       ) : (
         <div className="bg-secondary border border-gray-800 rounded-[2.5rem] overflow-hidden shadow-2xl">
-          <table className="w-full text-left">
-            <thead className="bg-dark/50 border-b border-gray-800">
-              <tr>
-                <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black">
-                  {t("users.table_user", "User")}
-                </th>
-                <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black">
-                  {t("users.table_email", "Email")}
-                </th>
-                <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black text-center">
-                  {t("users.table_role", "Identity Role")}
-                </th>
-                <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black text-right">
-                  {t("users.table_actions", "Actions")}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-800/50">
-              {users.map((user) => (
-                <tr
-                  key={user.id}
-                  className="hover:bg-white/2 transition-colors group"
-                >
-                  <td className="px-6 py-5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl bg-linear-to-br from-accent/20 to-accent/5 flex items-center justify-center border border-accent/10">
-                        <User className="w-5 h-5 text-accent" />
-                      </div>
-                      <span className="font-bold text-white">
-                        {user.username}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <span className="text-gray-400 text-sm font-medium">
-                      {user.email}
-                    </span>
-                  </td>
-                  <td className="px-6 py-5 text-center">
-                    <button
-                      type="button"
-                      onClick={() => handleToggleRole(user)}
-                      disabled={user.id === 1}
-                      className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all ${
-                        user.role === "admin"
-                          ? "bg-accent/10 text-accent border border-accent/20"
-                          : "bg-gray-800/30 text-gray-500 border border-transparent hover:border-gray-700"
-                      } disabled:opacity-50`}
-                      aria-label={`Toggle role for ${user.username}`}
-                    >
-                      {user.role}
-                    </button>
-                  </td>
-                  <td className="px-6 py-5 text-right">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setUserToDelete(user.id);
-                        setIsDeleteModalOpen(true);
-                      }}
-                      disabled={user.id === 1}
-                      className="p-3 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all disabled:opacity-30 cursor-pointer"
-                      aria-label={t("users.delete_user", "Delete User")}
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left min-w-[600px] md:min-w-0">
+              <thead className="bg-dark/50 border-b border-gray-800">
+                <tr>
+                  <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black">
+                    {t("users.table_user", "User")}
+                  </th>
+                  <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black">
+                    {t("users.table_email", "Email")}
+                  </th>
+                  <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black text-center">
+                    {t("users.table_role", "Identity Role")}
+                  </th>
+                  <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black text-right">
+                    {t("users.table_actions", "Actions")}
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-800/50">
+                {users.map((user) => (
+                  <tr
+                    key={user.id}
+                    className="hover:bg-white/2 transition-colors group"
+                  >
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-linear-to-br from-accent/20 to-accent/5 flex items-center justify-center border border-accent/10">
+                          <User className="w-5 h-5 text-accent" />
+                        </div>
+                        <span className="font-bold text-white">
+                          {user.username}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <span className="text-gray-400 text-sm font-medium">
+                        {user.email}
+                      </span>
+                    </td>
+                    <td className="px-6 py-5 text-center">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleRole(user)}
+                        disabled={user.id === 1}
+                        className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all ${
+                          user.role === "admin"
+                            ? "bg-accent/10 text-accent border border-accent/20"
+                            : "bg-gray-800/30 text-gray-500 border border-transparent hover:border-gray-700"
+                        } disabled:opacity-50`}
+                        aria-label={`Toggle role for ${user.username}`}
+                      >
+                        {user.role}
+                      </button>
+                    </td>
+                    <td className="px-6 py-5 text-right">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUserToDelete(user.id);
+                          setIsDeleteModalOpen(true);
+                        }}
+                        disabled={user.id === 1}
+                        className="p-3 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-2xl transition-all disabled:opacity-30 cursor-pointer"
+                        aria-label={t("users.delete_user", "Delete User")}
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
