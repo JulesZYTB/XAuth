@@ -42,17 +42,17 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-dark p-4 font-sans selection:bg-accent selection:text-white">
+    <div className="min-h-screen flex items-center justify-center bg-dark p-4 sm:p-6 font-sans selection:bg-accent selection:text-white">
       <PageSEO title={t("seo.register_title")} />
 
-      <main className="max-w-md w-full bg-secondary p-10 rounded-[2.5rem] border border-gray-800 shadow-2xl relative overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-1000">
+      <main className="max-w-md w-full bg-secondary p-8 sm:p-10 rounded-[2.5rem] border border-gray-800 shadow-2xl relative overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-1000">
         <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-accent to-transparent opacity-50" />
 
-        <header className="text-center mb-10">
-          <h1 className="text-4xl font-black text-white tracking-tighter mb-2">
+        <header className="text-center mb-8 sm:mb-10">
+          <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tighter mb-2">
             {t("auth.register_title", "Join XAuth")}
           </h1>
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-400 text-[10px] sm:text-sm">
             {t("auth.register_subtitle", "Create your personal license portal")}
           </p>
         </header>
