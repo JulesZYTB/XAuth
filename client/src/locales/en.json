@@ -16,7 +16,9 @@
     "user_management": "User Management",
     "audit_logs": "Audit Logs",
     "documentation": "Documentation",
-    "sign_out": "Sign Out"
+    "sign_out": "Sign Out",
+    "toggle_menu": "Toggle Menu",
+    "home": "Home"
   },
   "docs": {
     "title": "Technical Documentation",
@@ -86,7 +88,8 @@
     "copied": "Copied!",
     "generate": "Generate",
     "close": "Close",
-    "never": "Never"
+    "never": "Never",
+    "back": "Back"
   },
   "time": {
     "1_hour": "1 Hour",
@@ -232,7 +235,8 @@
     "no_licenses": "No active licenses found.",
     "redeem_hint": "Redeem a product key above to activate your software.",
     "trial_request": "Request 24h Free Trial",
-    "trial_success": "Trial generated successfully! Here is your key:"
+    "trial_success": "Trial generated successfully! Here is your key:",
+    "limited_offer": "Limited Time Offer"
   },
   "apps": {
     "title": "Application Hub",
