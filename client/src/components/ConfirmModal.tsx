@@ -46,11 +46,11 @@ export default function ConfirmModal({
           <p className="text-sm font-medium leading-relaxed">{message}</p>
         </div>
 
-        <div className="flex gap-3 pt-4 border-t border-gray-800/50">
+        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-800/50">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 px-6 py-4 rounded-2xl bg-dark border border-gray-800 text-gray-400 font-bold hover:text-white hover:bg-white/5 transition-all outline-none focus:ring-2 focus:ring-gray-700 cursor-pointer"
+            className="w-full sm:flex-1 px-6 py-4 rounded-2xl bg-dark border border-gray-800 text-gray-400 font-bold hover:text-white hover:bg-white/5 transition-all outline-none focus:ring-2 focus:ring-gray-700 cursor-pointer order-2 sm:order-1"
           >
             {t("common.cancel", "Cancel")}
           </button>
@@ -60,7 +60,7 @@ export default function ConfirmModal({
               onConfirm();
               onClose();
             }}
-            className={`flex-1 px-6 py-4 rounded-2xl text-white font-black shadow-xl transition-all active:scale-95 outline-none focus:ring-4 focus:ring-white/10 cursor-pointer ${btnColors[type]}`}
+            className={`w-full sm:flex-1 px-6 py-4 rounded-2xl text-white font-black shadow-xl transition-all active:scale-95 outline-none focus:ring-4 focus:ring-white/10 cursor-pointer order-1 sm:order-2 ${btnColors[type]}`}
           >
             {resolvedConfirmText}
           </button>
