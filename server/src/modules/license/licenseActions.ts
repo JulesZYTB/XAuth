@@ -21,7 +21,8 @@ import { licenseCreateSchema, licenseRedeemSchema, licenseTrialSchema, licenseVa
 
 // Helper for random key generation
 const generateRandomKey = (mask: string = "XXXX-XXXX-XXXX") => {
-  return mask.replace(/X/g, () => crypto.randomBytes(1).toString("hex").substring(0, 1).toUpperCase());
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Premium charset (no ambiguous chars)
+  return mask.replace(/X/g, () => chars.charAt(Math.floor(Math.random() * chars.length)));
 };
 
 // Helper to check if user owns the app, is a reseller, or is admin
@@ -72,6 +73,31 @@ const add: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    let finalExpiryDate: Date;
+    const expiryStr = String(expiry_date);
+    const unitMatch = expiryStr.match(/^(\d+)([dhmy])?$/i);
+
+    if (unitMatch) {
+      const value = parseInt(unitMatch[1]);
+      const unit = (unitMatch[2] || "d").toLowerCase();
+      finalExpiryDate = new Date();
+      
+      if (unit === "d") finalExpiryDate.setDate(finalExpiryDate.getDate() + value);
+      else if (unit === "h") finalExpiryDate.setHours(finalExpiryDate.getHours() + value);
+      else if (unit === "m") finalExpiryDate.setMinutes(finalExpiryDate.getMinutes() + value);
+      else if (unit === "y") finalExpiryDate.setFullYear(finalExpiryDate.getFullYear() + value);
+    } else if (!isNaN(Date.parse(expiryStr))) {
+      finalExpiryDate = new Date(expiryStr);
+    } else {
+      res.status(400).json({ message: "Invalid expiry_date format. Use '30', '30d', '1h' or a valid ISO date." });
+      return;
+    }
+
+    let finalLicenseKey = typeof license_key === "string" ? license_key : "";
+    if (!finalLicenseKey || finalLicenseKey.includes("X")) {
+      finalLicenseKey = generateRandomKey(finalLicenseKey || "XXXX-XXXX-XXXX");
+    }
+
     // If actor is a reseller, check their quotas BEFORE creation
     if (actor.role !== "admin") {
       const app = await appRepository.read(app_id);
@@ -89,9 +115,8 @@ const add: RequestHandler = async (req, res, next) => {
               }
 
               // 2. Check Day Quota (Duration)
-              const expiryDate = new Date(expiry_date);
               const now = new Date();
-              const diffTime = expiryDate.getTime() - now.getTime();
+              const diffTime = finalExpiryDate.getTime() - now.getTime();
               const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
               
               if (diffDays > quotaDay) {
@@ -109,8 +134,8 @@ const add: RequestHandler = async (req, res, next) => {
     }
 
     const id = await licenseRepository.create({
-      license_key: license_key as string,
-      expiry_date: new Date(expiry_date as string),
+      license_key: finalLicenseKey,
+      expiry_date: finalExpiryDate,
       app_id: Number(app_id),
       status: "active",
       created_by: actor.id
@@ -133,7 +158,12 @@ const add: RequestHandler = async (req, res, next) => {
       user_agent: req.headers["user-agent"]
     });
 
-    res.status(201).json({ id });
+    res.status(201).json({ 
+      id, 
+      license_key: finalLicenseKey,
+      data: finalLicenseKey, // For compatibility with external systems expecting 'data'
+      status: "success"
+    });
   } catch (err) {
     next(err);
   }

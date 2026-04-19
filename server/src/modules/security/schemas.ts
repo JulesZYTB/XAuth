@@ -19,9 +19,9 @@ export const registerSchema = z.object({
  * License Schemas
  */
 export const licenseCreateSchema = z.object({
-  app_id: z.number().int().positive(),
+  app_id: z.coerce.number().int().positive(),
   license_key: z.string().optional(),
-  expiry_date: z.string().datetime(),
+  expiry_date: z.union([z.string(), z.number()]),
 });
 
 export const licenseRedeemSchema = z.object({
