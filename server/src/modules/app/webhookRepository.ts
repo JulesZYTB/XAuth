@@ -28,8 +28,14 @@ class WebhookRepository {
   }
 
   async update(id: number, data: Partial<Webhook>) {
-    const fields = Object.keys(data).map(key => `${key} = ?`).join(", ");
-    const values = Object.values(data);
+    const allowedFields = ["url", "event_types", "secret", "is_enabled"];
+    const keys = Object.keys(data).filter(key => allowedFields.includes(key));
+    
+    if (keys.length === 0) return 0;
+
+    const fields = keys.map(key => `${key} = ?`).join(", ");
+    const values = keys.map(key => (data as any)[key]);
+    
     const [result] = await databaseClient.query<Result>(
       `update webhook set ${fields} where id = ?`,
       [...values, id]
