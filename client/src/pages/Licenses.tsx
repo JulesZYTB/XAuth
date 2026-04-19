@@ -259,122 +259,124 @@ export default function Licenses() {
         </div>
       ) : (
         <div className="bg-secondary border border-gray-800 rounded-[2.5rem] overflow-hidden shadow-2xl">
-          <table className="w-full text-left">
-            <thead className="bg-dark/50 border-b border-gray-800">
-              <tr>
-                <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black">
-                  {t("licenses.table_key", "License Key")}
-                </th>
-                <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black">
-                  {t("licenses.table_status", "Status")}
-                </th>
-                <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black">
-                  {t("licenses.table_hwid", "HWID")}
-                </th>
-                <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black">
-                  {t("licenses.table_expiry", "Expiry")}
-                </th>
-                <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black text-right">
-                  {t("licenses.table_actions", "Actions")}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-800/50">
-              {licenses.map((license) => (
-                <tr
-                  key={license.id}
-                  className="hover:bg-white/2 transition-colors group"
-                >
-                  <td className="px-6 py-5 font-mono text-sm text-gray-300">
-                    <div className="flex items-center gap-3">
-                      <span className="select-all">{license.license_key}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-5">
-                    <span
-                      className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${
-                        license.status === "active"
-                          ? "bg-green-500/10 text-green-500 border-green-500/20"
-                          : "bg-red-500/10 text-red-500 border-red-500/20"
-                      }`}
-                    >
-                      {license.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-5 text-gray-500 text-xs font-mono">
-                    {license.hwid || t("licenses.not_linked", "Not Linked")}
-                  </td>
-                  <td className="px-6 py-5 text-gray-400 text-xs font-medium">
-                    {new Date(license.expiry_date).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-5 text-right">
-                    <div className="flex justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedLicense(license);
-                          setIsEditVariablesModalOpen(true);
-                        }}
-                        className="p-2 text-gray-500 hover:text-green-500 hover:bg-green-500/10 rounded-xl transition-all cursor-pointer"
-                        title={t(
-                          "licenses.edit_metadata",
-                          "Edit License Metadata",
-                        )}
-                      >
-                        <Code className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openConfirm(license.id, "regenerate")}
-                        className="p-2 text-gray-500 hover:text-blue-500 hover:bg-blue-500/10 rounded-xl transition-all cursor-pointer"
-                        title={t("licenses.regen_key", "Regenerate Key Value")}
-                      >
-                        <Wand2 className="w-4 h-4" />
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => openConfirm(license.id, "reset-hwid")}
-                        className="p-2 text-gray-500 hover:text-accent hover:bg-accent/10 rounded-xl transition-all cursor-pointer"
-                        title={t("licenses.reset_hwid", "Reset HWID")}
-                      >
-                        <RefreshCcw className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          openConfirm(
-                            license.id,
-                            license.status === "active" ? "ban" : "unban",
-                          )
-                        }
-                        className={`p-2 rounded-xl transition-all cursor-pointer ${license.status === "active" ? "text-orange-500 hover:bg-orange-500/10" : "text-green-500 hover:bg-green-500/10"}`}
-                        title={
-                          license.status === "active"
-                            ? t("licenses.ban_key", "Ban Key")
-                            : t("licenses.unban_key", "Unban Key")
-                        }
-                      >
-                        {license.status === "active" ? (
-                          <Lock className="w-4 h-4" />
-                        ) : (
-                          <Unlock className="w-4 h-4" />
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => openConfirm(license.id, "delete")}
-                        className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all cursor-pointer"
-                        title={t("licenses.delete_key", "Delete Key")}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left min-w-[800px] lg:min-w-0">
+              <thead className="bg-dark/50 border-b border-gray-800">
+                <tr>
+                  <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black">
+                    {t("licenses.table_key", "License Key")}
+                  </th>
+                  <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black">
+                    {t("licenses.table_status", "Status")}
+                  </th>
+                  <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black">
+                    {t("licenses.table_hwid", "HWID")}
+                  </th>
+                  <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black">
+                    {t("licenses.table_expiry", "Expiry")}
+                  </th>
+                  <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black text-right">
+                    {t("licenses.table_actions", "Actions")}
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-800/50">
+                {licenses.map((license) => (
+                  <tr
+                    key={license.id}
+                    className="hover:bg-white/2 transition-colors group"
+                  >
+                    <td className="px-6 py-5 font-mono text-sm text-gray-300">
+                      <div className="flex items-center gap-3">
+                        <span className="select-all">{license.license_key}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <span
+                        className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border ${
+                          license.status === "active"
+                            ? "bg-green-500/10 text-green-500 border-green-500/20"
+                            : "bg-red-500/10 text-red-500 border-red-500/20"
+                        }`}
+                      >
+                        {license.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-5 text-gray-500 text-xs font-mono">
+                      {license.hwid || t("licenses.not_linked", "Not Linked")}
+                    </td>
+                    <td className="px-6 py-5 text-gray-400 text-xs font-medium">
+                      {new Date(license.expiry_date).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-5 text-right">
+                      <div className="flex justify-end gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedLicense(license);
+                            setIsEditVariablesModalOpen(true);
+                          }}
+                          className="p-2 text-gray-500 hover:text-green-500 hover:bg-green-500/10 rounded-xl transition-all cursor-pointer"
+                          title={t(
+                            "licenses.edit_metadata",
+                            "Edit License Metadata",
+                          )}
+                        >
+                          <Code className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openConfirm(license.id, "regenerate")}
+                          className="p-2 text-gray-500 hover:text-blue-500 hover:bg-blue-500/10 rounded-xl transition-all cursor-pointer"
+                          title={t("licenses.regen_key", "Regenerate Key Value")}
+                        >
+                          <Wand2 className="w-4 h-4" />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => openConfirm(license.id, "reset-hwid")}
+                          className="p-2 text-gray-500 hover:text-accent hover:bg-accent/10 rounded-xl transition-all cursor-pointer"
+                          title={t("licenses.reset_hwid", "Reset HWID")}
+                        >
+                          <RefreshCcw className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            openConfirm(
+                              license.id,
+                              license.status === "active" ? "ban" : "unban",
+                            )
+                          }
+                          className={`p-2 rounded-xl transition-all cursor-pointer ${license.status === "active" ? "text-orange-500 hover:bg-orange-500/10" : "text-green-500 hover:bg-green-500/10"}`}
+                          title={
+                            license.status === "active"
+                              ? t("licenses.ban_key", "Ban Key")
+                              : t("licenses.unban_key", "Unban Key")
+                          }
+                        >
+                          {license.status === "active" ? (
+                            <Lock className="w-4 h-4" />
+                          ) : (
+                            <Unlock className="w-4 h-4" />
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openConfirm(license.id, "delete")}
+                          className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all cursor-pointer"
+                          title={t("licenses.delete_key", "Delete Key")}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           {licenses.length === 0 && (
             <div className="text-center py-20 text-gray-600">
               <Key className="w-12 h-12 mx-auto mb-4 opacity-5" />
