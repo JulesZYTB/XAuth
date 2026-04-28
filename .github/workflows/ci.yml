@@ -5,7 +5,7 @@ on:
       branches: main
 
 jobs:
-  build: 
+  test: 
     runs-on: ubuntu-latest
     steps:  
       - name: Checkout du code 
@@ -25,4 +25,13 @@ jobs:
       - name: Exécution des tests
         run: npm run test unit
 
+      - name: Build client 
+        run: npm run build
+      
+      - name: Upload dist after build client
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: client/dist
+        
 
