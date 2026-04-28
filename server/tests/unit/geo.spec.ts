@@ -1,4 +1,5 @@
-import geoService from '../../src/services/geoService.js';
+import geoService from "../../src/services/geoService.js";
+
 
 describe('Geo Service - Unit Tests', () => {
   it('should return Local Development for localhost IPs', async () => {
