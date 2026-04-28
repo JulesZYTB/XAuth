@@ -1,0 +1,28 @@
+name: ci
+
+on:
+  push:
+      branches: main
+
+jobs:
+  build: 
+    runs-on: ubuntu-latest
+    steps:  
+      - name: Checkout du code 
+        uses: actions/checkout@v3
+    
+      - name: Install node.js
+        uses: actions/setup-node@v3
+        with:
+            node-version: '25'
+          
+      - name: Installation des dépendances
+        run: npm ci
+
+      - name: Exécution de lint
+        run: npm lint 
+
+      - name: Exécution des tests
+        run: npm run test
+
+
