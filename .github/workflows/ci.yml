@@ -20,7 +20,7 @@ jobs:
         run: npm ci
 
       - name: Exécution de lint
-        run: npm check 
+        run: npm run check 
 
       - name: Exécution des tests
         run: npm run test
