@@ -32,6 +32,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: client/dist
+          path: dist
+
+      - name: Download a single artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: dist
         
 
