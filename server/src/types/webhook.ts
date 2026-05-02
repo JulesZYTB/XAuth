@@ -7,4 +7,4 @@ export interface Webhook {
   is_enabled: boolean;
 }
 
-export type WebhookEvent = "REDEEM" | "BAN" | "UNBAN" | "RESET_HWID" | "KEY_REGENERATE";
+export type WebhookEvent = "REDEEM" | "BAN" | "UNBAN" | "RESET_HWID" | "KEY_REGENERATE" | "LOGIN";
