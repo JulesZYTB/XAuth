@@ -11,6 +11,7 @@ import geoService from "../../services/geoService.js";
 import validationLogRepository from "../app/validationLogRepository.js";
 import trialRepository from "../app/trialRepository.js";
 import resellerRepository from "../admin/resellerRepository.js";
+import releaseRepository from "../app/releaseRepository.js";
 
 interface AuthenticatedRequest extends Request {
   auth: AuthUser;
@@ -138,7 +139,9 @@ const add: RequestHandler = async (req, res, next) => {
       expiry_date: finalExpiryDate,
       app_id: Number(app_id),
       status: "active",
-      created_by: actor.id
+      created_by: actor.id,
+      max_hwids: validation.data.max_hwids || 1,
+      linked_hwids: "[]"
     });
 
     // Increment keys_generated AFTER successful creation
@@ -174,7 +177,7 @@ const add: RequestHandler = async (req, res, next) => {
 // Client action: Validate a license (Omega Edition)
 const validate: RequestHandler = async (req, res, next) => {
   try {
-    const { license_key, hwid, app_secret, session_id, error_type, details } = req.body;
+    const { license_key, hwid, app_secret, session_id, error_type, details, version } = req.body;
     const ip = req.ip || req.socket.remoteAddress || "0.0.0.0";
 
     // 0. Manual Security Signal (Debugger/Bypass detected by client)
@@ -346,20 +349,58 @@ const validate: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    // HWID Check
-    if (license.hwid && license.hwid !== hwid) {
-       await validationLogRepository.create({
-        app_id: app.id,
-        license_id: license.id,
-        ip_address: ip,
-        country: country as string,
-        country_code: country_code as string,
-        status: "failed",
-        error_type: "HWID_MISMATCH"
-      });
+    // HWID Check (Multiple support)
+    const linkedHwids: string[] = typeof license.linked_hwids === 'string' ? JSON.parse(license.linked_hwids) : (license.linked_hwids || []);
+    const hwidHash = hwid ? securityService.hash(hwid) : null;
 
-      res.status(403).json({ message: "HWID mismatch" });
-      return;
+    if (hwidHash) {
+      if (!linkedHwids.includes(hwidHash)) {
+        if (linkedHwids.length < (license.max_hwids || 1)) {
+          await licenseRepository.linkHwid(license.id, hwidHash);
+          linkedHwids.push(hwidHash);
+        } else {
+           await validationLogRepository.create({
+            app_id: app.id,
+            license_id: license.id,
+            ip_address: ip,
+            country: country as string,
+            country_code: country_code as string,
+            status: "failed",
+            error_type: "HWID_LIMIT_REACHED"
+          });
+          res.status(403).json({ message: "Maximum number of hardware IDs reached for this license." });
+          return;
+        }
+      }
+    }
+
+    // Version check
+    let versionInfo: any = null;
+    if (version) {
+      const isBanned = await releaseRepository.isVersionBanned(app.id, version);
+      if (isBanned) {
+        await validationLogRepository.create({
+          app_id: app.id,
+          license_id: license.id,
+          ip_address: ip,
+          country: country as string,
+          country_code: country_code as string,
+          status: "failed",
+          error_type: "BANNED_VERSION"
+        });
+        res.status(403).json({ message: "This software version is outdated and has been banned. Please update to continue." });
+        return;
+      }
+
+      const latest = await releaseRepository.getLatest(app.id, "stable");
+      if (latest) {
+        versionInfo = {
+          current: version,
+          latest: latest.version,
+          update_available: version !== latest.version,
+          download_url: version !== latest.version ? latest.download_url : null
+        };
+      }
     }
 
     // IP Lock check
@@ -378,7 +419,7 @@ const validate: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    // Lock HWID/IP if not set
+    // Legacy support: Lock primary HWID if not set
     if (!license.hwid && hwid) {
       await licenseRepository.updateHwid(license.id, hwid);
     }
@@ -393,11 +434,24 @@ const validate: RequestHandler = async (req, res, next) => {
       status: "success"
     });
 
+    // Webhook dispatch (LOGIN)
+    await webhookService.dispatch(app.id, "LOGIN", { 
+      license_id: license.id, 
+      key: license.license_key,
+      ip_address: ip,
+      country: country,
+      hwid: hwid || "unknown",
+      version: version || "unknown"
+    });
+
 
 
     // 4. Finalize session (consume it)
     await sessionRepository.delete(session_id);
 
+
+    // Get online users count
+    const online_users = await validationLogRepository.countOnlineUsers(app.id);
 
     // Prepare response data with Enterprise metadata
     const responseData = JSON.stringify({ 
@@ -405,6 +459,8 @@ const validate: RequestHandler = async (req, res, next) => {
       expiry: license.expiry_date,
       variables: JSON.parse(license.variables || "{}"),
       broadcast: app.broadcast_message || "Welcome to XAuth Omega protected software.",
+      online_users: online_users,
+      version_info: versionInfo
     });
 
     // Encrypted response using app secret + session nonce as additional security
