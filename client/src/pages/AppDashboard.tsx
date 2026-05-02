@@ -3,7 +3,6 @@ import {
   BarChart3,
   ChevronLeft,
   Flame,
-  Globe,
   Rocket,
   ShieldAlert,
   ShieldCheck,
@@ -227,6 +226,13 @@ export default function AppDashboard() {
       color: "text-accent",
     },
     {
+      label: t("dashboard.online_users", "Online Users"),
+      value: (stats as any).onlineUsers || 0,
+      growth: "Now",
+      icon: Activity,
+      color: "text-green-500",
+    },
+    {
       label: t("dashboard.total_users", "App Users"),
       value: stats.totalUsers,
       growth: "Live",
@@ -239,13 +245,6 @@ export default function AppDashboard() {
       growth: "DB",
       icon: Rocket,
       color: "text-orange-500",
-    },
-    {
-      label: t("dashboard.app_reach"),
-      value: stats.mapData.length,
-      growth: "Countries",
-      icon: Globe,
-      color: "text-green-500",
     },
   ];
 
