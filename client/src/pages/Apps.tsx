@@ -360,6 +360,14 @@ function AppCard({ app, isOwner, t, handleTogglePause, setAppForRelease, setIsRe
                   ? t("apps.service_paused", "Service Paused")
                   : t("apps.active_protected", "Active & Protected")}
               </span>
+              {app.online_users > 0 && (
+                <div className="flex items-center gap-1.5 ml-3 bg-green-500/10 px-2 py-0.5 rounded-full border border-green-500/20">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                  <span className="text-[9px] font-black text-green-500 uppercase">
+                    {app.online_users} {t("apps.online", "Online")}
+                  </span>
+                </div>
+              )}
               {!isOwner && app.owner_username && (
                 <span className="text-[9px] text-accent/50 uppercase font-black ml-2 border border-accent/20 px-2 py-0.5 rounded-full">
                   Owner: {app.owner_username}
