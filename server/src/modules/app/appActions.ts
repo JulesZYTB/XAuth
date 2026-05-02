@@ -16,7 +16,13 @@ const browse: RequestHandler = async (req, res, next) => {
     if (actor.role === "admin") {
       // Admins see everything + owner username
       const [allApps] = await (await import("../../../database/client.js")).default.query(
-        `SELECT a.*, u.username as owner_username 
+        `SELECT a.*, u.username as owner_username,
+                (SELECT COUNT(DISTINCT v.license_id) 
+                 FROM validation_log v 
+                 WHERE v.app_id = a.id 
+                   AND v.status = 'success' 
+                   AND v.created_at > DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+                ) as online_users
          FROM app a 
          JOIN user u ON a.owner_id = u.id`
       );
