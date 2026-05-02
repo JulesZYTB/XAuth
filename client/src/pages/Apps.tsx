@@ -13,6 +13,7 @@ import {
   ShieldAlert,
   ShieldCheck,
   Trash2,
+  Users,
   Webhook,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -32,6 +33,7 @@ type App = {
   broadcast_message?: string;
   is_paused: boolean;
   owner_id: number;
+  owner_username?: string;
 };
 
 export default function Apps() {
@@ -161,7 +163,6 @@ export default function Apps() {
   };
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const isOwner = (app: App) => app.owner_id === user.id || user.role === "admin";
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-1000 relative">
@@ -235,214 +236,70 @@ export default function Apps() {
           {t("apps.synchronizing", "Synchronizing applications...")}
         </div>
       ) : (
-        <ul className="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-12">
-          {apps.map((app) => (
-            <li
-              key={app.id}
-              className="group bg-secondary border border-gray-800 rounded-[2.5rem] p-6 sm:p-8 shadow-2xl hover:border-accent/40 transition-all outline-none relative overflow-hidden"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
-                <div className="flex items-center gap-4 order-2 sm:order-1">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 bg-accent/10 rounded-2xl flex items-center justify-center border border-accent/20 shrink-0">
-                    <Settings2
-                      className="w-6 h-6 sm:w-7 sm:h-7 text-accent"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-lg sm:text-xl font-black text-white tracking-tight leading-tight">
-                      {app.name}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div
-                        className={`w-2 h-2 rounded-full ${app.is_paused ? "bg-orange-500 animate-pulse" : "bg-green-500"}`}
-                      />
-                      <span className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest">
-                        {app.is_paused
-                          ? t("apps.service_paused", "Service Paused")
-                          : t("apps.active_protected", "Active & Protected")}
-                      </span>
-                    </div>
-                  </div>
+        <div className="space-y-16">
+          {/* My Apps Section */}
+          <section className="space-y-8">
+            {user.role === "admin" && (
+              <h3 className="text-xl font-black text-white px-2 flex items-center gap-3">
+                <ShieldCheck className="w-6 h-6 text-accent" /> {t("apps.my_apps", "My Applications")}
+              </h3>
+            )}
+            <ul className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {apps.filter(app => app.owner_id === user.id).map((app) => (
+                <AppCard 
+                  key={app.id} 
+                  app={app} 
+                  isOwner={true}
+                  t={t}
+                  handleTogglePause={handleTogglePause}
+                  setAppForRelease={setAppForRelease}
+                  setIsReleaseModalOpen={setIsReleaseModalOpen}
+                  setAppForWebhook={setAppForWebhook}
+                  setIsWebhookModalOpen={setIsWebhookModalOpen}
+                  setAppToDelete={setAppToDelete}
+                  setIsDeleteModalOpen={setIsDeleteModalOpen}
+                  handleCopy={handleCopy}
+                  copiedId={copiedId}
+                  handleUpdateBroadcast={handleUpdateBroadcast}
+                />
+              ))}
+              {apps.filter(app => app.owner_id === user.id).length === 0 && (
+                <div className="col-span-full border-2 border-dashed border-gray-800 rounded-[3rem] py-20 flex flex-col items-center text-gray-600">
+                  <p className="text-lg font-medium">{t("apps.no_my_apps", "You haven't deployed any apps yet.")}</p>
                 </div>
+              )}
+            </ul>
+          </section>
 
-                <div className="flex flex-wrap gap-2 order-1 sm:order-2">
-                    {isOwner(app) && (
-                      <button
-                        type="button"
-                        onClick={() => handleTogglePause(app)}
-                        className={`p-3 rounded-2xl transition-all cursor-pointer ${app.is_paused ? "bg-orange-500/10 text-orange-500 border border-orange-500/20" : "bg-gray-800/50 text-gray-500 hover:text-white border border-transparent"}`}
-                        title={
-                          app.is_paused
-                            ? t("apps.resume_app", "Resume App")
-                            : t("apps.pause_app", "Pause App")
-                        }
-                      >
-                        {app.is_paused ? (
-                          <Play className="w-5 h-5" fill="currentColor" />
-                        ) : (
-                          <Pause className="w-5 h-5" fill="currentColor" />
-                        )}
-                      </button>
-                    )}
-                    {isOwner(app) && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setAppForRelease(app);
-                          setIsReleaseModalOpen(true);
-                        }}
-                        className="p-3 bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded-2xl hover:bg-blue-500/20 transition-all cursor-pointer"
-                        title={t("apps.manage_releases", "Manage Releases")}
-                      >
-                        <Package className="w-5 h-5" />
-                      </button>
-                    )}
-                    {isOwner(app) && (
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setAppForWebhook(app);
-                            setIsWebhookModalOpen(true);
-                          }}
-                          className="p-3 bg-accent/10 text-accent border border-accent/20 rounded-2xl hover:bg-accent/20 transition-all cursor-pointer"
-                          title={t("apps.config_webhooks", "Configure Webhooks")}
-                        >
-                          <Webhook className="w-5 h-5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setAppToDelete(app.id);
-                            setIsDeleteModalOpen(true);
-                          }}
-                          className="p-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-2xl hover:bg-red-500/20 transition-all cursor-pointer"
-                          aria-label={t("apps.delete_app", "Delete Application")}
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      </div>
-                    )}
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center gap-2 text-[10px] text-gray-600 uppercase font-black px-1">
-                    <Package className="w-3 h-3" /> {t("apps.app_id", "App ID")}
-                  </div>
-                  <div className="bg-dark/50 p-4 rounded-2xl border border-gray-800/50 flex justify-between items-center group/key">
-                    <code className="text-sm font-mono text-gray-300 truncate max-w-[200px]">
-                      {app.id}
-                    </code>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleCopy(
-                          app.id.toString(),
-                          `app-${app.id}-id`,
-                          t("apps.app_id", "App ID"),
-                        )
-                      }
-                      className="text-[10px] text-accent font-black uppercase opacity-0 group-hover/key:opacity-100 transition-all cursor-pointer"
-                    >
-                      {copiedId === `app-${app.id}-id`
-                        ? t("common.copied", "Copied!")
-                        : t("copy", "Copy")}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-[10px] text-gray-600 uppercase font-black px-1">
-                    <Key className="w-3 h-3" />{" "}
-                    {t("apps.app_secret", "App Secret Key")}
-                  </div>
-                  <div className="bg-dark/50 p-4 rounded-2xl border border-gray-800/50 flex justify-between items-center group/key">
-                    <code className="text-sm font-mono text-gray-300 truncate max-w-[200px]">
-                      {app.secret_key}
-                    </code>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleCopy(
-                          app.secret_key,
-                          `app-${app.id}-secret`,
-                          t("apps.app_secret", "App Secret Key"),
-                        )
-                      }
-                      className="text-[10px] text-accent font-black uppercase opacity-0 group-hover/key:opacity-100 transition-all cursor-pointer"
-                    >
-                      {copiedId === `app-${app.id}-secret`
-                        ? t("common.copied", "Copied!")
-                        : t("copy", "Copy")}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-[10px] text-gray-600 uppercase font-black px-1">
-                    <MessageSquare className="w-3 h-3" />{" "}
-                    {t("apps.broadcast_message", "Broadcast Message")}
-                  </div>
-                  <input
-                    type="text"
-                    defaultValue={
-                      app.broadcast_message || t("apps.broadcast_default")
-                    }
-                    onBlur={(e) =>
-                      handleUpdateBroadcast(app.id, e.target.value)
-                    }
-                    readOnly={!isOwner(app)}
-                    className={`w-full bg-dark/30 border border-gray-800/50 rounded-2xl px-4 py-3 text-sm text-gray-400 focus:border-accent outline-none ${!isOwner(app) ? "opacity-50 cursor-not-allowed" : ""}`}
-                    placeholder={t(
-                      "apps.broadcast_placeholder",
-                      "Enter message for clients...",
-                    )}
-                    aria-label="Application broadcast message"
+          {/* Admin: Other Apps Section */}
+          {user.role === "admin" && apps.filter(app => app.owner_id !== user.id).length > 0 && (
+            <section className="space-y-8 pt-8 border-t border-gray-800/50">
+               <h3 className="text-xl font-black text-white px-2 flex items-center gap-3">
+                <Users className="w-6 h-6 text-blue-500" /> {t("apps.other_apps", "Global Infrastructure (Other Owners)")}
+              </h3>
+              <ul className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {apps.filter(app => app.owner_id !== user.id).map((app) => (
+                  <AppCard 
+                    key={app.id} 
+                    app={app} 
+                    isOwner={false}
+                    t={t}
+                    handleTogglePause={handleTogglePause}
+                    setAppForRelease={setAppForRelease}
+                    setIsReleaseModalOpen={setIsReleaseModalOpen}
+                    setAppForWebhook={setAppForWebhook}
+                    setIsWebhookModalOpen={setIsWebhookModalOpen}
+                    setAppToDelete={setAppToDelete}
+                    setIsDeleteModalOpen={setIsDeleteModalOpen}
+                    handleCopy={handleCopy}
+                    copiedId={copiedId}
+                    handleUpdateBroadcast={handleUpdateBroadcast}
                   />
-                </div>
-              </div>
-
-              <div className="mt-8 pt-8 border-t border-gray-800/50 flex justify-between items-center">
-                <div className="flex gap-2">
-                  {isOwner(app) && (
-                    <Link
-                      to={`/apps/${app.id}/dashboard`}
-                      className="flex items-center gap-2 text-sm font-bold text-blue-500 hover:underline px-4 py-2 bg-blue-500/5 rounded-xl border border-blue-500/10 transition-all font-sans"
-                    >
-                      <BarChart3 className="w-4 h-4" />{" "}
-                      {t("apps.insights", "Insights")}
-                    </Link>
-                  )}
-                </div>
-                <Link
-                  to={`/apps/${app.id}/licenses`}
-                  className="flex items-center gap-2 text-sm font-bold text-accent hover:underline px-4 py-2 bg-accent/5 rounded-xl border border-accent/10 transition-all font-sans"
-                >
-                  {t("apps.manage_licenses", "Manage Licenses")}{" "}
-                  <ChevronRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </li>
-          ))}
-
-          {apps.length === 0 && (
-            <div className="col-span-full border-2 border-dashed border-gray-800 rounded-[3rem] py-32 flex flex-col items-center text-gray-600">
-              <ShieldCheck className="w-16 h-16 mb-4 opacity-5" />
-              <p className="text-xl font-medium">
-                {t("apps.no_apps_title", "No protected applications yet.")}
-              </p>
-              <p className="text-sm opacity-50 mt-1">
-                {t(
-                  "apps.no_apps_desc",
-                  "Deploy your first app to start issuing licenses.",
-                )}
-              </p>
-            </div>
+                ))}
+              </ul>
+            </section>
           )}
-        </ul>
+        </div>
       )}
 
       <ConfirmModal
@@ -474,5 +331,195 @@ export default function Apps() {
         />
       )}
     </div>
+  );
+}
+
+function AppCard({ app, isOwner, t, handleTogglePause, setAppForRelease, setIsReleaseModalOpen, setAppForWebhook, setIsWebhookModalOpen, setAppToDelete, setIsDeleteModalOpen, handleCopy, copiedId, handleUpdateBroadcast }: any) {
+  return (
+    <li
+      className="group bg-secondary border border-gray-800 rounded-[2.5rem] p-6 sm:p-8 shadow-2xl hover:border-accent/40 transition-all outline-none relative overflow-hidden"
+    >
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+        <div className="flex items-center gap-4 order-2 sm:order-1">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-accent/10 rounded-2xl flex items-center justify-center border border-accent/20 shrink-0">
+            <Settings2
+              className="w-6 h-6 sm:w-7 sm:h-7 text-accent"
+              aria-hidden="true"
+            />
+          </div>
+          <div>
+            <h3 className="text-lg sm:text-xl font-black text-white tracking-tight leading-tight">
+              {app.name}
+            </h3>
+            <div className="flex items-center gap-2 mt-1">
+              <div
+                className={`w-2 h-2 rounded-full ${app.is_paused ? "bg-orange-500 animate-pulse" : "bg-green-500"}`}
+              />
+              <span className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest">
+                {app.is_paused
+                  ? t("apps.service_paused", "Service Paused")
+                  : t("apps.active_protected", "Active & Protected")}
+              </span>
+              {!isOwner && app.owner_username && (
+                <span className="text-[9px] text-accent/50 uppercase font-black ml-2 border border-accent/20 px-2 py-0.5 rounded-full">
+                  Owner: {app.owner_username}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2 order-1 sm:order-2">
+            <button
+              type="button"
+              onClick={() => handleTogglePause(app)}
+              className={`p-3 rounded-2xl transition-all cursor-pointer ${app.is_paused ? "bg-orange-500/10 text-orange-500 border border-orange-500/20" : "bg-gray-800/50 text-gray-500 hover:text-white border border-transparent"}`}
+              title={
+                app.is_paused
+                  ? t("apps.resume_app", "Resume App")
+                  : t("apps.pause_app", "Pause App")
+              }
+            >
+              {app.is_paused ? (
+                <Play className="w-5 h-5" fill="currentColor" />
+              ) : (
+                <Pause className="w-5 h-5" fill="currentColor" />
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setAppForRelease(app);
+                setIsReleaseModalOpen(true);
+              }}
+              className="p-3 bg-blue-500/10 text-blue-500 border border-blue-500/20 rounded-2xl hover:bg-blue-500/20 transition-all cursor-pointer"
+              title={t("apps.manage_releases", "Manage Releases")}
+            >
+              <Package className="w-5 h-5" />
+            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setAppForWebhook(app);
+                  setIsWebhookModalOpen(true);
+                }}
+                className="p-3 bg-accent/10 text-accent border border-accent/20 rounded-2xl hover:bg-accent/20 transition-all cursor-pointer"
+                title={t("apps.config_webhooks", "Configure Webhooks")}
+              >
+                <Webhook className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setAppToDelete(app.id);
+                  setIsDeleteModalOpen(true);
+                }}
+                className="p-3 bg-red-500/10 text-red-500 border border-red-500/20 rounded-2xl hover:bg-red-500/20 transition-all cursor-pointer"
+                aria-label={t("apps.delete_app", "Delete Application")}
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+            </div>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center gap-2 text-[10px] text-gray-600 uppercase font-black px-1">
+            <Package className="w-3 h-3" /> {t("apps.app_id", "App ID")}
+          </div>
+          <div className="bg-dark/50 p-4 rounded-2xl border border-gray-800/50 flex justify-between items-center group/key">
+            <code className="text-sm font-mono text-gray-300 truncate max-w-[200px]">
+              {app.id}
+            </code>
+            <button
+              type="button"
+              onClick={() =>
+                handleCopy(
+                  app.id.toString(),
+                  `app-${app.id}-id`,
+                  t("apps.app_id", "App ID"),
+                )
+              }
+              className="text-[10px] text-accent font-black uppercase opacity-0 group-hover/key:opacity-100 transition-all cursor-pointer"
+            >
+              {copiedId === `app-${app.id}-id`
+                ? t("common.copied", "Copied!")
+                : t("copy", "Copy")}
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-[10px] text-gray-600 uppercase font-black px-1">
+            <Key className="w-3 h-3" />{" "}
+            {t("apps.app_secret", "App Secret Key")}
+          </div>
+          <div className="bg-dark/50 p-4 rounded-2xl border border-gray-800/50 flex justify-between items-center group/key">
+            <code className="text-sm font-mono text-gray-300 truncate max-w-[200px]">
+              {app.secret_key}
+            </code>
+            <button
+              type="button"
+              onClick={() =>
+                handleCopy(
+                  app.secret_key,
+                  `app-${app.id}-secret`,
+                  t("apps.app_secret", "App Secret Key"),
+                )
+              }
+              className="text-[10px] text-accent font-black uppercase opacity-0 group-hover/key:opacity-100 transition-all cursor-pointer"
+            >
+              {copiedId === `app-${app.id}-secret`
+                ? t("common.copied", "Copied!")
+                : t("copy", "Copy")}
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-[10px] text-gray-600 uppercase font-black px-1">
+            <MessageSquare className="w-3 h-3" />{" "}
+            {t("apps.broadcast_message", "Broadcast Message")}
+          </div>
+          <input
+            type="text"
+            defaultValue={
+              app.broadcast_message || t("apps.broadcast_default")
+            }
+            onBlur={(e) =>
+              handleUpdateBroadcast(app.id, e.target.value)
+            }
+            readOnly={!isOwner}
+            className={`w-full bg-dark/30 border border-gray-800/50 rounded-2xl px-4 py-3 text-sm text-gray-400 focus:border-accent outline-none ${!isOwner ? "opacity-50 cursor-not-allowed" : ""}`}
+            placeholder={t(
+              "apps.broadcast_placeholder",
+              "Enter message for clients...",
+            )}
+            aria-label="Application broadcast message"
+          />
+        </div>
+      </div>
+
+      <div className="mt-8 pt-8 border-t border-gray-800/50 flex justify-between items-center">
+        <div className="flex gap-2">
+          <Link
+            to={`/apps/${app.id}/dashboard`}
+            className="flex items-center gap-2 text-sm font-bold text-blue-500 hover:underline px-4 py-2 bg-blue-500/5 rounded-xl border border-blue-500/10 transition-all font-sans"
+          >
+            <BarChart3 className="w-4 h-4" />{" "}
+            {t("apps.insights", "Insights")}
+          </Link>
+        </div>
+        <Link
+          to={`/apps/${app.id}/licenses`}
+          className="flex items-center gap-2 text-sm font-bold text-accent hover:underline px-4 py-2 bg-accent/5 rounded-xl border border-accent/10 transition-all font-sans"
+        >
+          {t("apps.manage_licenses", "Manage Licenses")}{" "}
+          <ChevronRight className="w-4 h-4" />
+        </Link>
+      </div>
+    </li>
   );
 }
