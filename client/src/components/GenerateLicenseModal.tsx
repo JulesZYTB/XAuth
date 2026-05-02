@@ -7,7 +7,7 @@ import Modal from "./Modal";
 type GenerateLicenseModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onGenerate: (data: { license_key?: string; expiry_date: string }) => void;
+  onGenerate: (data: { license_key?: string; expiry_date: string; max_hwids: number }) => void;
 };
 
 export default function GenerateLicenseModal({
@@ -46,6 +46,7 @@ export default function GenerateLicenseModal({
   const [duration, setDuration] = useState(DURATION_OPTIONS[3].value);
   const [pattern, setPattern] = useState(PATTERN_OPTIONS[0].pattern);
   const [manualKey, setManualKey] = useState("");
+  const [maxHwids, setMaxHwids] = useState(1);
 
   const generatePatternKey = (pat: string) => {
     return pat.replace(/X/g, () =>
@@ -56,7 +57,7 @@ export default function GenerateLicenseModal({
   const handleGenerate = () => {
     const key = manualKey || generatePatternKey(pattern);
     const expiryDate = new Date(Date.now() + duration).toISOString();
-    onGenerate({ license_key: key, expiry_date: expiryDate });
+    onGenerate({ license_key: key, expiry_date: expiryDate, max_hwids: maxHwids });
     onClose();
   };
 
@@ -148,6 +149,24 @@ export default function GenerateLicenseModal({
               setPattern("");
             }}
           />
+        </div>
+
+        {/* HWID Limit */}
+        <div className="space-y-3">
+          <label className="text-[10px] text-gray-500 uppercase font-black px-1 flex items-center gap-2">
+            <Sparkles className="w-3 h-3" /> {t("licenses.hwid_limit", "Maximum Hardware Links")}
+          </label>
+          <div className="flex items-center gap-4 bg-dark/30 p-4 rounded-2xl border border-gray-800">
+            <input 
+              type="range" 
+              min="1" 
+              max="10" 
+              value={maxHwids} 
+              onChange={(e) => setMaxHwids(Number(e.target.value))}
+              className="flex-1 accent-accent"
+            />
+            <span className="text-xl font-black text-white w-8 text-center">{maxHwids}</span>
+          </div>
         </div>
 
         <button
