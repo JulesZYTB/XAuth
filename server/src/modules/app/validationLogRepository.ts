@@ -78,6 +78,17 @@ class ValidationLogRepository {
     );
     return result.affectedRows;
   }
+
+  async countOnlineUsers(appId: number) {
+    const [rows] = await databaseClient.query<Rows>(
+      `SELECT COUNT(DISTINCT license_id) as count 
+       FROM validation_log 
+       WHERE app_id = ? AND status = 'success' 
+       AND created_at > DATE_SUB(NOW(), INTERVAL 10 MINUTE)`,
+      [appId]
+    );
+    return (rows[0] as any).count || 0;
+  }
 }
 
 export default new ValidationLogRepository();
