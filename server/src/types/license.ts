@@ -8,6 +8,8 @@ export interface License {
   status: "active" | "banned";
   app_id: number;
   variables?: string;
+  max_hwids?: number;
+  linked_hwids?: string; // JSON string
   ip_lock?: string;
   user_id?: number;
   created_by?: number;
