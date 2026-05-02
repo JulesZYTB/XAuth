@@ -14,8 +14,12 @@ const browse: RequestHandler = async (req, res, next) => {
     
     let apps;
     if (actor.role === "admin") {
-      // Admins see everything
-      const [allApps] = await (await import("../../../database/client.js")).default.query("select * from app");
+      // Admins see everything + owner username
+      const [allApps] = await (await import("../../../database/client.js")).default.query(
+        `SELECT a.*, u.username as owner_username 
+         FROM app a 
+         JOIN user u ON a.owner_id = u.id`
+      );
       apps = allApps;
     } else {
       // Regular users see only their own
