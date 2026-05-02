@@ -5,4 +5,5 @@ export interface App {
   broadcast_message?: string;
   is_paused: boolean;
   owner_id: number;
+  online_users?: number;
 }
