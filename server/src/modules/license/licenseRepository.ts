@@ -8,8 +8,8 @@ class LicenseRepository {
     const encryptedKey = securityService.dbEncrypt(license.license_key);
     const keyHash = securityService.hash(license.license_key);
     const [result] = await databaseClient.query<Result>(
-      "insert into license (license_key, license_key_hash, expiry_date, app_id, status, variables, created_by) values (?, ?, ?, ?, ?, ?, ?)",
-      [encryptedKey, keyHash, license.expiry_date, license.app_id, license.status, license.variables || "{}", license.created_by || null]
+      "insert into license (license_key, license_key_hash, expiry_date, app_id, status, variables, max_hwids, linked_hwids, created_by) values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [encryptedKey, keyHash, license.expiry_date, license.app_id, license.status, license.variables || "{}", license.max_hwids || 1, license.linked_hwids || "[]", license.created_by || null]
     );
     return result.insertId;
   }
@@ -95,8 +95,16 @@ class LicenseRepository {
     const encryptedHwid = securityService.dbEncrypt(hwid);
     const hwidHash = securityService.hash(hwid);
     const [result] = await databaseClient.query<Result>(
-      "update license set hwid = ?, hwid_hash = ? where id = ?",
-      [encryptedHwid, hwidHash, id]
+      "update license set hwid = ?, hwid_hash = ?, linked_hwids = JSON_ARRAY(?) where id = ?",
+      [encryptedHwid, hwidHash, hwidHash, id]
+    );
+    return result.affectedRows;
+  }
+
+  async linkHwid(id: number, hwidHash: string) {
+    const [result] = await databaseClient.query<Result>(
+      "update license set linked_hwids = JSON_ARRAY_APPEND(IFNULL(linked_hwids, JSON_ARRAY()), '$', ?) where id = ?",
+      [hwidHash, id]
     );
     return result.affectedRows;
   }
@@ -118,7 +126,7 @@ class LicenseRepository {
   }
 
   async update(id: number, data: Partial<License>) {
-    const allowedFields = ["status", "expiry_date", "variables", "ip_lock", "hwid"];
+    const allowedFields = ["status", "expiry_date", "variables", "ip_lock", "hwid", "max_hwids"];
     const keys = Object.keys(data).filter(key => allowedFields.includes(key));
     
     if (keys.length === 0) return 0;
@@ -175,7 +183,7 @@ class LicenseRepository {
 
   async resetHwid(id: number) {
     const [result] = await databaseClient.query<Result>(
-      "update license set hwid = NULL where id = ?",
+      "update license set hwid = NULL, hwid_hash = NULL, linked_hwids = JSON_ARRAY() where id = ?",
       [id]
     );
     return result.affectedRows;
