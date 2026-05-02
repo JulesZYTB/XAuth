@@ -5,8 +5,9 @@ import { useTranslation } from "react-i18next";
 interface EditVariablesModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (variables: string) => Promise<void>;
+  onSave: (variables: string, maxHwids: number) => Promise<void>;
   initialVariables: string;
+  initialMaxHwids: number;
   licenseKey: string;
 }
 
@@ -15,11 +16,13 @@ export default function EditVariablesModal({
   onClose,
   onSave,
   initialVariables,
+  initialMaxHwids,
   licenseKey,
 }: EditVariablesModalProps) {
   const { t } = useTranslation();
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [maxHwids, setMaxHwids] = useState(initialMaxHwids);
 
   // Initialize from JSON string
   const [pairs, setPairs] = useState<{ key: string; value: string }[]>(() => {
@@ -65,7 +68,7 @@ export default function EditVariablesModal({
         }
       }
 
-      await onSave(JSON.stringify(obj));
+      await onSave(JSON.stringify(obj), maxHwids);
       onClose();
     } catch (err: unknown) {
       setError(t("licenses.metadata_save_fail", "Failed to save configuration."));
@@ -115,6 +118,23 @@ export default function EditVariablesModal({
                 "These variables are returned to the client software during validation. Use JSON format to store feature flags, user roles, or custom configurations.",
               )}
             </p>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <label className="text-[10px] text-gray-500 uppercase font-black px-1">
+                {t("licenses.hwid_limit", "Hardware ID Limit")}
+              </label>
+              <span className="text-xs font-black text-accent">{maxHwids} Devices</span>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="10"
+              value={maxHwids}
+              onChange={(e) => setMaxHwids(parseInt(e.target.value))}
+              className="w-full h-2 bg-dark/50 rounded-lg appearance-none cursor-pointer accent-accent"
+            />
           </div>
 
           <div className="space-y-4">
