@@ -38,6 +38,15 @@ export default function WebhookModal({
   const [loading, setLoading] = useState(true);
   const [newUrl, setNewUrl] = useState("");
   const [newSecret, setNewSecret] = useState("");
+  const [selectedEvents, setSelectedEvents] = useState<string[]>(["LOGIN", "BAN", "REDEEM"]);
+
+  const availableEvents = ["LOGIN", "BAN", "REDEEM", "CREATE", "DELETE", "RESET_HWID"];
+
+  const toggleEvent = (event: string) => {
+    setSelectedEvents(prev => 
+      prev.includes(event) ? prev.filter(e => e !== event) : [...prev, event]
+    );
+  };
 
   const fetchWebhooks = useCallback(async () => {
     try {
@@ -72,7 +81,7 @@ export default function WebhookModal({
           app_id: appId,
           url: newUrl,
           secret: newSecret,
-          event_types: "all",
+          event_types: selectedEvents.join(","),
         }),
       });
       setNewUrl("");
@@ -148,6 +157,28 @@ export default function WebhookModal({
                 onChange={(e) => setNewUrl(e.target.value)}
               />
             </div>
+            <div className="space-y-3">
+              <label className="text-[10px] text-gray-500 uppercase font-black px-1">
+                {t("apps.webhook_events_select", "Trigger Events")}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {availableEvents.map(event => (
+                  <button
+                    key={event}
+                    type="button"
+                    onClick={() => toggleEvent(event)}
+                    className={`px-3 py-1.5 rounded-xl text-[10px] font-black transition-all border ${
+                      selectedEvents.includes(event)
+                        ? "bg-accent/10 border-accent/40 text-accent"
+                        : "bg-dark/50 border-gray-800 text-gray-500 hover:border-gray-700"
+                    }`}
+                  >
+                    {event}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label
