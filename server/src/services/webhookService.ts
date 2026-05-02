@@ -18,7 +18,7 @@ class WebhookService {
           return;
         }
 
-        const body = JSON.stringify({
+        let body = JSON.stringify({
           event,
           timestamp: new Date().toISOString(),
           data: payload
@@ -29,6 +29,26 @@ class WebhookService {
           "X-XAuth-Event": event,
           "User-Agent": "XAuth-Omega-Webhook/1.0"
         };
+
+        // Automatic Discord Webhook Support
+        const isDiscord = hook.url.includes("discord.com/api/webhooks");
+        if (isDiscord) {
+          body = JSON.stringify({
+            username: "XAuth Omega",
+            avatar_url: "https://xauth.monster/logo.png",
+            embeds: [{
+              title: `System Event: ${event}`,
+              color: event === "BAN" ? 16711680 : (event === "REDEEM" ? 65280 : 3447003),
+              fields: Object.entries(payload).map(([key, value]) => ({
+                name: key.toUpperCase(),
+                value: `\`${String(value)}\``,
+                inline: true
+              })),
+              timestamp: new Date().toISOString(),
+              footer: { text: "XAuth Omega Security Layer" }
+            }]
+          });
+        }
 
         // Add HMAC signature if a secret is configured
         if (hook.secret) {
