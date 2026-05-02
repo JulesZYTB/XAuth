@@ -140,7 +140,8 @@
     "retention_app": "Stats Détaillées de l'App",
     "retention_app_desc": "Rétention et activité spécifiques aux utilisateurs de cette application uniquement.",
     "app_activity": "Activité de l'App",
-    "anomaly_app_desc": "Tentatives de crack spécifiques à cette application"
+    "anomaly_app_desc": "Tentatives de crack spécifiques à cette application",
+    "online_users": "Utilisateurs en Ligne"
   },
   "threats": {
     "no_threats": "Aucune menace immédiate détectée",
@@ -244,6 +245,9 @@
     "app_name_placeholder": "Nom de l'App (ex: Plugin Photoshop)",
     "deploy": "Déployer",
     "synchronizing": "Synchronisation des applications...",
+    "my_apps": "Mes Applications",
+    "other_apps": "Infrastructure Globale (Autres Propriétaires)",
+    "no_my_apps": "Vous n'avez pas encore déployé d'applications.",
     "resume_app": "Reprendre l'App",
     "pause_app": "Mettre l'App en Pause",
     "manage_releases": "Gérer les Mises à Jour",
@@ -273,6 +277,7 @@
     "webhook_events": "Événements :",
     "webhook_test": "Tester l'URL",
     "webhook_delete": "Supprimer le Webhook",
+    "webhook_events_select": "Événements à Déclencher",
     "release_title": "Gestion des Déploiements",
     "release_deploying": "Déploiement des versions pour",
     "release_version": "Chaîne de Version",
@@ -342,6 +347,7 @@
     "manual_override": "Saisie Manuelle",
     "leave_blank_auto": "LAISSER VIDE POUR AUTO-GEN",
     "init_prod": "Initialiser la Production",
+    "hwid_limit": "Limite d'Appareils (HWID)",
     "pattern_standard": "Standard (XXXX-XXXX-XXXX)",
     "pattern_extended": "Étendu (XXXXX-XXXXX-XXXXX)",
     "pattern_legacy": "Héritage (XXXX-XXXX)",
