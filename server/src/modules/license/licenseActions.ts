@@ -20,6 +20,15 @@ interface AuthenticatedRequest extends Request {
 
 import { licenseCreateSchema, licenseRedeemSchema, licenseTrialSchema, licenseVariableSchema } from "../security/schemas.js";
 
+// Helper to get client IP reliably
+const getClientIp = (req: Request) => {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) {
+    return (typeof forwarded === 'string' ? forwarded.split(',')[0] : forwarded[0]).trim();
+  }
+  return req.ip || req.socket.remoteAddress || "0.0.0.0";
+};
+
 // Helper for random key generation
 const generateRandomKey = (mask: string = "XXXX-XXXX-XXXX") => {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Premium charset (no ambiguous chars)
@@ -157,7 +166,7 @@ const add: RequestHandler = async (req, res, next) => {
       details: `License created for app ID: ${app_id} (License ID: ${id})`,
       user_id: actor.id,
       app_id: Number(app_id),
-      ip_address: req.ip || req.socket.remoteAddress,
+      ip_address: getClientIp(req),
       user_agent: req.headers["user-agent"]
     });
 
@@ -178,7 +187,7 @@ const add: RequestHandler = async (req, res, next) => {
 const validate: RequestHandler = async (req, res, next) => {
   try {
     const { license_key, hwid, app_secret, session_id, error_type, details, version } = req.body;
-    const ip = req.ip || req.socket.remoteAddress || "0.0.0.0";
+    const ip = getClientIp(req);
 
     // 0. Manual Security Signal (Debugger/Bypass detected by client)
     if (error_type === "BYPASS_DETECTED" || error_type === "DEBUGGER_DETECTED") {
@@ -491,7 +500,7 @@ const ban: RequestHandler = async (req, res, next) => {
       details: `License banned (ID: ${id})`,
       user_id: actor.id,
       app_id: license?.app_id || 0,
-      ip_address: req.ip || req.socket.remoteAddress,
+      ip_address: getClientIp(req),
       user_agent: req.headers["user-agent"]
     });
     
@@ -524,7 +533,7 @@ const unban: RequestHandler = async (req, res, next) => {
       details: `License unbanned (ID: ${id})`,
       user_id: actor.id,
       app_id: license?.app_id || 0,
-      ip_address: req.ip || req.socket.remoteAddress,
+      ip_address: getClientIp(req),
       user_agent: req.headers["user-agent"]
     });
     
@@ -558,7 +567,7 @@ const resetHwid: RequestHandler = async (req, res, next) => {
       action: "HWID_RESET",
       details: `Hardware ID reset for license ID: ${id}`,
       user_id: actor.id,
-      ip_address: req.ip,
+      ip_address: getClientIp(req),
       user_agent: req.headers["user-agent"]
     });
 
@@ -593,7 +602,7 @@ const regenerateKey: RequestHandler = async (req, res, next) => {
       action: "KEY_REGENERATE",
       details: `License key regenerated for ID: ${id}`,
       user_id: actor.id,
-      ip_address: req.ip,
+      ip_address: getClientIp(req),
       user_agent: req.headers["user-agent"]
     });
 
@@ -673,7 +682,7 @@ const redeem: RequestHandler = async (req, res, next) => {
           details: `License redeemed (ID: ${license.id}) by user: ${userId}`,
           user_id: userId,
           app_id: license.app_id,
-          ip_address: req.ip || req.socket.remoteAddress,
+          ip_address: getClientIp(req),
           user_agent: req.headers["user-agent"]
         });
       }
@@ -702,7 +711,7 @@ const modify: RequestHandler = async (req, res, next) => {
       details: `License modified (ID: ${id})`,
       user_id: actor.id,
       app_id: license?.app_id || 0,
-      ip_address: req.ip || req.socket.remoteAddress,
+      ip_address: getClientIp(req),
       user_agent: req.headers["user-agent"]
     });
     res.sendStatus(204);
@@ -760,7 +769,7 @@ const setVariable: RequestHandler = async (req, res, next) => {
       action: "LICENSE_VAR_SET",
       details: `Variable '${key}' set for license ID: ${id}`,
       user_id: actor.id,
-      ip_address: req.ip || req.socket.remoteAddress,
+      ip_address: getClientIp(req),
       user_agent: req.headers["user-agent"]
     });
 
@@ -808,7 +817,7 @@ const requestTrial: RequestHandler = async (req, res, next) => {
       action: "LICENSE_TRIAL_REQUEST",
       details: `Trial license requested for app ID: ${app_id} (License ID: ${id})`,
       user_id: actor.id,
-      ip_address: req.ip || req.socket.remoteAddress,
+      ip_address: getClientIp(req),
       user_agent: req.headers["user-agent"]
     });
 
