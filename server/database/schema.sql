@@ -36,6 +36,8 @@ CREATE TABLE license (
   status ENUM('active', 'revoked', 'expired', 'banned') DEFAULT 'active',
   expiry_date DATETIME NOT NULL,
   variables JSON DEFAULT (JSON_OBJECT()),
+  max_hwids INT DEFAULT 1,
+  linked_hwids JSON DEFAULT (JSON_ARRAY()),
   created_by INT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (app_id) REFERENCES app(id) ON DELETE CASCADE,
