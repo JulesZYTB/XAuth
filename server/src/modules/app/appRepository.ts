@@ -13,7 +13,14 @@ class AppRepository {
 
   async readByOwnerId(userId: number) {
     const [rows] = await databaseClient.query<Rows>(
-      `SELECT DISTINCT a.* FROM app a
+      `SELECT DISTINCT a.*,
+              (SELECT COUNT(DISTINCT v.license_id) 
+               FROM validation_log v 
+               WHERE v.app_id = a.id 
+                 AND v.status = 'success' 
+                 AND v.created_at > DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+              ) as online_users
+       FROM app a
        LEFT JOIN reseller r ON a.id = r.app_id
        WHERE a.owner_id = ? OR r.user_id = ?`,
       [userId, userId]
