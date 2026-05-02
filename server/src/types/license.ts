@@ -14,4 +14,5 @@ export interface License {
   user_id?: number;
   created_by?: number;
   app_name?: string;
+  is_online?: boolean;
 }
