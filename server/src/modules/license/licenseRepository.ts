@@ -70,11 +70,20 @@ class LicenseRepository {
   }
 
   async readByAppId(appId: number, creatorId?: number) {
-    let query = "select * from license where app_id = ?";
+    let query = `
+      SELECT l.*, 
+             (SELECT COUNT(*) 
+              FROM validation_log v 
+              WHERE v.license_id = l.id 
+                AND v.status = 'success' 
+                AND v.created_at > DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+             ) > 0 as is_online
+      FROM license l 
+      WHERE l.app_id = ?`;
     const params: any[] = [appId];
 
     if (creatorId) {
-      query += " AND created_by = ?";
+      query += " AND l.created_by = ?";
       params.push(creatorId);
     }
 
