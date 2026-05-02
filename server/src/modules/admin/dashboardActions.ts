@@ -50,8 +50,14 @@ const getStats: RequestHandler = async (req, res, next) => {
        return decrypted;
     });
 
+    let onlineUsers = 0;
+    if (appId) {
+      onlineUsers = await validationLogRepository.countOnlineUsers(appId);
+    }
+
     res.json({
       ...stats,
+      onlineUsers,
       app: appId ? await appRepository.read(appId) : null,
       trafficData: trafficData.reverse(),
       recentActivity,
