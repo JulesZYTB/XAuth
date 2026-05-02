@@ -29,6 +29,8 @@ type License = {
   status: "active" | "banned";
   app_id: number;
   variables?: string;
+  max_hwids?: number;
+  is_online?: boolean;
 };
 
 export default function Licenses() {
@@ -163,7 +165,7 @@ export default function Licenses() {
     }
   };
 
-  const handleUpdateVariables = async (variables: string) => {
+  const handleUpdateLicense = async (variables: string, max_hwids: number) => {
     if (!selectedLicense) return;
     try {
       const res = await fetch(
@@ -175,7 +177,7 @@ export default function Licenses() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-          body: JSON.stringify({ variables }),
+          body: JSON.stringify({ variables, max_hwids }),
         },
       );
 
@@ -288,7 +290,12 @@ export default function Licenses() {
                   >
                     <td className="px-6 py-5 font-mono text-sm text-gray-300">
                       <div className="flex items-center gap-3">
-                        <span className="select-all">{license.license_key}</span>
+                        <div className="relative">
+                           <span className="select-all">{license.license_key}</span>
+                           {license.is_online && (
+                             <span className="absolute -top-1 -right-4 w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+                           )}
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-5">
@@ -454,8 +461,9 @@ export default function Licenses() {
         <EditVariablesModal
           isOpen={isEditVariablesModalOpen}
           onClose={() => setIsEditVariablesModalOpen(false)}
-          onSave={handleUpdateVariables}
+          onSave={handleUpdateLicense}
           initialVariables={selectedLicense.variables || "{}"}
+          initialMaxHwids={selectedLicense.max_hwids || 1}
           licenseKey={selectedLicense.license_key}
         />
       )}
