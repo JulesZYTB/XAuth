@@ -244,6 +244,7 @@
     "subtitle": "Create and manage your protectable software",
     "app_name_placeholder": "App Name (e.g. Photoshop Plugin)",
     "deploy": "Deploy",
+    "online": "Online",
     "synchronizing": "Synchronizing applications...",
     "my_apps": "My Applications",
     "other_apps": "Global Infrastructure (Other Owners)",
