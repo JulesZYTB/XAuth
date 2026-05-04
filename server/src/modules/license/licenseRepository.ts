@@ -69,7 +69,7 @@ class LicenseRepository {
     return null;
   }
 
-  async readByAppId(appId: number, creatorId?: number) {
+  async readByAppId(appId: number, creatorId?: number, search?: string, limit: number = 50, offset: number = 0) {
     let query = `
       SELECT l.*, 
              (SELECT COUNT(*) 
@@ -87,17 +87,56 @@ class LicenseRepository {
       params.push(creatorId);
     }
 
+    if (search) {
+        query += " AND l.status LIKE ?";
+        params.push(`%${search}%`);
+    }
+
+    query += " ORDER BY l.id DESC LIMIT ? OFFSET ?";
+    params.push(Number(limit), Number(offset));
+
     const [rows] = await databaseClient.query<Rows>(query, params);
     const results = rows as License[];
     for (const res of results) {
       try {
         res.license_key = securityService.dbDecrypt(res.license_key);
         if (res.hwid) res.hwid = securityService.dbDecrypt(res.hwid);
-      } catch (e) {
-        // Silently skip if decryption fails
-      }
+      } catch (e) {}
     }
     return results;
+  }
+
+  async countByAppId(appId: number, creatorId?: number, search?: string) {
+    let query = "SELECT COUNT(*) as count FROM license l WHERE app_id = ?";
+    const params: any[] = [appId];
+
+    if (creatorId) {
+      query += " AND l.created_by = ?";
+      params.push(creatorId);
+    }
+    if (search) {
+      query += " AND l.status LIKE ?";
+      params.push(`%${search}%`);
+    }
+
+    const [rows] = await databaseClient.query<Rows>(query, params);
+    return (rows[0] as any).count as number;
+  }
+
+  async deleteByLongExpiry(appId: number, years: number = 1000) {
+    const [result] = await databaseClient.query<Result>(
+      "DELETE FROM license WHERE app_id = ? AND expiry_date > DATE_ADD(NOW(), INTERVAL ? YEAR)",
+      [appId, years]
+    );
+    return result.affectedRows;
+  }
+
+  async deleteByExpiryDate(appId: number, date: string) {
+    const [result] = await databaseClient.query<Result>(
+      "DELETE FROM license WHERE app_id = ? AND expiry_date >= ?",
+      [appId, date]
+    );
+    return result.affectedRows;
   }
 
   async updateHwid(id: number, hwid: string) {
@@ -209,10 +248,17 @@ class LicenseRepository {
   }
 
   async delete(id: number) {
-
     const [result] = await databaseClient.query<Result>(
       "delete from license where id = ?",
       [id]
+    );
+    return result.affectedRows;
+  }
+
+  async bulkDelete(ids: number[]) {
+    const [result] = await databaseClient.query<Result>(
+      "delete from license where id in (?)",
+      [ids]
     );
     return result.affectedRows;
   }
