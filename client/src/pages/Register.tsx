@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router";
 import PageSEO from "../components/PageSEO";
+import Turnstile from "../components/Turnstile";
 import { getApiUrl } from "../services/apiConfig.js";
 
 export default function Register() {
@@ -12,6 +13,7 @@ export default function Register() {
     email: "",
     password: "",
     secret: "",
+    captchaToken: "",
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -166,9 +168,27 @@ export default function Register() {
             </div>
           </div>
 
+          {/* Honeypot Field for Bot Detection */}
+          <div className="hidden pointer-events-none opacity-0 absolute -top-999" aria-hidden="true">
+            <label htmlFor="email_confirmation">Confirm Email Address</label>
+            <input
+              id="email_confirmation"
+              type="text"
+              name="email_confirmation"
+              autoComplete="off"
+              tabIndex={-1}
+              onChange={(e) => setFormData({ ...formData, email_confirmation: e.target.value } as any)}
+            />
+          </div>
+
+          <div className="flex justify-center py-2">
+             <Turnstile onVerify={(token) => setFormData(prev => ({ ...prev, captchaToken: token }))} />
+          </div>
+
           <button
             type="submit"
-            className="w-full bg-accent hover:bg-accent/80 text-white font-black py-4 rounded-2xl shadow-xl shadow-accent/20 transition-all active:scale-95 flex items-center justify-center gap-2 mt-4 cursor-pointer"
+            disabled={!formData.captchaToken}
+            className={`w-full bg-accent hover:bg-accent/80 text-white font-black py-4 rounded-2xl shadow-xl shadow-accent/20 transition-all active:scale-95 flex items-center justify-center gap-2 mt-4 cursor-pointer ${!formData.captchaToken ? "opacity-50 grayscale cursor-not-allowed" : ""}`}
           >
             <UserPlus className="w-5 h-5" /> {t("auth.sign_up", "Sign Up")}
           </button>
