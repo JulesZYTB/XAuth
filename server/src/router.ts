@@ -10,9 +10,39 @@ const router = express.Router();
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // Limit each IP to 5 requests per windowMs
-  message: { message: "Too many authentication attempts, please try again after 15 minutes." },
+  message: { message: "Too many authentication attempts, please try again." },
   standardHeaders: true,
   legacyHeaders: false,
+});
+
+/**
+ * Security: Dedicated Registration Rate Limiter
+ * Stricter limit to prevent mass account creation bots.
+ */
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 2, // Only 2 accounts per hour per IP
+  message: { message: "Account creation limit reached. Please try again." },
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: false,
+});
+
+/**
+ * Security: Rate Limiting for License Creation
+ * Strictly limits license creation to prevent spam.
+ */
+const licenseCreationLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 1, // 1 license per minute
+  message: { message: "Rate limit exceeded. Please try again." },
+  keyGenerator: (req) => {
+    // Limit by app_id if provided (for external API) or by user ID
+    return String(req.body.app_id || (req as any).auth?.id || req.ip);
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: false,
 });
 
 /* ************************************************************************* */
@@ -33,6 +63,7 @@ import updateActions from "./modules/app/updateActions.js";
 import apiKeyActions from "./modules/admin/apiKeyActions.js";
 import searchActions from "./modules/admin/searchActions.js";
 import resellerActions from "./modules/admin/resellerActions.js";
+import { blockDisposableEmail, intelligentSpamCheck } from "./modules/security/spamProtection.js";
 
 
 
@@ -40,13 +71,14 @@ import resellerActions from "./modules/admin/resellerActions.js";
 router.post("/api/v1/client/initialize", sessionActions.initialize);
 router.post("/api/v1/client/validate", licenseActions.validate);
 router.post("/api/v1/client/verify-version", updateActions.verify);
+router.post("/api/v1/licenses/external-create", licenseCreationLimiter, licenseActions.externalCreate);
 
 // --- PUBLIC UPDATE GATEWAY ---
 router.get("/api/update/:appId/:channel", updateActions.check);
 
 // --- IDENTITY API (Public with Strict Rate Limiting) ---
 router.post("/api/auth/login", authLimiter, userActions.login);
-router.post("/api/auth/register", authLimiter, userActions.register);
+router.post("/api/auth/register", registerLimiter, blockDisposableEmail, intelligentSpamCheck, userActions.register);
 
 // Protected routes (Requires valid JWT)
 router.use(verifyToken);
@@ -91,7 +123,8 @@ router.post("/api/licenses/request-trial", licenseActions.requestTrial);
 // LICENSES - DEVELOPER ACTIONS (Manage licenses for owned apps)
 // NOTE: Ownership checks are required in these actions
 router.get("/api/apps/:appId/licenses", licenseActions.browse);
-router.post("/api/licenses", licenseActions.add);
+router.post("/api/licenses", licenseCreationLimiter, licenseActions.add);
+router.delete("/api/licenses/bulk", licenseActions.bulkDestroy);
 router.patch("/api/licenses/:id", licenseActions.modify);
 router.patch("/api/licenses/:id/ban", licenseActions.ban);
 router.patch("/api/licenses/:id/unban", licenseActions.unban);
@@ -99,6 +132,8 @@ router.patch("/api/licenses/:id/reset-hwid", licenseActions.resetHwid);
 router.patch("/api/licenses/:id/regenerate", licenseActions.regenerateKey);
 router.patch("/api/licenses/:id/variables/set", licenseActions.setVariable);
 router.delete("/api/licenses/:id", licenseActions.destroy);
+router.delete("/api/apps/:appId/licenses/purge-long", licenseActions.purgeLongExpiry);
+router.delete("/api/apps/:appId/licenses/purge-by-date", licenseActions.purgeByExpiryDate);
 
 // APP-SPECIFIC ANALYTICS
 router.get("/api/apps/:appId/dashboard/stats", dashboardActions.getStats);
@@ -120,11 +155,14 @@ router.use(isAdmin);
 
 // USERS MANAGEMENT
 router.get("/api/users", userActions.browse);
+router.delete("/api/users/bulk", userActions.bulkDestroy);
 router.patch("/api/users/:id", userActions.editRole);
 router.delete("/api/users/:id", userActions.destroy);
 
 // AUDIT TRAIL
 router.get("/api/logs", auditLogActions.browse);
+router.delete("/api/logs/bulk", auditLogActions.bulkDestroy);
+router.delete("/api/logs/reset", auditLogActions.reset);
 
 // GLOBAL DASHBOARD ANALYTICS
 router.get("/api/dashboard/stats", dashboardActions.getStats);
