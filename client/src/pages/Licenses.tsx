@@ -50,10 +50,19 @@ export default function Licenses() {
   const [isEditVariablesModalOpen, setIsEditVariablesModalOpen] =
     useState(false);
   const [selectedLicense, setSelectedLicense] = useState<License | null>(null);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [activeAction, setActiveAction] = useState<{
     id: number;
-    action: "ban" | "unban" | "reset-hwid" | "delete" | "regenerate";
+    action: "ban" | "unban" | "reset-hwid" | "delete" | "regenerate" | "purge" | "purge-date";
   } | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(20);
+  const [isPurging, setIsPurging] = useState(false);
+  const [purgeYears, setPurgeYears] = useState(1000);
+  const [purgeDate, setPurgeDate] = useState(new Date().toISOString().split('T')[0]);
 
   const showNotification = (
     message: string,
@@ -65,13 +74,19 @@ export default function Licenses() {
 
   const fetchLicenses = useCallback(async () => {
     try {
-      const res = await fetch(getApiUrl(`/api/apps/${appId}/licenses`), {
+      const url = new URL(getApiUrl(`/api/apps/${appId}/licenses`));
+      if (searchTerm) url.searchParams.append("search", searchTerm);
+      url.searchParams.append("page", page.toString());
+      url.searchParams.append("limit", limit.toString());
+
+      const res = await fetch(url.toString(), {
         credentials: "include",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
-      if (Array.isArray(data)) {
-        setLicenses(data);
+      if (data.data && Array.isArray(data.data)) {
+        setLicenses(data.data);
+        setTotalPages(data.pagination.totalPages);
       } else {
         setLicenses([]);
       }
@@ -80,7 +95,7 @@ export default function Licenses() {
     } finally {
       setLoading(false);
     }
-  }, [appId]);
+  }, [appId, searchTerm, page, limit]);
 
   useEffect(() => {
     fetchLicenses();
@@ -126,6 +141,18 @@ export default function Licenses() {
       url = `/api/licenses/${id}`;
     }
 
+    if (action === "purge") {
+        method = "DELETE";
+        url = `/api/apps/${appId}/licenses/purge-long?years=${purgeYears}`;
+        setIsPurging(true);
+    }
+
+    if (action === "purge-date") {
+        method = "DELETE";
+        url = `/api/apps/${appId}/licenses/purge-by-date?date=${purgeDate}`;
+        setIsPurging(true);
+    }
+
     try {
       const res = await fetch(getApiUrl(url), {
         credentials: "include",
@@ -154,6 +181,10 @@ export default function Licenses() {
           successMessages[action] ||
             t("licenses.success_generic", "Action completed."),
         );
+        if (action === "purge") {
+            const affectedData = await res.json().catch(() => ({}));
+            showNotification(t("licenses.success_purge", { count: affectedData.affected || 0 }));
+        }
         fetchLicenses();
       }
     } catch (err) {
@@ -162,6 +193,55 @@ export default function Licenses() {
         t("licenses.error_network", "Network error occurred."),
         "error",
       );
+    } finally {
+        setIsPurging(false);
+        setIsConfirmModalOpen(false);
+        setActiveAction(null);
+    }
+  };
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedIds(licenses.map(l => l.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id: number) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter(i => i !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    setIsBulkDeleting(true);
+    try {
+      const res = await fetch(getApiUrl("/api/licenses/bulk"), {
+        credentials: "include",
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ ids: selectedIds }),
+      });
+      if (res.ok) {
+        showNotification(t("common.success_bulk_delete", { count: selectedIds.length }));
+        setSelectedIds([]);
+        fetchLicenses();
+      } else {
+        showNotification("Failed to delete licenses", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      showNotification("Network error", "error");
+    } finally {
+      setIsBulkDeleting(false);
+      setIsConfirmModalOpen(false);
     }
   };
 
@@ -241,14 +321,62 @@ export default function Licenses() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setIsGenerateModalOpen(true)}
-          className="bg-accent px-8 py-5 rounded-4xl text-white text-sm font-black flex items-center gap-3 shadow-2xl shadow-accent/30 active:scale-95 transition-all cursor-pointer"
-        >
-          <Plus className="w-5 h-5" />{" "}
-          {t("licenses.provision_new", "Provision New Key")}
-        </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            type="text"
+            placeholder={t("common.search_licenses", "Search status...")}
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setPage(1);
+            }}
+            className="bg-dark border border-gray-800 rounded-2xl px-6 py-4 text-sm text-white focus:border-accent/50 transition-all outline-none min-w-[200px]"
+          />
+          {selectedIds.length > 0 && (
+            <button
+              onClick={() => {
+                setActiveAction({ id: 0, action: "delete" });
+                setIsConfirmModalOpen(true);
+              }}
+              className="bg-red-500/10 hover:bg-red-500/20 text-red-500 px-6 py-4 rounded-3xl text-xs font-black uppercase tracking-tighter flex items-center gap-2 transition-all border border-red-500/20"
+            >
+              <Trash2 className="w-4 h-4" />
+              {t("common.delete_selected", { count: selectedIds.length })}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+                setActiveAction({ id: 0, action: "purge" });
+                setIsConfirmModalOpen(true);
+            }}
+            className="bg-orange-500/10 hover:bg-orange-500/20 text-orange-500 px-6 py-4 rounded-3xl text-xs font-black uppercase tracking-tighter flex items-center gap-2 transition-all border border-orange-500/20"
+            title={t("licenses.purge_long_desc", "Delete licenses with > 1000y duration")}
+          >
+            <ShieldAlert className="w-4 h-4" />
+            {t("licenses.purge_long", "Purge Spam")}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+                setActiveAction({ id: 0, action: "purge-date" });
+                setIsConfirmModalOpen(true);
+            }}
+            className="bg-red-500/10 hover:bg-red-500/20 text-red-500 px-6 py-4 rounded-3xl text-xs font-black uppercase tracking-tighter flex items-center gap-2 transition-all border border-red-500/20"
+            title={t("licenses.purge_date_desc", "Delete licenses expiring after a specific date")}
+          >
+            <ShieldAlert className="w-4 h-4" />
+            {t("licenses.purge_date", "Purge by Date")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsGenerateModalOpen(true)}
+            className="bg-accent px-8 py-5 rounded-4xl text-white text-sm font-black flex items-center gap-3 shadow-2xl shadow-accent/30 active:scale-95 transition-all cursor-pointer"
+          >
+            <Plus className="w-5 h-5" />{" "}
+            {t("licenses.provision_new", "Provision New Key")}
+          </button>
+        </div>
       </header>
 
       {loading ? (
@@ -265,6 +393,14 @@ export default function Licenses() {
             <table className="w-full text-left min-w-[800px] lg:min-w-0">
               <thead className="bg-dark/50 border-b border-gray-800">
                 <tr>
+                  <th className="px-6 py-4 w-10">
+                    <input
+                      type="checkbox"
+                      onChange={handleSelectAll}
+                      checked={selectedIds.length === licenses.length && licenses.length > 0}
+                      className="w-4 h-4 rounded border-gray-700 bg-dark text-accent focus:ring-accent"
+                    />
+                  </th>
                   <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black">
                     {t("licenses.table_key", "License Key")}
                   </th>
@@ -286,8 +422,16 @@ export default function Licenses() {
                 {licenses.map((license) => (
                   <tr
                     key={license.id}
-                    className="hover:bg-white/2 transition-colors group"
+                    className={`hover:bg-white/2 transition-colors group ${selectedIds.includes(license.id) ? "bg-accent/5" : ""}`}
                   >
+                    <td className="px-6 py-5">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(license.id)}
+                        onChange={() => handleSelectOne(license.id)}
+                        className="w-4 h-4 rounded border-gray-700 bg-dark text-accent focus:ring-accent"
+                      />
+                    </td>
                     <td className="px-6 py-5 font-mono text-sm text-gray-300">
                       <div className="flex items-center gap-3">
                         <div className="relative">
@@ -398,6 +542,28 @@ export default function Licenses() {
         </div>
       )}
 
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-4 mt-8">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            className="bg-secondary border border-gray-800 text-gray-400 px-6 py-2 rounded-xl text-xs font-bold hover:bg-gray-800 disabled:opacity-30 transition-all"
+          >
+            {t("common.previous", "Previous")}
+          </button>
+          <span className="text-gray-500 text-xs font-black">
+            {page} / {totalPages}
+          </span>
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            className="bg-secondary border border-gray-800 text-gray-400 px-6 py-2 rounded-xl text-xs font-bold hover:bg-gray-800 disabled:opacity-30 transition-all"
+          >
+            {t("common.next", "Next")}
+          </button>
+        </div>
+      )}
+
       <div className="flex items-center gap-4 p-6 bg-accent/5 border border-accent/10 rounded-4xl">
         <ShieldAlert className="w-6 h-6 text-accent shrink-0" />
         <p className="text-xs text-accent/70 leading-relaxed font-medium font-sans">
@@ -411,17 +577,30 @@ export default function Licenses() {
 
       <ConfirmModal
         isOpen={isConfirmModalOpen}
-        onClose={() => setIsConfirmModalOpen(false)}
-        onConfirm={confirmAction}
+        onClose={() => {
+          setIsConfirmModalOpen(false);
+          if (activeAction?.id === 0) setActiveAction(null);
+        }}
+        onConfirm={
+          activeAction?.id === 0 && !activeAction.action.startsWith("purge")
+            ? handleBulkDelete
+            : confirmAction
+        }
         title={
-          activeAction?.action === "delete"
+          activeAction?.action === "purge" || activeAction?.action === "purge-date"
+            ? t("licenses.purge_title", "Massive Spam Purge")
+            : activeAction?.id === 0
+            ? t("licenses.bulk_delete_title", "Destroy Selection")
+            : activeAction?.action === "delete"
             ? t("licenses.destroy_license", "Destroy License")
             : activeAction?.action === "regenerate"
               ? t("licenses.regen_secret", "Regenerate Key Secret")
               : t("licenses.alter_security", "Alter Security Status")
         }
         message={
-          activeAction?.action === "delete"
+          activeAction?.action === "purge" || activeAction?.action === "purge-date"
+            ? t("licenses.purge_confirm_msg", "This will permanently delete ALL licenses for this application that have a duration exceeding the specified threshold. This action is irreversible and used to clear mass-generated spam.")
+            : activeAction?.action === "delete"
             ? t(
                 "licenses.delete_confirm_msg",
                 "This will permanently remove the license key from the system. Users will not be able to redeem or use it anymore.",
@@ -438,18 +617,50 @@ export default function Licenses() {
                 )
         }
         confirmText={
-          activeAction?.action === "regenerate"
-            ? t("licenses.regen_now", "Regenerate Now")
-            : t("licenses.confirm_change", "Confirm Change")
+          activeAction?.action === "purge" || activeAction?.action === "purge-date"
+            ? t("licenses.purge_now", "Purge Everything Now")
+            : activeAction?.action === "regenerate"
+            ? t("licenses.regen_now")
+            : t("licenses.confirm_change")
         }
+        loading={isBulkDeleting || isPurging}
         type={
-          activeAction?.action === "delete"
+          activeAction?.action === "delete" || activeAction?.action === "purge" || activeAction?.action === "purge-date"
             ? "danger"
             : activeAction?.action === "regenerate"
               ? "info"
               : "warning"
         }
-      />
+      >
+        {activeAction?.action === "purge" && (
+          <div className="mt-4">
+            <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 px-1">
+              {t("licenses.years_to_purge", "Licenses older than (years)")}
+            </label>
+            <input
+              type="number"
+              min="1"
+              value={purgeYears}
+              onChange={(e) => setPurgeYears(Number(e.target.value))}
+              className="w-full bg-dark border border-gray-800 rounded-2xl px-6 py-4 text-white focus:border-accent/50 transition-all outline-none"
+              placeholder="1000"
+            />
+          </div>
+        )}
+        {activeAction?.action === "purge-date" && (
+          <div className="mt-4">
+            <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2 px-1">
+              {t("licenses.date_to_purge", "Licenses expiring after")}
+            </label>
+            <input
+              type="date"
+              value={purgeDate}
+              onChange={(e) => setPurgeDate(e.target.value)}
+              className="w-full bg-dark border border-gray-800 rounded-2xl px-6 py-4 text-white focus:border-accent/50 transition-all outline-none"
+            />
+          </div>
+        )}
+      </ConfirmModal>
 
       <GenerateLicenseModal
         isOpen={isGenerateModalOpen}
