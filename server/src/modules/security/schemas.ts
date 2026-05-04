@@ -13,6 +13,7 @@ export const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8).regex(/[A-Z]/, "Must contain at least one uppercase letter").regex(/[0-9]/, "Must contain at least one number"),
   secret: z.string().optional(),
+  captchaToken: z.string().min(1, "Captcha verification is required"),
 });
 
 /**
@@ -20,9 +21,13 @@ export const registerSchema = z.object({
  */
 export const licenseCreateSchema = z.object({
   app_id: z.coerce.number().int().positive(),
-  license_key: z.string().optional(),
+  license_key: z.string().regex(/^[a-zA-Z0-9-!]+$/, "License key must only contain letters, numbers, hyphens (-) and exclamation marks (!).").optional(),
   expiry_date: z.union([z.string(), z.number()]),
   max_hwids: z.coerce.number().int().positive().optional().default(1),
+});
+
+export const bulkDeleteSchema = z.object({
+  ids: z.array(z.number().int().positive()).min(1),
 });
 
 export const licenseRedeemSchema = z.object({
