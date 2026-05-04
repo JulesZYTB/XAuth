@@ -36,9 +36,31 @@ class UserRepository {
     return result.insertId;
   }
 
-  async readAll() {
-    const [rows] = await databaseClient.query<Rows>("select id, username, email, role from user");
+  async readAll(search?: string, limit: number = 50, offset: number = 0) {
+    let query = "select id, username, email, role from user";
+    const params: any[] = [];
+
+    if (search) {
+      query += " where username like ? or email like ?";
+      params.push(`%${search}%`, `%${search}%`);
+    }
+
+    query += " order by id desc limit ? offset ?";
+    params.push(Number(limit), Number(offset));
+
+    const [rows] = await databaseClient.query<Rows>(query, params);
     return rows as User[];
+  }
+
+  async count(search?: string) {
+    let query = "select count(*) as count from user";
+    const params: any[] = [];
+    if (search) {
+      query += " where username like ? or email like ?";
+      params.push(`%${search}%`, `%${search}%`);
+    }
+    const [rows] = await databaseClient.query<Rows>(query, params);
+    return (rows[0] as any).count as number;
   }
 
   async updateRole(id: number, role: "admin" | "user") {
@@ -69,6 +91,14 @@ class UserRepository {
     const [result] = await databaseClient.query<Result>(
       "delete from user where id = ? and id != 1", // Protection for system_admin
       [id]
+    );
+    return result.affectedRows;
+  }
+
+  async bulkDelete(ids: number[]) {
+    const [result] = await databaseClient.query<Result>(
+      "delete from user where id in (?) and id != 1",
+      [ids]
     );
     return result.affectedRows;
   }

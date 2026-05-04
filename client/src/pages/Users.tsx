@@ -19,16 +19,28 @@ export default function Users() {
   // Modal states
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<number | null>(null);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(20);
 
   const fetchUsers = useCallback(async () => {
     try {
-      const res = await fetch(getApiUrl("/api/users"), {
+      const url = new URL(getApiUrl("/api/users"));
+      if (searchTerm) url.searchParams.append("search", searchTerm);
+      url.searchParams.append("page", page.toString());
+      url.searchParams.append("limit", limit.toString());
+
+      const res = await fetch(url.toString(), {
         credentials: "include",
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
-      if (Array.isArray(data)) {
-        setUsers(data);
+      if (data.data && Array.isArray(data.data)) {
+        setUsers(data.data);
+        setTotalPages(data.pagination.totalPages);
       } else {
         setUsers([]);
       }
@@ -37,7 +49,7 @@ export default function Users() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [searchTerm, page, limit]);
 
   useEffect(() => {
     fetchUsers();
@@ -58,6 +70,48 @@ export default function Users() {
       fetchUsers();
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedIds(users.filter(u => u.id !== 1).map(u => u.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id: number) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter(i => i !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    setIsBulkDeleting(true);
+    try {
+      const res = await fetch(getApiUrl("/api/users/bulk"), {
+        credentials: "include",
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ ids: selectedIds }),
+      });
+      if (res.ok) {
+        setSelectedIds([]);
+        fetchUsers();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsBulkDeleting(false);
+      setIsDeleteModalOpen(false);
+      setUserToDelete(null);
     }
   };
 
@@ -86,9 +140,30 @@ export default function Users() {
             {t("users.subtitle", "Manage platform users and access levels")}
           </p>
         </div>
-        <div className="bg-accent/10 border border-accent/20 px-4 py-2 rounded-full text-accent text-xs font-bold flex items-center gap-2">
-          <Shield className="w-4 h-4" />{" "}
-          {t("users.admin_controls", "Admin Controls Active")}
+        <div className="flex flex-wrap items-center gap-4">
+          <input
+            type="text"
+            placeholder={t("common.search_users", "Search users...")}
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setPage(1);
+            }}
+            className="bg-dark border border-gray-800 rounded-2xl px-6 py-3 text-sm text-white focus:border-accent/50 transition-all outline-none min-w-[250px]"
+          />
+          {selectedIds.length > 0 && (
+            <button
+              onClick={() => setIsDeleteModalOpen(true)}
+              className="bg-red-500/10 hover:bg-red-500/20 text-red-500 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-tighter flex items-center gap-2 transition-all border border-red-500/20"
+            >
+              <Trash2 className="w-4 h-4" />
+              {t("common.delete_selected", { count: selectedIds.length })}
+            </button>
+          )}
+          <div className="bg-accent/10 border border-accent/20 px-4 py-2 rounded-full text-accent text-xs font-bold flex items-center gap-2">
+            <Shield className="w-4 h-4" />{" "}
+            {t("users.admin_controls", "Admin Controls Active")}
+          </div>
         </div>
       </header>
 
@@ -103,6 +178,14 @@ export default function Users() {
             <table className="w-full text-left min-w-[600px] md:min-w-0">
               <thead className="bg-dark/50 border-b border-gray-800">
                 <tr>
+                  <th className="px-6 py-4 w-10">
+                    <input
+                      type="checkbox"
+                      onChange={handleSelectAll}
+                      checked={selectedIds.length === users.filter(u => u.id !== 1).length && users.length > 1}
+                      className="w-4 h-4 rounded border-gray-700 bg-dark text-accent focus:ring-accent"
+                    />
+                  </th>
                   <th className="px-6 py-4 text-[10px] text-gray-500 uppercase font-black">
                     {t("users.table_user", "User")}
                   </th>
@@ -121,8 +204,17 @@ export default function Users() {
                 {users.map((user) => (
                   <tr
                     key={user.id}
-                    className="hover:bg-white/2 transition-colors group"
+                    className={`hover:bg-white/2 transition-colors group ${selectedIds.includes(user.id) ? "bg-accent/5" : ""}`}
                   >
+                    <td className="px-6 py-5">
+                      <input
+                        type="checkbox"
+                        disabled={user.id === 1}
+                        checked={selectedIds.includes(user.id)}
+                        onChange={() => handleSelectOne(user.id)}
+                        className="w-4 h-4 rounded border-gray-700 bg-dark text-accent focus:ring-accent disabled:opacity-30"
+                      />
+                    </td>
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-2xl bg-linear-to-br from-accent/20 to-accent/5 flex items-center justify-center border border-accent/10">
@@ -175,6 +267,28 @@ export default function Users() {
         </div>
       )}
 
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-4 mt-8">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            className="bg-secondary border border-gray-800 text-gray-400 px-6 py-2 rounded-xl text-xs font-bold hover:bg-gray-800 disabled:opacity-30 transition-all"
+          >
+            {t("common.previous", "Previous")}
+          </button>
+          <span className="text-gray-500 text-xs font-black">
+            {page} / {totalPages}
+          </span>
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            className="bg-secondary border border-gray-800 text-gray-400 px-6 py-2 rounded-xl text-xs font-bold hover:bg-gray-800 disabled:opacity-30 transition-all"
+          >
+            {t("common.next", "Next")}
+          </button>
+        </div>
+      )}
+
       <div className="flex items-center gap-4 p-6 bg-red-500/5 border border-red-500/10 rounded-4xl">
         <ShieldAlert className="w-6 h-6 text-red-500 shrink-0" />
         <p className="text-xs text-red-500/70 leading-relaxed font-medium font-sans">
@@ -190,14 +304,15 @@ export default function Users() {
 
       <ConfirmModal
         isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={confirmDelete}
-        title={t("users.delete_title", "Sanitize Identity Record")}
-        message={t(
-          "users.delete_msg",
-          "This operation is final. Deleting this user will remove all their data, including hosted applications and all associated license keys. This cannot be undone.",
-        )}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setUserToDelete(null);
+        }}
+        onConfirm={userToDelete ? confirmDelete : handleBulkDelete}
+        title={userToDelete ? t("users.delete_title") : t("users.bulk_delete_title", "Massive Sanitization")}
+        message={userToDelete ? t("users.delete_msg") : t("common.bulk_delete_confirm", { count: selectedIds.length })}
         confirmText={t("users.delete_confirm", "Confirm Deletion")}
+        loading={isBulkDeleting}
       />
     </div>
   );

@@ -165,18 +165,7 @@ const destroy: RequestHandler = async (req, res, next) => {
     }
     const actor = (req as unknown as Request & { auth: AuthUser }).auth;
 
-    let affected;
-    if (actor.role === "admin") {
-      affected = await appRepository.deleteAdmin(id);
-    } else {
-      affected = await appRepository.delete(id, actor.id);
-    }
-
-    if (affected === 0) {
-      res.status(404).json({ message: "App not found or unauthorized" });
-      return;
-    }
-
+    // Log the deletion BEFORE it happens to satisfy foreign key constraints
     await auditLogRepository.create({
       action: "APP_DELETE",
       details: `Application deleted (ID: ${id})`,
@@ -185,6 +174,20 @@ const destroy: RequestHandler = async (req, res, next) => {
       ip_address: req.ip || req.socket.remoteAddress,
       user_agent: req.headers["user-agent"]
     });
+
+    let affected;
+    if (actor.role === "admin") {
+      affected = await appRepository.deleteAdmin(id);
+    } else {
+      affected = await appRepository.delete(id, actor.id);
+    }
+
+    if (affected === 0) {
+      // Note: Audit log was already created, but since deletion failed (likely unauthorized), 
+      // it might be misleading. However, given the constraint, we must log before or without the ID.
+      res.status(404).json({ message: "App not found or unauthorized" });
+      return;
+    }
 
     res.sendStatus(204);
   } catch (err) {

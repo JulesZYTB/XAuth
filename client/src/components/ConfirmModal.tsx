@@ -10,6 +10,8 @@ type ConfirmModalProps = {
   message: string;
   confirmText?: string;
   type?: "danger" | "warning" | "info";
+  loading?: boolean;
+  children?: React.ReactNode;
 };
 
 export default function ConfirmModal({
@@ -20,6 +22,8 @@ export default function ConfirmModal({
   message,
   confirmText,
   type = "danger",
+  loading = false,
+  children,
 }: ConfirmModalProps) {
   const { t } = useTranslation();
   const resolvedConfirmText =
@@ -46,6 +50,8 @@ export default function ConfirmModal({
           <p className="text-sm font-medium leading-relaxed">{message}</p>
         </div>
 
+        {children && <div className="py-2">{children}</div>}
+
         <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-800/50">
           <button
             type="button"
@@ -56,12 +62,14 @@ export default function ConfirmModal({
           </button>
           <button
             type="button"
+            disabled={loading}
             onClick={() => {
               onConfirm();
-              onClose();
+              if (!loading) onClose();
             }}
-            className={`w-full sm:flex-1 px-6 py-4 rounded-2xl text-white font-black shadow-xl transition-all active:scale-95 outline-none focus:ring-4 focus:ring-white/10 cursor-pointer order-1 sm:order-2 ${btnColors[type]}`}
+            className={`w-full sm:flex-1 px-6 py-4 rounded-2xl text-white font-black shadow-xl transition-all active:scale-95 outline-none focus:ring-4 focus:ring-white/10 cursor-pointer order-1 sm:order-2 flex items-center justify-center gap-2 ${btnColors[type]} ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
           >
+            {loading && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
             {resolvedConfirmText}
           </button>
         </div>
