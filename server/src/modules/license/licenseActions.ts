@@ -18,7 +18,7 @@ interface AuthenticatedRequest extends Request {
 }
 
 
-import { licenseCreateSchema, licenseRedeemSchema, licenseTrialSchema, licenseVariableSchema } from "../security/schemas.js";
+import { licenseCreateSchema, licenseRedeemSchema, licenseTrialSchema, licenseVariableSchema, bulkDeleteSchema } from "../security/schemas.js";
 
 // Helper to get client IP reliably
 const getClientIp = (req: Request) => {
@@ -625,6 +625,10 @@ const browse: RequestHandler = async (req, res, next) => {
       return;
     }
     const actor = (req as unknown as AuthenticatedRequest).auth;
+    const { search, limit, page } = req.query;
+    const l = Number(limit) || 20;
+    const p = Number(page) || 1;
+    const offset = (p - 1) * l;
 
     if (!(await checkAppAccess(actor, appId))) {
       res.status(403).json({ message: "Forbidden: You do not have access to this application" });
@@ -632,8 +636,18 @@ const browse: RequestHandler = async (req, res, next) => {
     }
 
     const isOwner = await isAppOwner(actor, appId);
-    const licenses = await licenseRepository.readByAppId(appId, isOwner ? undefined : actor.id);
-    res.json(licenses);
+    const licenses = await licenseRepository.readByAppId(appId, isOwner ? undefined : actor.id, search as string, l, offset);
+    const total = await licenseRepository.countByAppId(appId, isOwner ? undefined : actor.id, search as string);
+
+    res.json({
+        data: licenses,
+        pagination: {
+            total,
+            page: p,
+            limit: l,
+            totalPages: Math.ceil(total / l)
+        }
+    });
   } catch (err) {
     next(err);
   }
@@ -737,6 +751,115 @@ const destroy: RequestHandler = async (req, res, next) => {
   }
 };
 
+const bulkDestroy: RequestHandler = async (req, res, next) => {
+  try {
+    const validation = bulkDeleteSchema.safeParse(req.body);
+    if (!validation.success) {
+      res.status(400).json({ message: "Invalid input", errors: validation.error.format() });
+      return;
+    }
+
+    const { ids } = validation.data;
+    const actor = (req as unknown as AuthenticatedRequest).auth;
+
+    // Check ownership for all IDs
+    for (const id of ids) {
+      if (!(await checkLicenseOwnership(actor, id))) {
+        res.status(403).json({ message: `Forbidden: You do not own license ID ${id}` });
+        return;
+      }
+    }
+
+    const affected = await licenseRepository.bulkDelete(ids);
+
+    await auditLogRepository.create({
+      action: "LICENSE_BULK_DELETE",
+      details: `Bulk deleted ${affected} licenses. Requested IDs: ${ids.join(", ")}`,
+      user_id: actor.id,
+      ip_address: getClientIp(req),
+      user_agent: req.headers["user-agent"]
+    });
+
+    res.status(200).json({ affected });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const externalCreate: RequestHandler = async (req, res, next) => {
+  try {
+    const { app_id, app_secret, expiry_date, license_key, max_hwids } = req.body;
+    
+    if (!app_id || !app_secret) {
+       res.status(400).json({ message: "App ID and Secret are required" });
+       return;
+    }
+
+    const app = await appRepository.read(app_id);
+    if (!app || app.secret_key !== app_secret) {
+      res.status(401).json({ message: "Invalid App ID or Secret" });
+      return;
+    }
+
+    // Reuse expiry logic
+    let finalExpiryDate: Date;
+    const expiryStr = String(expiry_date || "30d");
+    const unitMatch = expiryStr.match(/^(\d+)([dhmy])?$/i);
+
+    if (unitMatch) {
+      const value = parseInt(unitMatch[1]);
+      const unit = (unitMatch[2] || "d").toLowerCase();
+      finalExpiryDate = new Date();
+      if (unit === "d") finalExpiryDate.setDate(finalExpiryDate.getDate() + value);
+      else if (unit === "h") finalExpiryDate.setHours(finalExpiryDate.getHours() + value);
+      else if (unit === "m") finalExpiryDate.setMinutes(finalExpiryDate.getMinutes() + value);
+      else if (unit === "y") finalExpiryDate.setFullYear(finalExpiryDate.getFullYear() + value);
+    } else if (!isNaN(Date.parse(expiryStr))) {
+      finalExpiryDate = new Date(expiryStr);
+    } else {
+      res.status(400).json({ message: "Invalid expiry_date format." });
+      return;
+    }
+
+    let finalLicenseKey = typeof license_key === "string" ? license_key : "";
+    if (finalLicenseKey) {
+        // Validate key format
+        if (!/^[a-zA-Z0-9-!]+$/.test(finalLicenseKey)) {
+            res.status(400).json({ message: "License key must only contain letters, numbers, hyphens (-) and exclamation marks (!)." });
+            return;
+        }
+    } else {
+        finalLicenseKey = generateRandomKey("XXXX-XXXX-XXXX");
+    }
+
+    const id = await licenseRepository.create({
+      license_key: finalLicenseKey,
+      expiry_date: finalExpiryDate,
+      app_id: Number(app_id),
+      status: "active",
+      created_by: app.owner_id, // Assigned to app owner
+      max_hwids: Number(max_hwids) || 1,
+      linked_hwids: "[]"
+    });
+
+    await auditLogRepository.create({
+      action: "LICENSE_CREATE_EXTERNAL",
+      details: `License created via external API for app ID: ${app_id} (License ID: ${id})`,
+      app_id: Number(app_id),
+      ip_address: getClientIp(req),
+      user_agent: req.headers["user-agent"]
+    });
+
+    res.status(201).json({ 
+      id, 
+      license_key: finalLicenseKey,
+      status: "success"
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const setVariable: RequestHandler = async (req, res, next) => {
   try {
     const id = Number(req.params.id);
@@ -827,5 +950,65 @@ const requestTrial: RequestHandler = async (req, res, next) => {
   }
 };
 
+const purgeLongExpiry: RequestHandler = async (req, res, next) => {
+  try {
+    const appId = Number(req.params.appId);
+    const actor = (req as unknown as AuthenticatedRequest).auth;
+    const years = Number(req.query.years) || 1000;
 
-export default { add, validate, browse, ban, unban, resetHwid, regenerateKey, myLicenses, redeem, modify, destroy, setVariable, requestTrial };
+    if (!(await isAppOwner(actor, appId))) {
+      res.status(403).json({ message: "Forbidden: Only the application owner can perform a massive purge." });
+      return;
+    }
+
+    const affected = await licenseRepository.deleteByLongExpiry(appId, years);
+
+    await auditLogRepository.create({
+      action: "LICENSE_PURGE_LONG_EXPIRY",
+      details: `Massive purge: deleted ${affected} licenses with > ${years}y expiry for app ID: ${appId}`,
+      user_id: actor.id,
+      app_id: appId,
+      ip_address: getClientIp(req),
+      user_agent: req.headers["user-agent"]
+    });
+
+    res.json({ affected });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const purgeByExpiryDate: RequestHandler = async (req, res, next) => {
+  try {
+    const appId = Number(req.params.appId);
+    const actor = (req as unknown as AuthenticatedRequest).auth;
+    const date = req.query.date as string;
+
+    if (!date) {
+      res.status(400).json({ message: "Missing expiration date parameter." });
+      return;
+    }
+
+    if (!(await isAppOwner(actor, appId))) {
+      res.status(403).json({ message: "Forbidden: Only the application owner can perform a massive purge." });
+      return;
+    }
+
+    const affected = await licenseRepository.deleteByExpiryDate(appId, date);
+
+    await auditLogRepository.create({
+      action: "LICENSE_PURGE_EXPIRY_DATE",
+      details: `Massive purge: deleted ${affected} licenses expiring after ${date} for app ID: ${appId}`,
+      user_id: actor.id,
+      app_id: appId,
+      ip_address: getClientIp(req),
+      user_agent: req.headers["user-agent"]
+    });
+
+    res.json({ affected });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export default { add, validate, browse, ban, unban, resetHwid, regenerateKey, myLicenses, redeem, modify, destroy, bulkDestroy, externalCreate, setVariable, requestTrial, purgeLongExpiry, purgeByExpiryDate };
