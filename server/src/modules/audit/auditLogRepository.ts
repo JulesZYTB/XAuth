@@ -12,30 +12,79 @@ class AuditLogRepository {
     return result;
   }
 
-  async readAll() {
-
-    const [rows] = await databaseClient.query<Rows>(
-      `select l.*, a.name as app_name, u.username 
+  async readAll(search?: string, limit: number = 50, offset: number = 0) {
+    let query = `
+       select l.*, a.name as app_name, u.username 
        from audit_log l 
        left join app a on l.app_id = a.id 
-       left join user u on l.user_id = u.id 
-       order by l.created_at desc 
-       limit 100`
-    );
+       left join user u on l.user_id = u.id`;
+    const params: any[] = [];
+
+    if (search) {
+      query += " where l.action like ? or l.details like ? or u.username like ?";
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+    }
+
+    query += " order by l.created_at desc limit ? offset ?";
+    params.push(Number(limit), Number(offset));
+
+    const [rows] = await databaseClient.query<Rows>(query, params);
     return rows as AuditLog[];
   }
 
-  async readByUserId(userId: number) {
-    const [rows] = await databaseClient.query<Rows>(
-      `select l.*, a.name as app_name 
+  async count(search?: string) {
+    let query = "select count(*) as count from audit_log l left join user u on l.user_id = u.id";
+    const params: any[] = [];
+    if (search) {
+      query += " where l.action like ? or l.details like ? or u.username like ?";
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+    }
+    const [rows] = await databaseClient.query<Rows>(query, params);
+    return (rows[0] as any).count as number;
+  }
+
+  async readByUserId(userId: number, search?: string, limit: number = 50, offset: number = 0) {
+    let query = `
+       select l.*, a.name as app_name 
        from audit_log l 
        left join app a on l.app_id = a.id 
-       where l.user_id = ? 
-       order by l.created_at desc 
-       limit 50`,
-      [userId]
-    );
+       where l.user_id = ?`;
+    const params: any[] = [userId];
+
+    if (search) {
+      query += " and (l.action like ? or l.details like ?)";
+      params.push(`%${search}%`, `%${search}%`);
+    }
+
+    query += " order by l.created_at desc limit ? offset ?";
+    params.push(Number(limit), Number(offset));
+
+    const [rows] = await databaseClient.query<Rows>(query, params);
     return rows as AuditLog[];
+  }
+
+  async countByUserId(userId: number, search?: string) {
+    let query = "select count(*) as count from audit_log l where l.user_id = ?";
+    const params: any[] = [userId];
+    if (search) {
+      query += " and (l.action like ? or l.details like ?)";
+      params.push(`%${search}%`, `%${search}%`);
+    }
+    const [rows] = await databaseClient.query<Rows>(query, params);
+    return (rows[0] as any).count as number;
+  }
+
+  async bulkDelete(ids: number[]) {
+    const [result] = await databaseClient.query(
+      "delete from audit_log where id in (?)",
+      [ids]
+    );
+    return result;
+  }
+
+  async reset() {
+    const [result] = await databaseClient.query("delete from audit_log");
+    return result;
   }
 }
 
