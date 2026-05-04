@@ -3,9 +3,10 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import userRepository from "./userRepository.js";
 import type { AuthUser, User } from "../../types/index.js";
-import { loginSchema, registerSchema } from "../security/schemas.js";
+import { loginSchema, registerSchema, bulkDeleteSchema } from "../security/schemas.js";
 import auditLogRepository from "../audit/auditLogRepository.js";
 import mailServerService from "../../services/mailServerService.js";
+import captchaService from "../../services/captchaService.js";
 
 const APP_SECRET = process.env.APP_SECRET;
 
@@ -65,12 +66,19 @@ const register: RequestHandler = async (req, res, next) => {
       return;
     }
 
-    const { username, email, password, secret } = validation.data;
+    const { username, email, password, secret, captchaToken } = validation.data;
 
-    // Check if domain has a valid mail server
-    const hasMailServer = await mailServerService.checkMailServer(email);
-    if (!hasMailServer) {
-      res.status(400).json({ message: "The email domain does not appear to have a valid mail server." });
+    // Verify Captcha
+    const isCaptchaValid = await captchaService.verify(captchaToken, req.ip);
+    if (!isCaptchaValid) {
+      res.status(400).json({ message: "Captcha verification failed. Please try again." });
+      return;
+    }
+
+    // Verify email using UserCheck API (Bot/Spam/Disposable check)
+    const emailVerification = await mailServerService.verifyWithUserCheck(email);
+    if (!emailVerification.success) {
+      res.status(400).json({ message: emailVerification.reason || "Invalid email address." });
       return;
     }
 
@@ -121,13 +129,23 @@ const register: RequestHandler = async (req, res, next) => {
 
 const browse: RequestHandler = async (req, res, next) => {
   try {
-    // Only allow admins to list all users
-    if (((req as any).auth as AuthUser).role !== "admin") {
-      res.status(403).json({ message: "Forbidden" });
-      return;
-    }
-    const users = await userRepository.readAll();
-    res.json(users);
+    const { search, limit, page } = req.query;
+    const l = Number(limit) || 20;
+    const p = Number(page) || 1;
+    const offset = (p - 1) * l;
+
+    const users = await userRepository.readAll(search as string, l, offset);
+    const total = await userRepository.count(search as string);
+
+    res.json({
+        data: users,
+        pagination: {
+            total,
+            page: p,
+            limit: l,
+            totalPages: Math.ceil(total / l)
+        }
+    });
   } catch (err) {
     next(err);
   }
@@ -163,6 +181,31 @@ const destroy: RequestHandler = async (req, res, next) => {
   }
 };
 
+const bulkDestroy: RequestHandler = async (req, res, next) => {
+  try {
+    const validation = bulkDeleteSchema.safeParse(req.body);
+    if (!validation.success) {
+      res.status(400).json({ message: "Invalid input", errors: validation.error.format() });
+      return;
+    }
+
+    const { ids } = validation.data;
+    const affected = await userRepository.bulkDelete(ids);
+
+    await auditLogRepository.create({
+      action: "USER_BULK_DELETE",
+      details: `Bulk deleted ${affected} users. Requested IDs: ${ids.join(", ")}`,
+      user_id: ((req as any).auth as AuthUser).id,
+      ip_address: req.ip || req.socket.remoteAddress,
+      user_agent: req.headers["user-agent"]
+    });
+
+    res.status(200).json({ affected });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const updateProfile: RequestHandler = async (req, res, next) => {
   try {
     const authUser = (req as any).auth as AuthUser;
@@ -193,5 +236,5 @@ const updateProfile: RequestHandler = async (req, res, next) => {
   }
 };
 
-export default { login, register, browse, editRole, destroy, updateProfile };
+export default { login, register, browse, editRole, destroy, bulkDestroy, updateProfile };
 
